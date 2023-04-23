@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface BaseMapper<T> {
 
@@ -41,8 +42,8 @@ public interface BaseMapper<T> {
      * @param entity 实体类
      * @return 返回影响的行数
      */
-    default int insert(T entity){
-        return insert(entity,false);
+    default int insert(T entity) {
+        return insert(entity, false);
     }
 
 
@@ -53,10 +54,9 @@ public interface BaseMapper<T> {
      * @param entity 实体类
      * @return 返回影响的行数
      */
-    default int insertSelective(T entity){
-        return insert(entity,true);
+    default int insertSelective(T entity) {
+        return insert(entity, true);
     }
-
 
 
     /**
@@ -68,7 +68,6 @@ public interface BaseMapper<T> {
      */
     @InsertProvider(type = EntitySqlProvider.class, method = "insert")
     int insert(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
-
 
 
     /**
@@ -245,7 +244,7 @@ public interface BaseMapper<T> {
      * @see com.mybatisflex.core.provider.EntitySqlProvider#selectOneById(Map, ProviderContext)
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectOneById")
-    T selectOneById(@Param(FlexConsts.PRIMARY_VALUE) Serializable id);
+    Optional<T> selectOneById(@Param(FlexConsts.PRIMARY_VALUE) Serializable id);
 
 
     /**
@@ -254,7 +253,7 @@ public interface BaseMapper<T> {
      * @param whereConditions where 条件
      * @return entity 数据
      */
-    default T selectOneByMap(Map<String, Object> whereConditions) {
+    default Optional<T> selectOneByMap(Map<String, Object> whereConditions) {
         return selectOneByQuery(QueryWrapper.create().where(whereConditions));
     }
 
@@ -265,7 +264,7 @@ public interface BaseMapper<T> {
      * @param condition 条件
      * @return 1 条数据
      */
-    default T selectOneByCondition(QueryCondition condition) {
+    default Optional<T> selectOneByCondition(QueryCondition condition) {
         return selectOneByQuery(QueryWrapper.create().where(condition));
     }
 
@@ -276,9 +275,9 @@ public interface BaseMapper<T> {
      * @param queryWrapper query 条件
      * @return entity 数据
      */
-    default T selectOneByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper) {
+    default Optional<T> selectOneByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper) {
         List<T> entities = selectListByQuery(queryWrapper.limit(1));
-        return (entities == null || entities.isEmpty()) ? null : entities.get(0);
+        return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.get(0));
     }
 
     /**
