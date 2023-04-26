@@ -26,34 +26,30 @@ public class Page<T> implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final int INIT_VALUE = -1;
 
-    private List<T> records = Collections.emptyList();
-    private int pageNumber = INIT_VALUE;
-    private int pageSize = INIT_VALUE;
-    private long totalPage = INIT_VALUE;
-    private long totalRow = INIT_VALUE;
+    private List<T> records;
+    private int pageNumber;
+    private int pageSize;
+    private long totalPage;
+    private long totalRow;
 
-    public static Page of(int pageNumber, int pageSize) {
-        return new Page(pageNumber, pageSize);
+    public static <T> Page<T> of(int pageNumber, int pageSize) {
+        return new Page<>(pageNumber, pageSize);
     }
 
-    public static Page of(int pageNumber, int pageSize, long totalRow) {
-        return new Page(pageNumber, pageSize, totalRow);
+    public static <T> Page<T> of(int pageNumber, int pageSize, long totalRow) {
+        return new Page<>(pageNumber, pageSize, totalRow);
     }
 
     public Page() {
-
+        this(INIT_VALUE,INIT_VALUE);
     }
 
     public Page(int pageNumber, int pageSize) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
+        this(pageNumber,pageSize,INIT_VALUE);
     }
 
     public Page(int pageNumber, int pageSize, long totalRow) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-        this.totalRow = totalRow;
-        this.totalPage = totalRow % pageSize == 0 ? (totalRow / pageSize) : (totalRow / pageSize + 1);
+        this(Collections.emptyList(),pageNumber,pageSize,totalRow);
     }
 
     public Page(List<T> records, int pageNumber, int pageSize, long totalRow) {
