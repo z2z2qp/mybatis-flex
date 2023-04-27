@@ -27,7 +27,7 @@ Maven示例：
 <dependency>
     <groupId>com.mybatis-flex</groupId>
     <artifactId>mybatis-flex-core</artifactId>
-    <version>1.1.9</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ Gradle示例：
 ```groovy
 // file: build.gradle
 ext {
-    mybatis_flex_version = '1.1.9'
+    mybatis_flex_version = '1.2.0'
 }
 dependencies {
     implementation("com.mybatis-flex:mybatis-flex-core:${mybatis_flex_version}")
@@ -124,7 +124,7 @@ public class HelloWorld {
 }
 ```
 
-> 以上的示例中， `ACCOUNT` 为 Mybatis-Flex 通过 APT 自动生成，无需手动编码。更多查看 [APT 文档](./apt)。
+> 以上的示例中， `ACCOUNT` 为 Mybatis-Flex 通过 APT 自动生成，无需手动编码。更多查看 [APT 文档](../others/apt.md)。
 
 
 ## 更多示例
