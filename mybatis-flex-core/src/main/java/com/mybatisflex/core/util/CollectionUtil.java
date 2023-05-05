@@ -52,7 +52,7 @@ public class CollectionUtil {
         } else if (isEmpty(list)) {
             return other;
         }
-        List<T> newList = new ArrayList<>(list);
+        var newList = new ArrayList<T>(list);
         newList.addAll(other);
         return newList;
     }
@@ -68,7 +68,7 @@ public class CollectionUtil {
      * @see <a href="https://bugs.openjdk.org/browse/JDK-8161372">https://bugs.openjdk.org/browse/JDK-8161372</a>
      */
     public static <K, V> V computeIfAbsent(Map<K, V> concurrentHashMap, K key, Function<? super K, ? extends V> mappingFunction) {
-        V v = concurrentHashMap.get(key);
+        var v = concurrentHashMap.get(key);
         if (v != null) {
             return v;
         }
@@ -76,11 +76,11 @@ public class CollectionUtil {
     }
 
     public static <T> Set<T> newHashSet(T... elements) {
-        return new HashSet<>(Arrays.asList(elements));
+        return new HashSet<>(Set.of(elements));
     }
 
     public static <T> List<T> newArrayList(T... elements) {
-        return new ArrayList<>(Arrays.asList(elements));
+        return new ArrayList<>(List.of(elements));
     }
 
 }

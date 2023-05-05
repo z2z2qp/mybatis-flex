@@ -24,7 +24,7 @@ public class ObjectUtil {
     }
 
     public static boolean areNotNull(Object... objs) {
-        for (Object obj : objs) {
+        for (var obj : objs) {
             if (obj == null) {
                 return false;
             }
@@ -33,7 +33,7 @@ public class ObjectUtil {
     }
 
     public static boolean areNull(Object... objs) {
-        for (Object obj : objs) {
+        for (var obj : objs) {
             if (obj != null) {
                 return false;
             }
@@ -45,7 +45,7 @@ public class ObjectUtil {
         if (others == null || others.length == 0) {
             throw new IllegalArgumentException("others must not be null or empty.");
         }
-        for (Object other : others) {
+        for (var other : others) {
             if (Objects.equals(a, other)) {
                 return true;
             }

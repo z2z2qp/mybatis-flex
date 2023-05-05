@@ -38,12 +38,12 @@ public class DateUtil {
     public static final String dateMillisecondPattern = "yyyy-MM-dd HH:mm:ss SSS";
     public static final String dateCSTPattern = "EEE MMM dd HH:mm:ss zzz yyyy";
 
-    private static final ThreadLocal<HashMap<String, SimpleDateFormat>> TL = ThreadLocal.withInitial(() -> new HashMap<>());
+    private static final ThreadLocal<HashMap<String, SimpleDateFormat>> TL = ThreadLocal.withInitial(HashMap::new);
 
     private static final Map<String, DateTimeFormatter> dateTimeFormatters = new ConcurrentHashMap<>();
 
     public static DateTimeFormatter getDateTimeFormatter(String pattern) {
-        DateTimeFormatter ret = dateTimeFormatters.get(pattern);
+        var ret = dateTimeFormatters.get(pattern);
         if (ret == null) {
             ret = DateTimeFormatter.ofPattern(pattern);
             dateTimeFormatters.put(pattern, ret);
@@ -52,7 +52,7 @@ public class DateUtil {
     }
 
     public static SimpleDateFormat getSimpleDateFormat(String pattern) {
-        SimpleDateFormat ret = TL.get().get(pattern);
+        var ret = TL.get().get(pattern);
         if (ret == null) {
             if (dateCSTPattern.equals(pattern)) {
                 ret = new SimpleDateFormat(dateCSTPattern, Locale.US);
@@ -66,20 +66,20 @@ public class DateUtil {
 
 
     public static Date parseDate(Object value) {
-        if (value instanceof Number) {
-            return new Date(((Number) value).longValue());
+        if (value instanceof Number number) {
+            return new Date(number.longValue());
         }
-        if (value instanceof Timestamp) {
-            return new Date(((Timestamp) value).getTime());
+        if (value instanceof Timestamp timestamp) {
+            return new Date(timestamp.getTime());
         }
-        if (value instanceof LocalDate) {
-            return DateUtil.toDate((LocalDate) value);
+        if (value instanceof LocalDate localDate) {
+            return DateUtil.toDate(localDate);
         }
-        if (value instanceof LocalDateTime) {
-            return DateUtil.toDate((LocalDateTime) value);
+        if (value instanceof LocalDateTime localDateTime) {
+            return DateUtil.toDate(localDateTime);
         }
-        if (value instanceof LocalTime) {
-            return DateUtil.toDate((LocalTime) value);
+        if (value instanceof LocalTime localTime) {
+            return DateUtil.toDate(localTime);
         }
         String s = value.toString();
         if (StringUtil.isNumeric(s)) {
@@ -89,19 +89,18 @@ public class DateUtil {
     }
 
 
-
     public static Date parseDate(String dateString) {
         if (StringUtil.isBlank(dateString)) {
             return null;
         }
         dateString = dateString.trim();
         try {
-            SimpleDateFormat sdf = getSimpleDateFormat(getPattern(dateString));
+            var sdf = getSimpleDateFormat(getPattern(dateString));
             try {
                 return sdf.parse(dateString);
             } catch (ParseException ex) {
                 //2022-10-23 00:00:00.0
-                int lastIndexOf = dateString.lastIndexOf(".");
+                var lastIndexOf = dateString.lastIndexOf(".");
                 if (lastIndexOf == 19) {
                     return parseDate(dateString.substring(0, lastIndexOf));
                 }
@@ -131,18 +130,17 @@ public class DateUtil {
     }
 
 
-
     public static LocalDateTime parseLocalDateTime(String dateString) {
         if (StringUtil.isBlank(dateString)) {
             return null;
         }
         dateString = dateString.trim();
-        DateTimeFormatter dateTimeFormatter = getDateTimeFormatter(getPattern(dateString));
+        var dateTimeFormatter = getDateTimeFormatter(getPattern(dateString));
         try {
             return LocalDateTime.parse(dateString, dateTimeFormatter);
         } catch (Exception ex) {
             //2022-10-23 00:00:00.0
-            int lastIndexOf = dateString.lastIndexOf(".");
+            var lastIndexOf = dateString.lastIndexOf(".");
             if (lastIndexOf == 19) {
                 return parseLocalDateTime(dateString.substring(0, lastIndexOf));
             }
@@ -171,7 +169,7 @@ public class DateUtil {
 
 
     private static String getPattern(String dateString) {
-        int length = dateString.length();
+        var length = dateString.length();
         if (length == datetimePattern.length()) {
             return datetimePattern;
         } else if (length == datePattern.length()) {
@@ -202,8 +200,8 @@ public class DateUtil {
             date = new Date(date.getTime());
         }
 
-        Instant instant = date.toInstant();
-        ZoneId zone = ZoneId.systemDefault();
+        var instant = date.toInstant();
+        var zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
     }
 
@@ -217,9 +215,9 @@ public class DateUtil {
             date = new Date(date.getTime());
         }
 
-        Instant instant = date.toInstant();
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+        var instant = date.toInstant();
+        var zone = ZoneId.systemDefault();
+        var localDateTime = LocalDateTime.ofInstant(instant, zone);
         return localDateTime.toLocalDate();
     }
 
@@ -233,9 +231,9 @@ public class DateUtil {
             date = new Date(date.getTime());
         }
 
-        Instant instant = date.toInstant();
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+        var instant = date.toInstant();
+        var zone = ZoneId.systemDefault();
+        var localDateTime = LocalDateTime.ofInstant(instant, zone);
         return localDateTime.toLocalTime();
     }
 
@@ -244,8 +242,8 @@ public class DateUtil {
         if (localDateTime == null) {
             return null;
         }
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDateTime.atZone(zone).toInstant();
+        var zone = ZoneId.systemDefault();
+        var instant = localDateTime.atZone(zone).toInstant();
         return Date.from(instant);
     }
 
@@ -254,8 +252,8 @@ public class DateUtil {
         if (localDate == null) {
             return null;
         }
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDate.atStartOfDay().atZone(zone).toInstant();
+        var zone = ZoneId.systemDefault();
+        var instant = localDate.atStartOfDay().atZone(zone).toInstant();
         return Date.from(instant);
     }
 
@@ -264,10 +262,10 @@ public class DateUtil {
         if (localTime == null) {
             return null;
         }
-        LocalDate localDate = LocalDate.now();
-        LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDateTime.atZone(zone).toInstant();
+        var localDate = LocalDate.now();
+        var localDateTime = LocalDateTime.of(localDate, localTime);
+        var zone = ZoneId.systemDefault();
+        var instant = localDateTime.atZone(zone).toInstant();
         return Date.from(instant);
     }
 

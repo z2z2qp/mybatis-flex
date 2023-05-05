@@ -38,7 +38,7 @@ public class ClassUtil {
             , "org.apache.ibatis.javassist.util.proxy.ProxyObject");
 
     public static boolean isProxy(Class<?> clazz) {
-        for (Class<?> cls : clazz.getInterfaces()) {
+        for (var cls : clazz.getInterfaces()) {
             if (PROXY_CLASS_NAMES.contains(cls.getName())) {
                 return true;
             }
@@ -59,7 +59,7 @@ public class ClassUtil {
         //com.demo.blog.Blog$$EnhancerByCGLIB$$69a17158  ----> CGLIB
         //io.jboot.test.app.TestAppListener_$$_jvstb9f_0 ------> javassist
 
-        final String name = clazz.getName();
+        final var name = clazz.getName();
         if (name.contains(ENHANCER_BY) || name.contains(JAVASSIST_BY)) {
             return (Class<T>) clazz.getSuperclass();
         }
@@ -110,8 +110,8 @@ public class ClassUtil {
             Constructor<?> defaultConstructor = null;
             Constructor<?> otherConstructor = null;
 
-            Constructor<?>[] declaredConstructors = clazz.getDeclaredConstructors();
-            for (Constructor<?> constructor : declaredConstructors) {
+            var declaredConstructors = clazz.getDeclaredConstructors();
+            for (var constructor : declaredConstructors) {
                 if (constructor.getParameterCount() == 0) {
                     defaultConstructor = constructor;
                 } else if (Modifier.isPublic(constructor.getModifiers())) {
@@ -141,11 +141,10 @@ public class ClassUtil {
 
     public static <T> T newInstance(Class<T> clazz, Object... paras) {
         try {
-            Constructor<?>[] constructors = clazz.getDeclaredConstructors();
-            for (Constructor<?> constructor : constructors) {
+            var constructors = clazz.getDeclaredConstructors();
+            for (var constructor : constructors) {
                 if (isMatchedParas(constructor, paras)) {
-                    Object ret = constructor.newInstance(paras);
-                    return (T) ret;
+                    return (T) constructor.newInstance(paras);
                 }
             }
             throw new IllegalArgumentException("Can not find constructor by paras: \"" + Arrays.toString(paras) + "\" in class[" + clazz.getName() + "]");
@@ -167,10 +166,10 @@ public class ClassUtil {
             return false;
         }
 
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
-        for (int i = 0; i < parameterTypes.length; i++) {
-            Class<?> parameterType = parameterTypes[i];
-            Object paraObject = paras[i];
+        var parameterTypes = constructor.getParameterTypes();
+        for (var i = 0; i < parameterTypes.length; i++) {
+            var parameterType = parameterTypes[i];
+            var paraObject = paras[i];
             if (paraObject != null && !parameterType.isAssignableFrom(paraObject.getClass())) {
                 return false;
             }
@@ -181,13 +180,13 @@ public class ClassUtil {
 
 
     public static List<Field> getAllFields(Class<?> cl) {
-        List<Field> fields = new ArrayList<>();
+        var fields = new ArrayList<Field>();
         doGetFields(cl, fields, null);
         return fields;
     }
 
     public static List<Field> getAllFields(Class<?> cl, Predicate<Field> predicate) {
-        List<Field> fields = new ArrayList<>();
+        var fields = new ArrayList<Field>();
         doGetFields(cl, fields, predicate);
         return fields;
     }
@@ -197,8 +196,8 @@ public class ClassUtil {
             return;
         }
 
-        Field[] declaredFields = cl.getDeclaredFields();
-        for (Field declaredField : declaredFields) {
+        var declaredFields = cl.getDeclaredFields();
+        for (var declaredField : declaredFields) {
             if (predicate == null || predicate.test(declaredField)) {
                 fields.add(declaredField);
             }
@@ -208,13 +207,13 @@ public class ClassUtil {
     }
 
     public static List<Method> getAllMethods(Class<?> cl) {
-        List<Method> methods = new ArrayList<>();
+        var methods = new ArrayList<Method>();
         doGetMethods(cl, methods, null);
         return methods;
     }
 
     public static List<Method> getAllMethods(Class<?> cl, Predicate<Method> predicate) {
-        List<Method> methods = new ArrayList<>();
+        var methods = new ArrayList<Method>();
         doGetMethods(cl, methods, predicate);
         return methods;
     }
@@ -225,8 +224,8 @@ public class ClassUtil {
             return;
         }
 
-        Method[] declaredMethods = cl.getDeclaredMethods();
-        for (Method method : declaredMethods) {
+        var declaredMethods = cl.getDeclaredMethods();
+        for (var method : declaredMethods) {
             if (predicate == null || predicate.test(method)) {
                 methods.add(method);
             }

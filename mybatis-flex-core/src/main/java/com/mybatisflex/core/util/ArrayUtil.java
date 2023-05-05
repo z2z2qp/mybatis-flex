@@ -61,7 +61,7 @@ public class ArrayUtil {
         } else if (isEmpty(second)) {
             return first;
         } else {
-            T[] result = Arrays.copyOf(first, first.length + second.length);
+            var result = Arrays.copyOf(first, first.length + second.length);
             System.arraycopy(second, 0, result, first.length, second.length);
             return result;
         }
@@ -69,11 +69,11 @@ public class ArrayUtil {
 
 
     public static <T> T[] concat(T[] first, T[] second, T[] third, T[]... others) {
-        T[] results = concat(first, second);
+        var results = concat(first, second);
         results = concat(results, third);
 
-        if (others != null && others.length > 0) {
-            for (T[] other : others) {
+        if (others != null) {
+            for (var other : others) {
                 results = concat(results, other);
             }
         }
@@ -93,7 +93,7 @@ public class ArrayUtil {
         if (isEmpty(arrays)) {
             return false;
         }
-        for (T array : arrays) {
+        for (var array : arrays) {
             if (Objects.equals(array, object)) {
                 return true;
             }

@@ -25,9 +25,9 @@ public class SqlUtil {
             column = column.trim();
         }
 
-        int strLen = column.length();
-        for (int i = 0; i < strLen; ++i) {
-            char ch = column.charAt(i);
+        var strLen = column.length();
+        for (var i = 0; i < strLen; ++i) {
+            var ch = column.charAt(i);
             if (Character.isWhitespace(ch)) {
                 throw new IllegalArgumentException("Column must not has space char.");
             }
@@ -41,7 +41,7 @@ public class SqlUtil {
     /**
      * 仅支持字母、数字、下划线、空格、逗号、小数点（支持多个字段排序）
      */
-    private static String SQL_ORDER_BY_PATTERN = "[a-zA-Z0-9_\\ \\,\\.]+";
+    private static final String SQL_ORDER_BY_PATTERN = "[a-zA-Z0-9_\\ \\,\\.]+";
 
     public static void keepOrderBySqlSafely(String value) {
         if (!value.matches(SQL_ORDER_BY_PATTERN)) {
@@ -53,7 +53,7 @@ public class SqlUtil {
     private static final char[] UN_SAFE_CHARS = "'`\"<>&*+=#-;".toCharArray();
 
     private static boolean isUnSafeChar(char ch) {
-        for (char c : UN_SAFE_CHARS) {
+        for (var c : UN_SAFE_CHARS) {
             if (c == ch) {
                 return true;
             }

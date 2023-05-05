@@ -60,7 +60,7 @@ public class ConvertUtil {
             }
             return Float.parseFloat(value.toString());
         } else if (targetClass == Boolean.class || targetClass == boolean.class) {
-            String v = value.toString().toLowerCase();
+            var v = value.toString().toLowerCase();
             if ("1".equals(v) || "true".equalsIgnoreCase(v)) {
                 return Boolean.TRUE;
             } else if ("0".equals(v) || "false".equalsIgnoreCase(v)) {
@@ -112,36 +112,36 @@ public class ConvertUtil {
 
 
     public static Integer toInt(Object i) {
-        if (i instanceof Integer) {
-            return (Integer) i;
-        } else if (i instanceof Number) {
-            return ((Number) i).intValue();
+        if (i instanceof Integer integer) {
+            return integer;
+        } else if (i instanceof Number number) {
+            return number.intValue();
         }
         return i != null ? Integer.parseInt(i.toString()) : null;
     }
 
     public static Long toLong(Object l) {
-        if (l instanceof Long) {
-            return (Long) l;
-        } else if (l instanceof Number) {
-            return ((Number) l).longValue();
+        if (l instanceof Long ll) {
+            return ll;
+        } else if (l instanceof Number number) {
+            return number.longValue();
         }
         return l != null ? Long.parseLong(l.toString()) : null;
     }
 
     public static Double toDouble(Object d) {
-        if (d instanceof Double) {
-            return (Double) d;
-        } else if (d instanceof Number) {
-            return ((Number) d).doubleValue();
+        if (d instanceof Double dd) {
+            return dd;
+        } else if (d instanceof Number number) {
+            return number.doubleValue();
         }
 
         return d != null ? Double.parseDouble(d.toString()) : null;
     }
 
     public static BigDecimal toBigDecimal(Object b) {
-        if (b instanceof BigDecimal) {
-            return (BigDecimal) b;
+        if (b instanceof BigDecimal bigDecimal) {
+            return bigDecimal;
         } else if (b != null) {
             return new BigDecimal(b.toString());
         } else {
@@ -150,61 +150,61 @@ public class ConvertUtil {
     }
 
     public static BigInteger toBigInteger(Object b) {
-        if (b instanceof BigInteger) {
-            return (BigInteger)b;
+        if (b instanceof BigInteger bigInteger) {
+            return bigInteger;
         }
         // 数据类型 id(19 number)在 Oracle Jdbc 下对应的是 BigDecimal,
         // 但是在 MySql 下对应的是 BigInteger，这会导致在 MySql 下生成的代码无法在 Oracle 数据库中使用
-        if (b instanceof BigDecimal) {
-            return ((BigDecimal)b).toBigInteger();
-        } else if (b instanceof Number) {
-            return BigInteger.valueOf(((Number)b).longValue());
-        } else if (b instanceof String) {
-            return new BigInteger((String)b);
+        if (b instanceof BigDecimal bigDecimal) {
+            return bigDecimal.toBigInteger();
+        } else if (b instanceof Number number) {
+            return BigInteger.valueOf(number.longValue());
+        } else if (b instanceof String str) {
+            return new BigInteger(str);
         }
 
         return (BigInteger)b;
     }
 
     public static Float toFloat(Object f) {
-        if (f instanceof Float) {
-            return (Float) f;
-        } else if (f instanceof Number) {
-            return ((Number) f).floatValue();
+        if (f instanceof Float ff) {
+            return ff;
+        } else if (f instanceof Number number) {
+            return number.floatValue();
         }
         return f != null ? Float.parseFloat(f.toString()) : null;
     }
 
 
     public static Short toShort(Object s) {
-        if (s instanceof Short) {
-            return (Short) s;
-        } else if (s instanceof Number) {
-            return ((Number) s).shortValue();
+        if (s instanceof Short ss) {
+            return ss;
+        } else if (s instanceof Number number) {
+            return number.shortValue();
         }
         return s != null ? Short.parseShort(s.toString()) : null;
     }
 
 
     public static Byte toByte(Object b) {
-        if (b instanceof Byte) {
-            return (Byte) b;
-        } else if (b instanceof Number) {
-            return ((Number) b).byteValue();
+        if (b instanceof Byte bb) {
+            return bb;
+        } else if (b instanceof Number number) {
+            return number.byteValue();
         }
         return b != null ? Byte.parseByte(b.toString()) : null;
     }
 
     public static Boolean toBoolean(Object b) {
-        if (b instanceof Boolean) {
-            return (Boolean) b;
+        if (b instanceof Boolean bb) {
+            return bb;
         } else if (b == null) {
             return null;
         }
 
         // 支持 Number 之下的整数类型
-        if (b instanceof Number) {
-            int n = ((Number) b).intValue();
+        if (b instanceof Number number) {
+            int n = number.intValue();
             if (n == 1) {
                 return Boolean.TRUE;
             } else if (n == 0) {
@@ -214,8 +214,7 @@ public class ConvertUtil {
         }
 
         // 支持 String
-        if (b instanceof String) {
-            String s = b.toString();
+        if (b instanceof String s) {
             if ("true".equalsIgnoreCase(s) || "1".equals(s)) {
                 return Boolean.TRUE;
             } else if ("false".equalsIgnoreCase(s) || "0".equals(s)) {
@@ -227,8 +226,8 @@ public class ConvertUtil {
     }
 
     public static Number toNumber(Object o) {
-        if (o instanceof Number) {
-            return (Number) o;
+        if (o instanceof Number number) {
+            return number;
         } else if (o == null) {
             return null;
         }
@@ -238,47 +237,45 @@ public class ConvertUtil {
 
 
     public static Date toDate(Object o) {
-        if (o instanceof Date) {
-            return (Date) o;
+        if (o instanceof Date date) {
+            return date;
         }
 
         if (o instanceof Temporal) {
-            if (o instanceof LocalDateTime) {
-                return DateUtil.toDate((LocalDateTime) o);
+            if (o instanceof LocalDateTime localDateTime) {
+                return DateUtil.toDate(localDateTime);
             }
-            if (o instanceof LocalDate) {
-                return DateUtil.toDate((LocalDate) o);
+            if (o instanceof LocalDate localDate) {
+                return DateUtil.toDate(localDate);
             }
-            if (o instanceof LocalTime) {
-                return DateUtil.toDate((LocalTime) o);
+            if (o instanceof LocalTime localTime) {
+                return DateUtil.toDate(localTime);
             }
         }
 
-        if (o instanceof String) {
-            String s = (String) o;
+        if (o instanceof String s) {
             return DateUtil.parseDate(s);
         }
 
-        return (java.util.Date) o;
+        return (Date) o;
     }
 
 
     public static LocalDateTime toLocalDateTime(Object o) {
-        if (o instanceof LocalDateTime) {
-            return (LocalDateTime) o;
+        if (o instanceof LocalDateTime localDateTime) {
+            return localDateTime;
         }
-        if (o instanceof java.util.Date) {
-            return DateUtil.toLocalDateTime((java.util.Date) o);
+        if (o instanceof Date date) {
+            return DateUtil.toLocalDateTime(date);
         }
-        if (o instanceof LocalDate) {
-            return ((LocalDate) o).atStartOfDay();
+        if (o instanceof LocalDate localDate) {
+            return localDate.atStartOfDay();
         }
-        if (o instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.now(), (LocalTime) o);
+        if (o instanceof LocalTime localTime) {
+            return LocalDateTime.of(LocalDate.now(), localTime);
         }
 
-        if (o instanceof String) {
-            String s = (String) o;
+        if (o instanceof String s) {
             return DateUtil.parseLocalDateTime(s);
         }
 

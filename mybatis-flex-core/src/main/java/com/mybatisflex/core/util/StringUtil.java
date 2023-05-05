@@ -29,9 +29,9 @@ public class StringUtil {
      * @param string
      */
     public static String firstCharToLowerCase(String string) {
-        char firstChar = string.charAt(0);
+        var firstChar = string.charAt(0);
         if (firstChar >= 'A' && firstChar <= 'Z') {
-            char[] arr = string.toCharArray();
+            var arr = string.toCharArray();
             arr[0] += ('a' - 'A');
             return new String(arr);
         }
@@ -45,9 +45,9 @@ public class StringUtil {
      * @param string
      */
     public static String firstCharToUpperCase(String string) {
-        char firstChar = string.charAt(0);
+        var firstChar = string.charAt(0);
         if (firstChar >= 'a' && firstChar <= 'z') {
-            char[] arr = string.toCharArray();
+            var arr = string.toCharArray();
             arr[0] -= ('a' - 'A');
             return new String(arr);
         }
@@ -64,10 +64,10 @@ public class StringUtil {
         if (isBlank(string)) {
             return "";
         }
-        int strLen = string.length();
-        StringBuilder sb = new StringBuilder(strLen);
-        for (int i = 0; i < strLen; i++) {
-            char c = string.charAt(i);
+        var strLen = string.length();
+        var sb = new StringBuilder(strLen);
+        for (var i = 0; i < strLen; i++) {
+            var c = string.charAt(i);
             if (Character.isUpperCase(c) && i > 0) {
                 sb.append('_');
             }
@@ -85,11 +85,11 @@ public class StringUtil {
         if (isBlank(string)) {
             return "";
         }
-        String temp = string.toLowerCase();
-        int strLen = temp.length();
-        StringBuilder sb = new StringBuilder(strLen);
-        for (int i = 0; i < strLen; i++) {
-            char c = temp.charAt(i);
+        var temp = string.toLowerCase();
+        var strLen = temp.length();
+        var sb = new StringBuilder(strLen);
+        for (var i = 0; i < strLen; i++) {
+            var c = temp.charAt(i);
             if (c == '_') {
                 if (++i < strLen) {
                     sb.append(Character.toUpperCase(temp.charAt(i)));
@@ -123,7 +123,7 @@ public class StringUtil {
             throw new IllegalArgumentException("args is empty.");
         }
 
-        for (String str : strings) {
+        for (var str : strings) {
             if (isBlank(str)) {
                 return true;
             }
@@ -163,11 +163,11 @@ public class StringUtil {
 
 
     public static boolean startsWithAny(String str, String... prefixes) {
-        if (isBlank(str) || prefixes == null || prefixes.length == 0) {
+        if (isBlank(str) || prefixes == null) {
             return false;
         }
 
-        for (String prefix : prefixes) {
+        for (var prefix : prefixes) {
             if (str.startsWith(prefix)) {
                 return true;
             }
@@ -177,7 +177,7 @@ public class StringUtil {
 
 
     public static boolean endsWithAny(String str, String... suffixes) {
-        if (isBlank(str) || suffixes == null || suffixes.length == 0) {
+        if (isBlank(str) || suffixes == null) {
             return false;
         }
 
@@ -254,12 +254,12 @@ public class StringUtil {
         if (CollectionUtil.isEmpty(objs)) {
             return "";
         } else if (objs.size() == 1) {
-            T next = objs.iterator().next();
+            var next = objs.iterator().next();
             return String.valueOf(function.apply(next));
         } else {
-            String[] strings = new String[objs.size()];
-            int index = 0;
-            for (T obj : objs) {
+            var strings = new String[objs.size()];
+            var index = 0;
+            for (var obj : objs) {
                 strings[index++] = function.apply(obj);
             }
             return String.join(delimiter, strings);

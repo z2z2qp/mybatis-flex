@@ -29,7 +29,7 @@ import java.util.List;
 
 public class UpdateEntity {
 
-    private static ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
+    private static final ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
 
 
     public static <T> T of(Class<T> clazz) {
@@ -38,16 +38,16 @@ public class UpdateEntity {
 
 
     public static <T> T of(Class<T> clazz, Object id) {
-        T newEntity = ModifyAttrsRecordProxyFactory.getInstance().get(clazz);
-        TableInfo tableInfo = TableInfoFactory.ofEntityClass(clazz);
-        List<IdInfo> primaryKeyList = tableInfo.getPrimaryKeyList();
-        Reflector reflector = reflectorFactory.findForClass(clazz);
+        var newEntity = ModifyAttrsRecordProxyFactory.getInstance().get(clazz);
+        var tableInfo = TableInfoFactory.ofEntityClass(clazz);
+        var primaryKeyList = tableInfo.getPrimaryKeyList();
+        var reflector = reflectorFactory.findForClass(clazz);
 
         if (primaryKeyList != null && !primaryKeyList.isEmpty()) {
-            for (int i = 0; i < primaryKeyList.size(); i++) {
-                IdInfo idInfo = primaryKeyList.get(i);
-                Object idValue = getIdValue(id, i);
-                Invoker setInvoker = reflector.getSetInvoker(idInfo.getProperty());
+            for (var i = 0; i < primaryKeyList.size(); i++) {
+                var idInfo = primaryKeyList.get(i);
+                var idValue = getIdValue(id, i);
+                var setInvoker = reflector.getSetInvoker(idInfo.getProperty());
                 try {
                     setInvoker.invoke(newEntity, new Object[]{ConvertUtil.convert(idValue, idInfo.getPropertyType())});
                 } catch (Exception e) {
@@ -76,12 +76,12 @@ public class UpdateEntity {
 
 
     public static <T> T ofNotNull(T entity) {
-        Class<?> usefulClass = ClassUtil.getUsefulClass(entity.getClass());
+        var usefulClass = ClassUtil.getUsefulClass(entity.getClass());
 
-        T newEntity = (T) of(usefulClass);
+        var newEntity = (T) of(usefulClass);
 
-        Reflector reflector = reflectorFactory.findForClass(usefulClass);
-        String[] propertyNames = reflector.getGetablePropertyNames();
+        var reflector = reflectorFactory.findForClass(usefulClass);
+        var propertyNames = reflector.getGetablePropertyNames();
 
         for (String propertyName : propertyNames) {
             try {
