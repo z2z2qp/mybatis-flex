@@ -15,6 +15,11 @@
  */
 package com.mybatisflex.core.util;
 
+import com.mybatisflex.annotation.EnumValue;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -22,11 +27,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.Temporal;
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 public class ConvertUtil {
 
 
-    public static Object convert(Object value, Class<?> targetClass) {
+    public static Object convert(Object value, Class targetClass) {
         if (value == null && targetClass.isPrimitive()) {
             return getPrimitiveDefaultValue(targetClass);
         }
@@ -87,9 +94,57 @@ public class ConvertUtil {
                 return ((Number) value).shortValue();
             }
             return Short.parseShort(value.toString());
+        } else if (targetClass.isEnum()) {
+            Object[] enumConstants = targetClass.getEnumConstants();
+            List<Field> allFields = ClassUtil.getAllFields(targetClass, field -> field.getAnnotation(EnumValue.class) != null);
+            if (allFields.size() == 1) {
+                Field field = allFields.get(0);
+
+                String fieldGetterName = "get" + StringUtil.firstCharToUpperCase(field.getName());
+                List<Method> allMethods = ClassUtil.getAllMethods(targetClass, method -> {
+                    String methodName = method.getName();
+                    return methodName.equals(fieldGetterName);
+                });
+
+                //getter
+                if (allMethods.size() == 1) {
+                    Method getter = allMethods.get(0);
+                    for (Object enumConstant : enumConstants) {
+                        try {
+                            Object enumValue = getter.invoke(enumConstant);
+                            if (Objects.equals(enumValue, value)) {
+                                return enumConstant;
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+
+                //public field
+                else if (Modifier.isPublic(field.getModifiers())) {
+                    for (Object enumConstant : enumConstants) {
+                        if (Objects.equals(readPublicField(field, enumConstant), value)) {
+                            return enumConstant;
+                        }
+                    }
+                }
+            } else if (value instanceof String) {
+                return Enum.valueOf(targetClass, value.toString());
+            }
         }
 
+
         throw new IllegalArgumentException("\"" + targetClass.getName() + "\" can not be parsed.");
+    }
+
+
+    private static Object readPublicField(Field field, Object target) {
+        try {
+            return field.get(target);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -163,7 +218,7 @@ public class ConvertUtil {
             return new BigInteger(str);
         }
 
-        return (BigInteger)b;
+        return (BigInteger) b;
     }
 
     public static Float toFloat(Object f) {

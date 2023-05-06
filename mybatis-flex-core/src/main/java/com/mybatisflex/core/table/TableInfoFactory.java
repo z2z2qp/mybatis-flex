@@ -94,16 +94,17 @@ public class TableInfoFactory {
 
 
     private static Class<?> getEntityClass(Class<?> mapperClass) {
+        if (mapperClass == null || mapperClass == Object.class) {
+            return null;
+        }
         Type[] genericInterfaces = mapperClass.getGenericInterfaces();
         if (genericInterfaces.length == 1) {
             Type type = genericInterfaces[0];
             if (type instanceof ParameterizedType) {
                 return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            } else {
-                return getEntityClass((Class<?>) type);
             }
         }
-        return null;
+        return getEntityClass(mapperClass.getSuperclass());
     }
 
 
@@ -126,7 +127,7 @@ public class TableInfoFactory {
                         .filter(listener -> listener != NoneListener.class)
                         .map(ClassUtil::newInstance)
                         .collect(Collectors.toList());
-                tableInfo.setOnInsertListener(insertListeners);
+                tableInfo.setOnInsertListeners(insertListeners);
             }
 
             if (table.onUpdate().length > 0) {
@@ -134,7 +135,7 @@ public class TableInfoFactory {
                         .filter(listener -> listener != NoneListener.class)
                         .map(ClassUtil::newInstance)
                         .collect(Collectors.toList());
-                tableInfo.setOnUpdateListener(updateListeners);
+                tableInfo.setOnUpdateListeners(updateListeners);
             }
 
             if (table.onSet().length > 0) {
@@ -142,7 +143,7 @@ public class TableInfoFactory {
                         .filter(listener -> listener != NoneListener.class)
                         .map(ClassUtil::newInstance)
                         .collect(Collectors.toList());
-                tableInfo.setOnSetListener(setListeners);
+                tableInfo.setOnSetListeners(setListeners);
             }
 
             if (StringUtil.isNotBlank(table.dataSource())) {

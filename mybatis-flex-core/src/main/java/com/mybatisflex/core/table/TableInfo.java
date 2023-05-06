@@ -36,8 +36,10 @@ import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.util.MapUtil;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class TableInfo {
@@ -86,9 +88,9 @@ public class TableInfo {
     private Map<String, ColumnInfo> columnInfoMapping = new HashMap<>();
     private Map<String, String> propertyColumnMapping = new HashMap<>();
 
-    private List<InsertListener> onInsertListener;
-    private List<UpdateListener> onUpdateListener;
-    private List<SetListener> onSetListener;
+    private List<InsertListener> onInsertListeners;
+    private List<UpdateListener> onUpdateListeners;
+    private List<SetListener> onSetListeners;
 
 
     private final ReflectorFactory reflectorFactory = new BaseReflectorFactory() {
@@ -233,28 +235,28 @@ public class TableInfo {
     }
 
 
-    public List<InsertListener> getOnInsertListener() {
-        return onInsertListener;
+    public List<InsertListener> getOnInsertListeners() {
+        return onInsertListeners;
     }
 
-    public void setOnInsertListener(List<InsertListener> onInsertListener) {
-        this.onInsertListener = onInsertListener;
+    public void setOnInsertListeners(List<InsertListener> onInsertListeners) {
+        this.onInsertListeners = onInsertListeners;
     }
 
-    public List<UpdateListener> getOnUpdateListener() {
-        return onUpdateListener;
+    public List<UpdateListener> getOnUpdateListeners() {
+        return onUpdateListeners;
     }
 
-    public void setOnUpdateListener(List<UpdateListener> onUpdateListener) {
-        this.onUpdateListener = onUpdateListener;
+    public void setOnUpdateListeners(List<UpdateListener> onUpdateListeners) {
+        this.onUpdateListeners = onUpdateListeners;
     }
 
-    public List<SetListener> getOnSetListener() {
-        return onSetListener;
+    public List<SetListener> getOnSetListeners() {
+        return onSetListeners;
     }
 
-    public void setOnSetListener(List<SetListener> onSetListener) {
-        this.onSetListener = onSetListener;
+    public void setOnSetListeners(List<SetListener> onSetListeners) {
+        this.onSetListeners = onSetListeners;
     }
 
     public List<ColumnInfo> getColumnInfoList() {
@@ -674,9 +676,7 @@ public class TableInfo {
                     if (column.equalsIgnoreCase(rowKey)) {
                         Object rowValue = row.get(rowKey);
                         Object value = ConvertUtil.convert(rowValue, metaObject.getSetterType(columnInfo.property));
-                        if (onSetListener != null) {
-                            value = invokeOnSetListener(instance, columnInfo.getProperty(), value);
-                        }
+                        value = invokeOnSetListener(instance, columnInfo.getProperty(), value);
                         metaObject.setValue(columnInfo.property, value);
                     }
                 }
@@ -688,9 +688,7 @@ public class TableInfo {
                         if (newColumn.equalsIgnoreCase(rowKey)) {
                             Object rowValue = row.get(rowKey);
                             Object value = ConvertUtil.convert(rowValue, metaObject.getSetterType(columnInfo.property));
-                            if (onSetListener != null) {
-                                value = invokeOnSetListener(instance, columnInfo.getProperty(), value);
-                            }
+                            value = invokeOnSetListener(instance, columnInfo.getProperty(), value);
                             metaObject.setValue(columnInfo.property, value);
                             fillValue = true;
                             break;
@@ -761,59 +759,54 @@ public class TableInfo {
         MetaObject metaObject = EntityMetaObject.forObject(entityObject, reflectorFactory);
         Object columnValue = getPropertyValue(metaObject, columnInfoMapping.get(logicDeleteColumn).property);
         if (columnValue == null) {
-            String name = columnInfoMapping.get(logicDeleteColumn).property;
-            Class<?> clazz = metaObject.getSetterType(name);
-            if (Number.class.isAssignableFrom(clazz)) {
-                metaObject.setValue(name, ConvertUtil.convert(0L, clazz));
-            } else if (clazz == Boolean.class) {
-                metaObject.setValue(name, false);
-            }
+            String property = columnInfoMapping.get(logicDeleteColumn).property;
+            Class<?> setterType = metaObject.getSetterType(property);
+
+            Object normalValueOfLogicDelete = FlexGlobalConfig.getDefaultConfig().getNormalValueOfLogicDelete();
+            metaObject.setValue(property, ConvertUtil.convert(normalValueOfLogicDelete, setterType));
         }
     }
 
+
+    private static Map<Class<?>, List<InsertListener>> insertListenerCache = new ConcurrentHashMap<>();
 
     public void invokeOnInsertListener(Object entity) {
-        List<InsertListener> list = onInsertListener;
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        // 全局监听器
-        List<InsertListener> globalListeners = FlexGlobalConfig.getDefaultConfig().getSupportedInsertListener(entityClass);
-        if (globalListeners != null) {
-            list.addAll(globalListeners);
-        }
-        Collections.sort(list);
-        list.forEach(insertListener -> insertListener.onInsert(entity));
+        List<InsertListener> listeners = MapUtil.computeIfAbsent(insertListenerCache, entityClass, aClass -> {
+            List<InsertListener> globalListeners = FlexGlobalConfig.getDefaultConfig()
+                    .getSupportedInsertListener(entityClass, CollectionUtil.isNotEmpty(onInsertListeners));
+            List<InsertListener> allListeners = CollectionUtil.merge(onInsertListeners, globalListeners);
+            Collections.sort(allListeners);
+            return allListeners;
+        });
+        listeners.forEach(insertListener -> insertListener.onInsert(entity));
     }
 
+
+    private static Map<Class<?>, List<UpdateListener>> updateListenerCache = new ConcurrentHashMap<>();
 
     public void invokeOnUpdateListener(Object entity) {
-        List<UpdateListener> list = onUpdateListener;
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        // 全局监听器
-        List<UpdateListener> globalListeners = FlexGlobalConfig.getDefaultConfig().getSupportedUpdateListener(entityClass);
-        if (globalListeners != null) {
-            list.addAll(globalListeners);
-        }
-        Collections.sort(list);
-        list.forEach(insertListener -> insertListener.onUpdate(entity));
+        List<UpdateListener> listeners = MapUtil.computeIfAbsent(updateListenerCache, entityClass, aClass -> {
+            List<UpdateListener> globalListeners = FlexGlobalConfig.getDefaultConfig()
+                    .getSupportedUpdateListener(entityClass, CollectionUtil.isNotEmpty(onUpdateListeners));
+            List<UpdateListener> allListeners = CollectionUtil.merge(onUpdateListeners, globalListeners);
+            Collections.sort(allListeners);
+            return allListeners;
+        });
+        listeners.forEach(insertListener -> insertListener.onUpdate(entity));
     }
 
 
+    private static Map<Class<?>, List<SetListener>> setListenerCache = new ConcurrentHashMap<>();
+
     public Object invokeOnSetListener(Object entity, String property, Object value) {
-        List<SetListener> list = onSetListener;
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        // 全局监听器
-        List<SetListener> globalListeners = FlexGlobalConfig.getDefaultConfig().getSupportedSetListener(entityClass);
-        if (globalListeners != null) {
-            list.addAll(globalListeners);
-        }
-        Collections.sort(list);
-        for (SetListener setListener : list) {
+        List<SetListener> listeners = MapUtil.computeIfAbsent(setListenerCache, entityClass, aClass -> {
+            List<SetListener> globalListeners = FlexGlobalConfig.getDefaultConfig()
+                    .getSupportedSetListener(entityClass, CollectionUtil.isNotEmpty(onSetListeners));
+            List<SetListener> allListeners = CollectionUtil.merge(onSetListeners, globalListeners);
+            Collections.sort(allListeners);
+            return allListeners;
+        });
+        for (SetListener setListener : listeners) {
             value = setListener.onSet(entity, property, value);
         }
         return value;

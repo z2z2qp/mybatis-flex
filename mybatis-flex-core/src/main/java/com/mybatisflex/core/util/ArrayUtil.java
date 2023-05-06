@@ -56,7 +56,7 @@ public class ArrayUtil {
     public static <T> T[] concat(T[] first, T[] second) {
         if (first == null && second == null) {
             throw new IllegalArgumentException("not allow first and second are null.");
-        } else if (isEmpty(first)) {
+        } else if (isEmpty(first) && second != null) {
             return second;
         } else if (isEmpty(second)) {
             return first;
@@ -78,6 +78,30 @@ public class ArrayUtil {
             }
         }
         return results;
+    }
+
+
+    /**
+     * 可变长参形式数组
+     *
+     * @param first  第一个数组
+     * @param second 第二个数组
+     * @param <T>
+     * @return 新的数组
+     */
+    @SafeVarargs
+    public static <T> T[] append(T[] first, T... second) {
+        if (first == null && second == null) {
+            throw new IllegalArgumentException("not allow first and second are null.");
+        } else if (isEmpty(first) && second != null) {
+            return second;
+        } else if (isEmpty(second)) {
+            return first;
+        } else {
+            T[] result = Arrays.copyOf(first, first.length + second.length);
+            System.arraycopy(second, 0, result, first.length, second.length);
+            return result;
+        }
     }
 
 
