@@ -140,6 +140,28 @@ public interface BaseMapper<T> {
     @DeleteProvider(type = EntitySqlProvider.class, method = "deleteBatchByIds")
     int deleteBatchByIds(@Param(FlexConsts.PRIMARY_VALUE) Collection<? extends Serializable> ids);
 
+    /**
+     * 根据多个 id 批量删除数据
+     *
+     * @param ids ids 列表
+     * @param size 切分大小
+     * @return 返回影响的行数
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map, ProviderContext)
+     */
+    default int deleteBatchByIds(@Param(FlexConsts.PRIMARY_VALUE) List<? extends Serializable> ids, int size) {
+        if (size <= 0) {
+            size = 1000;//默认1000
+        }
+        int sum = 0;
+        int entitiesSize = ids.size();
+        int maxIndex = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
+        for (int i = 0; i < maxIndex; i++) {
+            List<? extends Serializable> list = ids.subList(i * size, Math.min(i * size + size, entitiesSize));
+            sum += deleteBatchByIds(list);
+        }
+        return sum;
+    }
+
 
     /**
      * 根据 map 构建的条件来删除数据
@@ -176,7 +198,7 @@ public interface BaseMapper<T> {
 
 
     /**
-     * 根据主键来更新数据，若数据为 null，也会更新到数据库
+     * 根据主键来更新数据，若 entity 属性数据为 null，该属性不会新到数据库
      *
      * @param entity 数据内容，必须包含有主键
      * @return 返回影响的行数
