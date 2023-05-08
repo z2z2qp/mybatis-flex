@@ -43,7 +43,7 @@ public class ListenerTest implements WithAssertions {
         account.setBirthday(new Date());
         accountMapper.insert(account);
 
-        Account one = accountMapper.selectOneById(account.getId());
+        Account one = accountMapper.selectOneById(account.getId()).orElse(null);
         System.out.println(one);
 //        assertThat(one.getAge()).isEqualTo(1);
     }
