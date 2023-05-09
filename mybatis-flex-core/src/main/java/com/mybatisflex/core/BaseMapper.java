@@ -18,10 +18,10 @@ package com.mybatisflex.core;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.provider.EntitySqlProvider;
+import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.util.ObjectUtil;
@@ -29,10 +29,8 @@ import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.builder.annotation.ProviderContext;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 
 public interface BaseMapper<T> {
 
@@ -288,6 +286,20 @@ public interface BaseMapper<T> {
     @SelectProvider(type = EntitySqlProvider.class, method = "selectOneById")
     Optional<T> selectOneById(@Param(FlexConsts.PRIMARY_VALUE) Serializable id);
 
+    /**
+     * 根据主键来选择数据
+     *
+     * @param id   id 主键
+     * @param cast 转换器
+     * @param <R>  需要对象泛型
+     * @return 需要的对象
+     */
+    default <R> Optional<R> selectOneById(Serializable id, Function<T, R> cast) {
+        Objects.requireNonNull(cast, "转换器不能为null");
+        var result = selectOneById(id);
+        return result.map(cast);
+    }
+
 
     /**
      * 根据 map 构建的条件来查询数据
@@ -297,6 +309,10 @@ public interface BaseMapper<T> {
      */
     default Optional<T> selectOneByMap(Map<String, Object> whereConditions) {
         return selectOneByQuery(QueryWrapper.create().where(whereConditions));
+    }
+
+    default <R> Optional<R> selectOneByMap(Map<String, Object> whereConditions, Function<T, R> cast) {
+        return selectOneByQuery(QueryWrapper.create().where(whereConditions), cast);
     }
 
 
@@ -310,6 +326,10 @@ public interface BaseMapper<T> {
         return selectOneByQuery(QueryWrapper.create().where(condition));
     }
 
+    default <R> Optional<R> selectOneByCondition(QueryCondition condition, Function<T, R> cast) {
+        return selectOneByQuery(QueryWrapper.create().where(condition), cast);
+    }
+
 
     /**
      * 根据 queryWrapper 构建的条件来查询 1 条数据
@@ -318,7 +338,12 @@ public interface BaseMapper<T> {
      * @return entity 数据
      */
     default Optional<T> selectOneByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper) {
-        List<T> entities = selectListByQuery(queryWrapper.limit(1));
+        var entities = selectListByQuery(queryWrapper.limit(1));
+        return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.get(0));
+    }
+
+    default <R> Optional<R> selectOneByQuery(QueryWrapper queryWrapper, Function<T, R> cast) {
+        var entities = selectListByQuery(queryWrapper.limit(1), cast);
         return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.get(0));
     }
 
@@ -332,6 +357,19 @@ public interface BaseMapper<T> {
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByIds")
     List<T> selectListByIds(@Param(FlexConsts.PRIMARY_VALUE) Collection<? extends Serializable> ids);
 
+    /**
+     * 根据多个主键来查询多条数据
+     *
+     * @param ids  主键列表
+     * @param cast 转换器
+     * @param <R>  需要的泛型
+     * @return 数据列表
+     */
+    default <R> List<R> selectListByIds(Collection<? extends Serializable> ids, Function<T, R> cast) {
+        var result = selectListByIds(ids);
+        return result.stream().map(cast).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    }
+
 
     /**
      * 根据 map 来构建查询条件，查询多条数据
@@ -341,6 +379,10 @@ public interface BaseMapper<T> {
      */
     default List<T> selectListByMap(Map<String, Object> whereConditions) {
         return selectListByQuery(QueryWrapper.create().where(whereConditions));
+    }
+
+    default <R> List<R> selectListByMap(Map<String, Object> whereConditions, Function<T, R> cast) {
+        return selectListByQuery(QueryWrapper.create().where(whereConditions), cast);
     }
 
 
@@ -354,6 +396,10 @@ public interface BaseMapper<T> {
         return selectListByQuery(QueryWrapper.create().where(whereConditions).limit(count));
     }
 
+    default <R> List<R> selectListByMap(Map<String, Object> whereConditions, int count, Function<T, R> cast) {
+        return selectListByQuery(QueryWrapper.create().where(whereConditions).limit(count), cast);
+    }
+
 
     /**
      * 根据 condition 来查询数据
@@ -363,6 +409,10 @@ public interface BaseMapper<T> {
      */
     default List<T> selectListByCondition(QueryCondition condition) {
         return selectListByQuery(QueryWrapper.create().where(condition));
+    }
+
+    default <R> List<R> selectListByCondition(QueryCondition condition, Function<T, R> cast) {
+        return selectListByQuery(QueryWrapper.create().where(condition), cast);
     }
 
 
@@ -377,6 +427,10 @@ public interface BaseMapper<T> {
         return selectListByQuery(QueryWrapper.create().where(condition).limit(count));
     }
 
+    default <R> List<R> selectListByCondition(QueryCondition condition, int count, Function<T, R> cast) {
+        return selectListByQuery(QueryWrapper.create().where(condition).limit(count), cast);
+    }
+
 
     /**
      * 根据 query 来构建条件查询数据列表
@@ -387,6 +441,19 @@ public interface BaseMapper<T> {
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
     List<T> selectListByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
+
+    /**
+     * 根据 query 来构建条件查询数据列表
+     *
+     * @param queryWrapper 查询条件
+     * @param cast         转换器
+     * @param <R>          需要的类别
+     * @return 数据类别
+     */
+    default <R> List<R> selectListByQuery(QueryWrapper queryWrapper, Function<T, R> cast) {
+        List<T> result = selectListByQuery(queryWrapper);
+        return result.stream().map(cast).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    }
 
 
     /**
@@ -434,6 +501,11 @@ public interface BaseMapper<T> {
         return paginate(page, queryWrapper);
     }
 
+    default <R> Page<R> paginate(int pageNumber, int pageSize, QueryWrapper queryWrapper, Function<T, R> cast) {
+        Page<T> page = new Page<>(pageNumber, pageSize);
+        return paginate(page, queryWrapper, cast);
+    }
+
 
     /**
      * 根据条件分页查询
@@ -446,6 +518,11 @@ public interface BaseMapper<T> {
     default Page<T> paginate(int pageNumber, int pageSize, QueryCondition condition) {
         Page<T> page = new Page<>(pageNumber, pageSize);
         return paginate(page, QueryWrapper.create().where(condition));
+    }
+
+    default <R> Page<R> paginate(int pageNumber, int pageSize, QueryCondition condition, Function<T, R> cast) {
+        Page<T> page = new Page<>(pageNumber, pageSize);
+        return paginate(page, QueryWrapper.create().where(condition), cast);
     }
 
     /**
@@ -462,6 +539,11 @@ public interface BaseMapper<T> {
         return paginate(page, queryWrapper);
     }
 
+    default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryWrapper queryWrapper, Function<T, R> cast) {
+        Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
+        return paginate(page, queryWrapper, cast);
+    }
+
 
     /**
      * 根据条件分页查询
@@ -475,6 +557,11 @@ public interface BaseMapper<T> {
     default Page<T> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition condition) {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, QueryWrapper.create().where(condition));
+    }
+
+    default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition condition, Function<T, R> cast) {
+        Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
+        return paginate(page, QueryWrapper.create().where(condition), cast);
     }
 
 
@@ -514,5 +601,11 @@ public interface BaseMapper<T> {
         List<T> rows = selectListByQuery(queryWrapper);
         page.setRecords(rows);
         return page;
+    }
+
+    default <R> Page<R> paginate(Page<T> page, QueryWrapper queryWrapper, Function<T, R> cast) {
+        var r = paginate(page,queryWrapper);
+        var records = r.getRecords().stream().map(cast).toList();
+        return new Page<>(records,page.getPageNumber(),page.getPageSize(),page.getTotalRow());
     }
 }
