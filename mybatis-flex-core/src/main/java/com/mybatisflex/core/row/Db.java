@@ -160,7 +160,7 @@ public class Db {
      * @param whereColumns where 条件
      */
     public static int deleteByMap(String tableName, Map<String, Object> whereColumns) {
-        return invoker().deleteByQuery(tableName, new QueryWrapper().where(whereColumns));
+        return invoker().deleteByQuery(tableName, QueryWrapper.create().where(whereColumns));
     }
 
 
@@ -171,7 +171,7 @@ public class Db {
      * @param condition 条件内容
      */
     public static int deleteByCondition(String tableName, QueryCondition condition) {
-        return invoker().deleteByQuery(tableName, new QueryWrapper().where(condition));
+        return invoker().deleteByQuery(tableName, QueryWrapper.create().where(condition));
     }
 
     /**
@@ -214,7 +214,7 @@ public class Db {
      * @param whereColumns where 条件
      */
     public static int updateByMap(String tableName, Row data, Map<String, Object> whereColumns) {
-        return invoker().updateByQuery(tableName, data, new QueryWrapper().where(whereColumns));
+        return invoker().updateByQuery(tableName, data, QueryWrapper.create().where(whereColumns));
     }
 
     /**
@@ -225,7 +225,7 @@ public class Db {
      * @param condition 条件
      */
     public static int updateByCondition(String tableName, Row data, QueryCondition condition) {
-        return invoker().updateByQuery(tableName, data, new QueryWrapper().where(condition));
+        return invoker().updateByQuery(tableName, data, QueryWrapper.create().where(condition));
     }
 
 
@@ -292,8 +292,8 @@ public class Db {
      * @param tableName    表名
      * @param whereColumns where条件
      */
-    public static Row selectOneByMap(String tableName, Map whereColumns) {
-        return invoker().selectOneByQuery(tableName, new QueryWrapper().where(whereColumns));
+    public static Row selectOneByMap(String tableName, Map<String, Object> whereColumns) {
+        return invoker().selectOneByQuery(tableName, QueryWrapper.create().where(whereColumns));
     }
 
     /**
@@ -303,7 +303,7 @@ public class Db {
      * @param condition 条件
      */
     public static Row selectOneByCondition(String tableName, QueryCondition condition) {
-        return invoker().selectOneByQuery(tableName, new QueryWrapper().where(condition));
+        return invoker().selectOneByQuery(tableName, QueryWrapper.create().where(condition));
     }
 
 
@@ -350,7 +350,7 @@ public class Db {
      * @param whereColumns where 条件
      */
     public static List<Row> selectListByMap(String tableName, Map<String, Object> whereColumns) {
-        return invoker().selectListByQuery(tableName, new QueryWrapper().where(whereColumns));
+        return invoker().selectListByQuery(tableName, QueryWrapper.create().where(whereColumns));
     }
 
     /**
@@ -361,7 +361,7 @@ public class Db {
      * @param count        数据量
      */
     public static List<Row> selectListByMap(String tableName, Map<String, Object> whereColumns, int count) {
-        return invoker().selectListByQuery(tableName, new QueryWrapper().where(whereColumns).limit(count));
+        return invoker().selectListByQuery(tableName, QueryWrapper.create().where(whereColumns).limit(count));
     }
 
 
@@ -372,7 +372,7 @@ public class Db {
      * @param condition where 条件
      */
     public static List<Row> selectListByCondition(String tableName, QueryCondition condition) {
-        return invoker().selectListByQuery(tableName, new QueryWrapper().where(condition));
+        return invoker().selectListByQuery(tableName, QueryWrapper.create().where(condition));
     }
 
     /**
@@ -383,7 +383,7 @@ public class Db {
      * @param count     数据量
      */
     public static List<Row> selectListByCondition(String tableName, QueryCondition condition, int count) {
-        return invoker().selectListByQuery(tableName, new QueryWrapper().where(condition).limit(count));
+        return invoker().selectListByQuery(tableName, QueryWrapper.create().where(condition).limit(count));
     }
 
 
@@ -461,7 +461,7 @@ public class Db {
      * @param condition 条件
      */
     public static long selectCountByCondition(String tableName, QueryCondition condition) {
-        return invoker().selectCountByQuery(tableName, new QueryWrapper().where(condition));
+        return invoker().selectCountByQuery(tableName, QueryWrapper.create().where(condition));
     }
 
 

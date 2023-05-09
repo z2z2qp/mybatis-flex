@@ -143,7 +143,7 @@ public interface BaseMapper<T> {
     /**
      * 根据多个 id 批量删除数据
      *
-     * @param ids ids 列表
+     * @param ids  ids 列表
      * @param size 切分大小
      * @return 返回影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map, ProviderContext)
@@ -395,7 +395,7 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default List<T> selectAll() {
-        return selectListByQuery(new QueryWrapper());
+        return selectListByQuery(QueryWrapper.create());
     }
 
 
@@ -445,7 +445,7 @@ public interface BaseMapper<T> {
      */
     default Page<T> paginate(int pageNumber, int pageSize, QueryCondition condition) {
         Page<T> page = new Page<>(pageNumber, pageSize);
-        return paginate(page, new QueryWrapper().where(condition));
+        return paginate(page, QueryWrapper.create().where(condition));
     }
 
     /**
@@ -474,7 +474,7 @@ public interface BaseMapper<T> {
      */
     default Page<T> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition condition) {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
-        return paginate(page, new QueryWrapper().where(condition));
+        return paginate(page, QueryWrapper.create().where(condition));
     }
 
 

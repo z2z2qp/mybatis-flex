@@ -87,7 +87,7 @@ public class QueryMethods {
     }
 
     private static QueryWrapper newWrapper() {
-        return new QueryWrapper();
+        return QueryWrapper.create();
     }
 
 
