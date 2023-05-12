@@ -67,11 +67,7 @@ public class Masks {
 
 
     private static String createMask(int count) {
-        StringBuilder mask = new StringBuilder();
-        for (int i = 0; i < count; i++) {
-            mask.append("*");
-        }
-        return mask.toString();
+        return "*".repeat(Math.max(0, count));
     }
 
 
@@ -87,8 +83,8 @@ public class Masks {
      * 保留前三后四，中间的为星号  "*"
      */
     static MaskProcessor MOBILE_PROCESSOR = data -> {
-        if (data instanceof String && ((String) data).startsWith("1") && ((String) data).length() == 11) {
-            return mask((String) data, 3, 4, 4);
+        if (data instanceof String str && str.startsWith("1") && str.length() == 11) {
+            return mask(str, 3, 4, 4);
         }
         return data;
     };
@@ -99,8 +95,8 @@ public class Masks {
      * 保留前三后四，中间的为星号  "*"
      */
     static MaskProcessor FIXED_PHONE_PROCESSOR = data -> {
-        if (data instanceof String && ((String) data).length() > 5) {
-            return mask((String) data, 3, 2, ((String) data).length() - 5);
+        if (data instanceof String str && str.length() > 5) {
+            return mask(str, 3, 2, str.length() - 5);
         }
         return data;
     };
@@ -111,8 +107,8 @@ public class Masks {
      * 身份证号的保留前三后四，中间的数为星号  "*"
      */
     static MaskProcessor ID_CARD_NUMBER_PROCESSOR = data -> {
-        if (data instanceof String && ((String) data).length() >= 15) {
-            return mask((String) data, 3, 4, ((String) data).length() - 7);
+        if (data instanceof String str && str.length() >= 15) {
+            return mask(str, 3, 4, str.length() - 7);
         }
         return data;
     };
@@ -122,8 +118,7 @@ public class Masks {
      * 姓名脱敏
      */
     static MaskProcessor CHINESE_NAME_PROCESSOR = data -> {
-        if (data instanceof String) {
-            String name = (String) data;
+        if (data instanceof String name) {
             if (name.length() == 2) {
                 return name.charAt(0) + "*";
             } else if (name.length() == 3) {
@@ -142,8 +137,7 @@ public class Masks {
      * 地址脱敏
      */
     static MaskProcessor ADDRESS_PROCESSOR = data -> {
-        if (data instanceof String) {
-            String address = (String) data;
+        if (data instanceof String address) {
             if (address.length() > 6) {
                 return mask(address, 6, 0, 3);
             } else if (address.length() > 3) {
@@ -158,11 +152,9 @@ public class Masks {
      * email 脱敏
      */
     static MaskProcessor EMAIL_PROCESSOR = data -> {
-        if (data instanceof String && ((String) data).contains("@")) {
-            String fullEmail = (String) data;
+        if (data instanceof String fullEmail && fullEmail.contains("@")) {
             int indexOf = fullEmail.lastIndexOf("@");
             String email = fullEmail.substring(0, indexOf);
-
             if (email.length() == 1) {
                 return "*" + fullEmail.substring(indexOf);
             } else if (email.length() == 2) {
@@ -181,8 +173,8 @@ public class Masks {
      * 密码 脱敏
      */
     static MaskProcessor PASSWORD_PROCESSOR = data -> {
-        if (data instanceof String ) {
-            return mask((String) data, 0, 0, ((String) data).length()) ;
+        if (data instanceof String str) {
+            return mask(str, 0, 0, str.length());
         }
         return data;
     };
@@ -192,8 +184,8 @@ public class Masks {
      * 车牌号 脱敏
      */
     static MaskProcessor CAR_LICENSE_PROCESSOR = data -> {
-        if (data instanceof String) {
-            return mask((String) data, 3, 1, ((String) data).length() - 4);
+        if (data instanceof String str) {
+            return mask(str, 3, 1, str.length() - 4);
         }
         return data;
     };
@@ -203,8 +195,8 @@ public class Masks {
      * 银行卡号 脱敏
      */
     static MaskProcessor BANK_CARD_PROCESSOR = data -> {
-        if (data instanceof String && ((String) data).length() >= 8) {
-            return mask((String) data, 4, 4, 4);
+        if (data instanceof String str && str.length() >= 8) {
+            return mask(str, 4, 4, 4);
         }
         return data;
     };
