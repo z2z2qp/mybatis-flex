@@ -22,7 +22,7 @@ import java.util.UUID;
 public class UUIDKeyGenerator implements IKeyGenerator {
 
     @Override
-    public Object generate(Object entity, String keyColumn) {
+    public String generate(Object entity, String keyColumn) {
         return UUID.randomUUID().toString().replace("-", "");
     }
 }
