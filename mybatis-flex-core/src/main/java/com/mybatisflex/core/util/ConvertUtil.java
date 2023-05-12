@@ -94,8 +94,8 @@ public class ConvertUtil {
         } else if (targetClass == LocalTime.class) {
             return DateUtil.toLocalTime(DateUtil.parseDate(value));
         } else if (targetClass == Short.class || targetClass == short.class) {
-            if (value instanceof Number) {
-                return ((Number) value).shortValue();
+            if (value instanceof Number number) {
+                return number.shortValue();
             }
             return Short.parseShort(value.toString());
         } else if (targetClass.isEnum()) {

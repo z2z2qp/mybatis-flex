@@ -52,7 +52,7 @@ public class FlexIDKeyGenerator implements IKeyGenerator {
     }
 
     @Override
-    public Object generate(Object entity, String keyColumn) {
+    public Long generate(Object entity, String keyColumn) {
         return nextId();
     }
 
