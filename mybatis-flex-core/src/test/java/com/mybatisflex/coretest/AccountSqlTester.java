@@ -21,7 +21,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelectSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select()
                 .from(ACCOUNT);
 
@@ -32,7 +32,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelectColumnsSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID, ACCOUNT.USER_NAME)
                 .from(ACCOUNT);
 
@@ -43,7 +43,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelect1ColumnsSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID, ACCOUNT.USER_NAME,
                         ARTICLE.ID.as("articleId"), ARTICLE.TITLE)
                 .from(ACCOUNT.as("a"), ARTICLE.as("b"))
@@ -56,7 +56,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelectColumnsAndFunctionsSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID, ACCOUNT.USER_NAME, max(ACCOUNT.BIRTHDAY), avg(ACCOUNT.SEX).as("sex_avg"))
                 .from(ACCOUNT);
 
@@ -68,7 +68,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelectAllColumnsSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ALL_COLUMNS)
                 .from(ACCOUNT);
 
@@ -80,7 +80,7 @@ public class AccountSqlTester {
 
     @Test
     public void testUnionSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID)
                 .from(ACCOUNT)
                 .orderBy(ACCOUNT.ID.desc())

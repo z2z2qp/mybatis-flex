@@ -15,7 +15,7 @@ public class ArticleSqlTester {
 
     @Test
     public void testSelectSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select()
                 .from(ARTICLE);
 
@@ -106,7 +106,7 @@ public class ArticleSqlTester {
         article.setContent("aaa");
         article.setVersion(1L);
 
-        QueryWrapper queryWrapper = new QueryWrapper()
+        QueryWrapper queryWrapper = QueryWrapper.create()
                 .where(ARTICLE.ID.ge(100));
 
         IDialect dialect = new CommonsDialectImpl();

@@ -25,7 +25,7 @@ public class AccountTest implements WithAssertions {
 
     @Test
     public void testSelectOne() {
-        Account account = accountMapper.selectOneById(1);
+        Account account = accountMapper.selectOneById(1).orElse(null);
         assertThat(account).isNotNull()
                 .satisfies(a -> assertThat(a.getId()).isEqualTo(1));
     }
