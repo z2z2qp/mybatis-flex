@@ -42,9 +42,9 @@ public @interface ConditionalOnMybatisFlexDatasource {
                 MutablePropertySources propertySources = ((AbstractEnvironment) env).getPropertySources();
                 Iterator<PropertySource<?>> it = propertySources.stream().iterator();
                 while (it.hasNext()) {
-                    PropertySource ps = it.next();
-                    if (ps instanceof MapPropertySource) {
-                        for (String propertyName : ((MapPropertySource) ps).getSource().keySet()) {
+                    PropertySource<?> ps = it.next();
+                    if (ps instanceof MapPropertySource mps) {
+                        for (String propertyName : mps.getSource().keySet()) {
                             if (propertyName.startsWith("mybatis-flex.datasource.")) {
                                 return true;
                             }

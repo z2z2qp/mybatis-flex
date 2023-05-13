@@ -29,9 +29,7 @@ public class MybatisAdapterFlex extends MybatisAdapterDefault {
 
         factoryBuilderPlus = new FlexSqlSessionFactoryBuilder();
 
-        dsWrap.context().getBeanAsync(FlexSqlSessionFactoryBuilder.class, bean -> {
-            factoryBuilderPlus = bean;
-        });
+        dsWrap.context().getBeanAsync(FlexSqlSessionFactoryBuilder.class, bean -> factoryBuilderPlus = bean);
 
         initAfter(dsWrap);
     }
@@ -41,9 +39,7 @@ public class MybatisAdapterFlex extends MybatisAdapterDefault {
 
         factoryBuilderPlus = new FlexSqlSessionFactoryBuilder();
 
-        dsWrap.context().getBeanAsync(FlexSqlSessionFactoryBuilder.class, bean -> {
-            factoryBuilderPlus = bean;
-        });
+        dsWrap.context().getBeanAsync(FlexSqlSessionFactoryBuilder.class, bean -> factoryBuilderPlus = bean);
 
         initAfter(dsWrap);
     }
@@ -109,7 +105,6 @@ public class MybatisAdapterFlex extends MybatisAdapterDefault {
         //@Db("db1") SqlSessionFactory factory;
         if (FlexGlobalConfig.class.isAssignableFrom(varH.getType())) {
             varH.setValue(this.getGlobalConfig());
-            return;
         }
     }
 }

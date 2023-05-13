@@ -291,8 +291,7 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
      * @since 2.0.5
      */
     @Override
-    public void setDefaultEnumTypeHandler(
-            @SuppressWarnings("rawtypes") Class<? extends TypeHandler> defaultEnumTypeHandler) {
+    public void setDefaultEnumTypeHandler(Class<? extends TypeHandler> defaultEnumTypeHandler) {
         this.defaultEnumTypeHandler = defaultEnumTypeHandler;
     }
 
@@ -419,7 +418,7 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
      * The default {@code SpringManagedTransactionFactory} should be appropriate for all cases: be it Spring transaction
      * management, EJB CMT or plain JTA. If there is no active transaction, SqlSession operations will execute SQL
      * statements non-transactionally.
-     *
+     * <p>
      * <b>It is strongly recommended to use the default {@code TransactionFactory}.</b> If not used, any attempt at
      * getting an SqlSession through Spring's MyBatis framework will throw an exception if a transaction is active.
      *
@@ -677,7 +676,7 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
                         classes.add(clazz);
                     }
                 } catch (Throwable e) {
-                    LOGGER.warn(() -> "Cannot load the '" + resource + "'. Cause by " + e.toString());
+                    LOGGER.warn(() -> "Cannot load the '" + resource + "'. Cause by " + e);
                 }
             }
         }
