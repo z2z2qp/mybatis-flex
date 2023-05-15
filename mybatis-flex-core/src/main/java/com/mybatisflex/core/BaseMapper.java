@@ -533,11 +533,7 @@ public interface BaseMapper<T> {
         if (queryResults == null || queryResults.isEmpty()) {
             return Collections.emptyList();
         }
-        List<R> results = new ArrayList<>();
-        for (Object queryResult : queryResults) {
-            results.add((R) ConvertUtil.convert(queryResult, asType));
-        }
-        return results;
+        return queryResults.stream().map(it -> ConvertUtil.convert(it, asType)).toList();
     }
 
 
@@ -669,7 +665,7 @@ public interface BaseMapper<T> {
 
             //清除group by 去查询数据
             CPI.setGroupByColumns(queryWrapper, null);
-            CPI.setSelectColumns(queryWrapper, Arrays.asList(count()));
+            CPI.setSelectColumns(queryWrapper, List.of(count()));
 
             long count = selectCountByQuery(queryWrapper);
             page.setTotalRow(count);
@@ -705,7 +701,7 @@ public interface BaseMapper<T> {
 
             //清除group by 去查询数据
             CPI.setGroupByColumns(queryWrapper, null);
-            CPI.setSelectColumns(queryWrapper, Arrays.asList(count()));
+            CPI.setSelectColumns(queryWrapper, List.of(count()));
 
             long count = selectCountByQuery(queryWrapper);
             page.setTotalRow(count);
@@ -729,8 +725,8 @@ public interface BaseMapper<T> {
     }
 
     default <R> Page<R> paginate(Page<T> page, QueryWrapper queryWrapper, Function<T, R> cast) {
-        var r = paginate(page,queryWrapper);
+        var r = paginate(page, queryWrapper);
         var records = r.getRecords().stream().map(cast).toList();
-        return new Page<>(records,page.getPageNumber(),page.getPageSize(),page.getTotalRow());
+        return new Page<>(records, page.getPageNumber(), page.getPageSize(), page.getTotalRow());
     }
 }

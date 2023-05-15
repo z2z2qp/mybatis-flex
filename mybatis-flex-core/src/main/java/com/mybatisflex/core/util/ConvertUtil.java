@@ -33,8 +33,8 @@ import java.util.Objects;
 public class ConvertUtil {
 
 
-    public static Object convert(Object value, Class targetClass) {
-        return convert(value, targetClass, false);
+    public static <T> T convert(Object value, Class<T> targetClass) {
+        return (T) convert(value, targetClass, false);
     }
 
     public static Object convert(Object value, Class targetClass, boolean ignoreConvertError) {
@@ -51,23 +51,23 @@ public class ConvertUtil {
         if (targetClass == String.class) {
             return value.toString();
         } else if (targetClass == Integer.class || targetClass == int.class) {
-            if (value instanceof Number) {
-                return ((Number) value).intValue();
+            if (value instanceof Number number) {
+                return number.intValue();
             }
             return Integer.parseInt(value.toString());
         } else if (targetClass == Long.class || targetClass == long.class) {
-            if (value instanceof Number) {
-                return ((Number) value).longValue();
+            if (value instanceof Number number) {
+                return number.longValue();
             }
             return Long.parseLong(value.toString());
         } else if (targetClass == Double.class || targetClass == double.class) {
-            if (value instanceof Number) {
-                return ((Number) value).doubleValue();
+            if (value instanceof Number number) {
+                return number.doubleValue();
             }
             return Double.parseDouble(value.toString());
         } else if (targetClass == Float.class || targetClass == float.class) {
-            if (value instanceof Number) {
-                return ((Number) value).floatValue();
+            if (value instanceof Number number) {
+                return number.floatValue();
             }
             return Float.parseFloat(value.toString());
         } else if (targetClass == Boolean.class || targetClass == boolean.class) {
