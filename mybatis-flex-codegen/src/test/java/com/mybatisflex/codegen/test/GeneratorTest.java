@@ -22,6 +22,10 @@ import com.mybatisflex.codegen.config.TableConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.Test;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+
 public class GeneratorTest {
 
 
@@ -29,10 +33,10 @@ public class GeneratorTest {
     public void testGenerator() {
         //配置数据源
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/jbootadmin?characterEncoding=utf-8");
+        dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/will?characterEncoding=utf-8");
         //        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/hh-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true");
         dataSource.setUsername("root");
-        dataSource.setPassword("123456");
+        dataSource.setPassword("704B2C1C67DB348E49F581318334A457");
 
         //        JdbcTypeMapping.registerMapping(BigInteger.class, Long.class);
         //        JdbcTypeMapping.registerMapping(Integer.class, Long.class);
@@ -90,23 +94,23 @@ public class GeneratorTest {
     }
 
     @Test
-    public void testCodeGen() {
+    public void testCodeGen() throws IOException {
         // 配置数据源
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?characterEncoding=utf-8");
+        dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/will?characterEncoding=utf-8");
         dataSource.setUsername("root");
-        dataSource.setPassword("12345678");
+        dataSource.setPassword("704B2C1C67DB348E49F581318334A457");
 
         GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setSourceDir(System.getProperty("user.dir") + "/src/test/java");
-        globalConfig.setTablePrefix("sys_");
+//        globalConfig.setTablePrefix("sys_");
         globalConfig.setBasePackage("com.test");
         globalConfig.setEntityWithLombok(true);
 
         globalConfig.setEntitySupperClass(BaseEntity.class);
 
         // 设置只生成哪些表
-        globalConfig.addGenerateTable("sys_user");
+//        globalConfig.addGenerateTable("sys_user");
 
         // 设置 entity 的包名
         globalConfig.setTableDefGenerateEnable(true);
@@ -125,6 +129,7 @@ public class GeneratorTest {
 
         // 开始生成代码
         generator.generate();
+        Desktop.getDesktop().open(new File(globalConfig.getSourceDir()));
     }
 
 }

@@ -430,7 +430,7 @@ public class GlobalConfig {
 
     public String getServiceImplPackage() {
         if (StringUtil.isBlank(serviceImplPackage)) {
-            serviceImplPackage = basePackage + ".service.impl";
+            serviceImplPackage = basePackage + ".service";
         }
         return serviceImplPackage;
     }

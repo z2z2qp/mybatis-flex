@@ -28,7 +28,7 @@ public class GeneratorFactory {
     static {
         registerGenerator("entity", new EntityGenerator());
         registerGenerator("mapper", new MapperGenerator());
-        registerGenerator("service", new ServiceGenerator());
+//        registerGenerator("service", new ServiceGenerator());
         registerGenerator("serviceImpl", new ServiceImplGenerator());
         registerGenerator("controller", new ControllerGenerator());
         registerGenerator("tableDef", new TableDefGenerator());
