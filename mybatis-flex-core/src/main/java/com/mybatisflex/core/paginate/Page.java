@@ -110,7 +110,7 @@ public class Page<T> implements Serializable {
         newPage.totalPage = totalPage;
         newPage.totalRow = totalRow;
 
-        if (records != null) {
+        if (records != null && !records.isEmpty()) {
             List<R> newRecords = new ArrayList<>(records.size());
             for (T t : records) {
                 newRecords.add(mapper.apply(t));
