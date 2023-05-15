@@ -17,7 +17,7 @@ package com.mybatisflex.core.mybatis;
 
 public class MappedStatementTypes {
 
-    private static ThreadLocal<Class<?>> currentTypeTL = new ThreadLocal<>();
+    private static final ThreadLocal<Class<?>> currentTypeTL = new ThreadLocal<>();
 
     static void setCurrentType(Class<?> type){
         currentTypeTL.set(type);

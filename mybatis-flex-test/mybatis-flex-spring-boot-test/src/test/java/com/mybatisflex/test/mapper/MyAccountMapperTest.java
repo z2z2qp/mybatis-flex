@@ -1,5 +1,6 @@
 package com.mybatisflex.test.mapper;
 
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.test.model.Account;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.mybatisflex.test.model.table.Tables.ACCOUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -40,6 +42,56 @@ class MyAccountMapperTest {
         }
         int i = mapper.insertBatch(accounts, 1000);
         assertEquals(33334, i);
+    }
+
+    @Test
+    void selectListByQueryAs() {
+        QueryWrapper wrapper = QueryWrapper.create()
+                .select(ACCOUNT.ID,ACCOUNT.USER_NAME)
+                .from(ACCOUNT)
+                .limit(1);
+        List<User> list = mapper.selectListByQueryAs(wrapper, User.class);
+        System.out.println(list);
+
+    }
+    static class User{
+        private long id;
+        private String userName;
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
+
+        @Override
+        public String toString() {
+            return "User{" +
+                    "id=" + id +
+                    ", userName='" + userName + '\'' +
+                    '}';
+        }
+    }
+
+    @Test
+    void selectObjectListByQueryAs() {
+        QueryWrapper wrapper = QueryWrapper.create()
+                .select(ACCOUNT.ID)
+                .from(ACCOUNT)
+                .limit(1);
+        List<Long> list = mapper.selectObjectListByQueryAs(wrapper, Long.class);
+        System.out.println(list);
+
     }
 
 }
