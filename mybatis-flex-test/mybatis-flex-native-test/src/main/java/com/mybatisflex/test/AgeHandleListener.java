@@ -8,17 +8,17 @@ import com.mybatisflex.annotation.InsertListener;
  * @author snow
  * @since 2023/4/28
  */
-public class AgeHandleListener implements InsertListener<AgeAware> {
+public class AgeHandleListener implements InsertListener {
 
     @Override
-    public void onInsert(AgeAware ageAware) {
-//        if (entity instanceof AgeAware) {
-//            AgeAware ageAware = (AgeAware) entity;
+    public void onInsert(Object entity) {
+        if (entity instanceof AgeAware) {
+            AgeAware ageAware = (AgeAware) entity;
             int age = ageAware.getAge();
             if (age < 0) {
                 ageAware.setAge(0);
             }
-//        }
+        }
     }
 
     @Override

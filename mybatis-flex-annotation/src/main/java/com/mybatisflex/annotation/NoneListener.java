@@ -15,19 +15,19 @@
  */
 package com.mybatisflex.annotation;
 
-public final class NoneListener<I,U,S> implements InsertListener<I>, UpdateListener<U>, SetListener<S> {
+public final class NoneListener implements InsertListener, UpdateListener, SetListener {
     @Override
-    public void onInsert(I entity) {
+    public void onInsert(Object entity) {
 
     }
 
     @Override
-    public void onUpdate(U entity) {
+    public void onUpdate(Object entity) {
 
     }
 
     @Override
-    public Object onSet(S entity, String property, Object value) {
+    public Object onSet(Object entity, String property, Object value) {
         return value;
     }
 }

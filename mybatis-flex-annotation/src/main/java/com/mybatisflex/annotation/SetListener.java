@@ -15,18 +15,7 @@
  */
 package com.mybatisflex.annotation;
 
-/**
- * 监听设置值
- * @param <T> 监听的对象
- */
-public interface SetListener<T> extends Listener {
+public interface SetListener extends Listener {
 
-    /**
-     * 设置entity的值，已return值为准
-     * @param entity 返回的对象
-     * @param property 对象属性key
-     * @param value 数据库获取的值
-     * @return 数据值，会set到entity
-     */
-    Object onSet(T entity, String property, Object value);
+    Object onSet(Object entity, String property, Object value);
 }

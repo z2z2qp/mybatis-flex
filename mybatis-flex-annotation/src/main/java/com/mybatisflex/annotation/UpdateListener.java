@@ -15,8 +15,8 @@
  */
 package com.mybatisflex.annotation;
 
-public interface UpdateListener<T> extends Listener {
+public interface UpdateListener extends Listener {
 
-    void onUpdate(T entity);
+    void onUpdate(Object entity);
 
 }
