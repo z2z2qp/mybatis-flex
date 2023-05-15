@@ -6,7 +6,7 @@ package com.mybatisflex.annotation;
  * @author snow
  * @since 2023/4/28
  */
-public abstract class AbstractInsertListener<T> implements InsertListener {
+public abstract class AbstractInsertListener<T> implements InsertListener<T> {
 
     /**
      * 该监听器支持的entity类型

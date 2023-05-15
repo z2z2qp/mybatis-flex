@@ -6,7 +6,7 @@ package com.mybatisflex.annotation;
  * @author snow
  * @since 2023/4/28
  */
-public abstract class AbstractUpdateListener<T> implements UpdateListener {
+public abstract class AbstractUpdateListener<T> implements UpdateListener<T> {
 
     /**
      * 该监听器支持的entity类型
