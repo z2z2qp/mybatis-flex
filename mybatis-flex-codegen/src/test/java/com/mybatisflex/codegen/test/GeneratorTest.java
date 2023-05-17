@@ -20,7 +20,6 @@ import com.mybatisflex.codegen.config.ColumnConfig;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.mybatisflex.codegen.config.TableConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.Test;
 
 import java.awt.*;
 import java.io.File;
@@ -93,8 +92,8 @@ public class GeneratorTest {
         generator.generate();
     }
 
-    @Test
-    public void testCodeGen() throws IOException {
+//    @Test
+    public void testCodeGen() {
         // 配置数据源
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/will?characterEncoding=utf-8");
