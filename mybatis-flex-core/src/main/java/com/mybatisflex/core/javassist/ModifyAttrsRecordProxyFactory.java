@@ -45,7 +45,7 @@ public class ModifyAttrsRecordProxyFactory {
 
         T proxyObject = null;
         try {
-            proxyObject = (T) proxyClass.newInstance();
+            proxyObject = (T) proxyClass.getDeclaredConstructor().newInstance();
             ((ProxyObject) proxyObject).setHandler(new ModifyAttrsRecordHandler());
         } catch (Throwable e) {
             LogFactory.getLog(ModifyAttrsRecordProxyFactory.class).error(e.toString(),e);
