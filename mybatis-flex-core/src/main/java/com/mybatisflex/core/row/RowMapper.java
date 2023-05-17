@@ -18,7 +18,6 @@ package com.mybatisflex.core.row;
 import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.provider.EntitySqlProvider;
 import com.mybatisflex.core.provider.RowSqlProvider;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.QueryColumn;
@@ -28,8 +27,8 @@ import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +36,8 @@ import static com.mybatisflex.core.query.QueryMethods.count;
 
 
 public interface RowMapper {
+
+    int DEFAULT_BATCH_SIZE = 1000;
 
     //////insert //////
 
@@ -190,6 +191,16 @@ public interface RowMapper {
      */
     @UpdateProvider(value = RowSqlProvider.class, method = "updateBatchById")
     int updateBatchById(@Param(FlexConsts.TABLE_NAME) String tableName, @Param(FlexConsts.ROWS) List<Row> rows);
+
+
+    /**
+     * 更新 entity，主要用于进行批量更新的场景
+     * @param entity 实体类
+     * @see RowSqlProvider#updateEntity(Map)
+     * @see Db#updateBatchEntity(Collection, int)
+     */
+    @UpdateProvider(value = RowSqlProvider.class, method = "updateEntity")
+    int updateEntity(@Param(FlexConsts.ENTITY) Object entity);
 
     ///////select /////
 
@@ -355,7 +366,7 @@ public interface RowMapper {
      * @return 数据列表
      * @see RowSqlProvider#selectObjectByQuery(Map)
      */
-    @SelectProvider(type = EntitySqlProvider.class, method = "selectObjectByQuery")
+    @SelectProvider(type = RowSqlProvider.class, method = "selectObjectByQuery")
     List<Object> selectObjectListByQuery(@Param(FlexConsts.TABLE_NAME) String tableName, @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
 
@@ -402,7 +413,7 @@ public interface RowMapper {
 
             //清除group by 去查询数据
             CPI.setGroupByColumns(queryWrapper, null);
-            CPI.setSelectColumns(queryWrapper, Arrays.asList(count()));
+            CPI.setSelectColumns(queryWrapper, Collections.singletonList(count()));
 
             long count = selectCountByQuery(tableName, queryWrapper);
             page.setTotalRow(count);
@@ -424,6 +435,5 @@ public interface RowMapper {
         page.setRecords(records);
         return page;
     }
-
 
 }

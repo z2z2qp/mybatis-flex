@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mybatisflex.core.mybatis;
+package com.mybatisflex.core.keygen;
 
-public class MappedStatementTypes {
+public class KeyGenerators {
 
-    private static final ThreadLocal<Class<?>> currentTypeTL = new ThreadLocal<>();
+    /**
+     * uuid 主键生成器
+     * {@link com.mybatisflex.core.keygen.impl.UUIDKeyGenerator}
+     */
+    public static final String uuid = "uuid";
 
-    public static void setCurrentType(Class<?> type){
-        currentTypeTL.set(type);
-    }
+    /**
+     * flexId 主键生成器
+     * {@link com.mybatisflex.core.keygen.impl.FlexIDKeyGenerator}
+     */
+    public static final String flexId = "flexId";
 
-    public static Class<?> getCurrentType(){
-        return currentTypeTL.get();
-    }
-
-    public static void clear(){
-        currentTypeTL.remove();
-    }
-
+    /**
+     * 雪花算法主键生成器
+     * {@link com.mybatisflex.core.keygen.impl.SnowFlakeIDKeyGenerator}
+     */
+    public static final String snowFlakeId = "snowFlakeId";
 }

@@ -24,13 +24,16 @@ import com.mybatisflex.core.query.QueryTable;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.transaction.Propagation;
 import com.mybatisflex.core.transaction.TransactionalManager;
+import com.mybatisflex.core.util.CollectionUtil;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.util.MapUtil;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -98,7 +101,11 @@ public class Db {
      * @param batchSize 每次提交的数据量
      */
     public static int[] insertBatch(String tableName, Collection<Row> rows, int batchSize) {
-        return invoker().insertBatch(tableName, rows, batchSize);
+        List<Row> list = CollectionUtil.toList(rows);
+        return executeBatch(rows.size(), batchSize, RowMapper.class, (mapper, index) -> {
+            Row row = list.get(index);
+            mapper.insert(tableName, row);
+        });
     }
 
     /**
@@ -197,6 +204,18 @@ public class Db {
 
 
     /**
+     * @param sql
+     * @param batchArgsSetter
+     * @return
+     */
+    public static int[] updateBatch(String sql, BatchArgsSetter batchArgsSetter) {
+        int batchSize = batchArgsSetter.getBatchSize();
+        return executeBatch(batchSize, batchSize, RowMapper.class
+                , (mapper, index) -> mapper.updateBySql(sql, batchArgsSetter.getSqlArgs(index)));
+    }
+
+
+    /**
      * 根据 id 来更新数据
      *
      * @param tableName 表情
@@ -251,6 +270,46 @@ public class Db {
         return invoker().updateBatchById(tableName, rows);
     }
 
+
+    /**
+     * 根据主键来批量更新数据
+     *
+     * @param entities  实体
+     * @param batchSize 批次大小
+     * @return int
+     */
+    public static <T> int updateBatchEntity(Collection<T> entities, int batchSize) {
+        List<T> list = CollectionUtil.toList(entities);
+        return Arrays.stream(executeBatch(list.size(), batchSize, RowMapper.class, (mapper, index) -> {
+            T entity = list.get(index);
+            mapper.updateEntity(entity);
+        })).sum();
+    }
+
+    /**
+     * 根据主键来批量更新数据
+     *
+     * @param entities 实体
+     * @return int 影响行数
+     */
+    public static <T> int updateBatchEntity(Collection<T> entities) {
+        return updateBatchEntity(entities, RowMapper.DEFAULT_BATCH_SIZE);
+    }
+
+
+    /**
+     * 批量执行工具方法
+     *
+     * @param totalSize   执行总量
+     * @param batchSize   每一批次的数据量
+     * @param mapperClass 通过那个 Mapper 来执行
+     * @param consumer    执行内容
+     * @param <M>         Mapper
+     * @return 执行影响的行数
+     */
+    public static <M> int[] executeBatch(int totalSize, int batchSize, Class<M> mapperClass, BiConsumer<M, Integer> consumer) {
+        return invoker().executeBatch(totalSize, batchSize, mapperClass, consumer);
+    }
 
     /**
      * 根据 sql 来查询 1 条数据
@@ -433,7 +492,8 @@ public class Db {
 
     /**
      * 根据 queryWrapper 查询内容，数据返回的应该只有 1 行 1 列
-     * @param tableName 表名
+     *
+     * @param tableName    表名
      * @param queryWrapper query 封装
      * @return 数据内容
      */
@@ -444,6 +504,7 @@ public class Db {
 
     /**
      * 根据 queryWrapper 查询内容，数据返回的应该只有 1 行 1 列
+     *
      * @param queryWrapper query 封装
      * @return 数据内容
      */
@@ -465,7 +526,8 @@ public class Db {
 
     /**
      * 根据 queryWrapper 查询内容，数据返回的应该只有 1 行 1 列
-     * @param tableName 表名
+     *
+     * @param tableName    表名
      * @param queryWrapper query 封装
      * @return 数据内容
      */
@@ -476,6 +538,7 @@ public class Db {
 
     /**
      * 根据 queryWrapper 查询内容，数据返回的应该只有 1 行 1 列
+     *
      * @param queryWrapper query 封装
      * @return 数据内容
      */

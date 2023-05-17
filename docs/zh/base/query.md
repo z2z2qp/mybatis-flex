@@ -19,6 +19,9 @@
 - **selectListByQueryAs(query, asType)**： 和 `selectListByQuery` 方法类似，但是在某些场景下，`query` 可能包含了 `left join` 等多表查询，返回的数据和 entity 字段不一致时，
   可以通过 `asType` 参数来指定接收的数据类型（通常是 dto、vo 等）。
 - **selectAll**：查询所有数据。
+- **selectObjectByQuery(query)**：查询只返回 1 列，并只有 1 条数据的场景。
+- **selectObjectListByQuery(query)**：查询只返回 1 列场景，比如 `QueryWrapper.create().select(ACCOINT.ID).from(...)`。
+- **selectObjectListByQueryAs(query, asType)**：对 `selectObjectListByQuery` 进行封装，并转换为特定的类型。
 - **selectCountByCondition**：根据 QueryWrapper 查询数据量。
 - **selectCountByQuery**：根据 QueryWrapper 查询数据量。
 
@@ -77,12 +80,12 @@ List<ArticleDTO> results = mapper.selectListByQueryAs(query, ArticleDTO.class);
 System.out.println(results);
 ```
 
-**注意事项！**
+**注意事项：**
 
-`selectOneByQueryAs`、`selectListByQueryAs` 、`paginateAs` 等方法中的 `asType` 参数类型，
-一样支持使用 `@Column`、`@ColumnMask` 以及 `@Table` 的 `onInsert`、`onUpdate`、`onSet` 配置。
+关联查询（`selectOneByQueryAs`、`selectListByQueryAs` 、`paginateAs` 等方法）中的 `asType` 参数类型（比如：`ArticleDTO`），
+一样支持使用 `@Column`、`@ColumnMask` 注解以及 `@Table` 的 `onInsert`、`onUpdate`、`onSet` 配置。
 
-同时，要求 `asType` 中必须定义有属性来接收数据库返回的数据类型，因此，以下的使用示例是 **错误** 的：
+同时，要求 `asType` 中的类型，必须定义属性来映射查询到的数据集，因此，以下的使用示例是 **错误** 的：
 
 ```java
 QueryWrapper query = QueryWrapper.create()
@@ -91,7 +94,7 @@ QueryWrapper query = QueryWrapper.create()
 
 List<Long> results = mapper.selectOneByQueryAs(query, Long.class);
 ```
-以上的示例是 **错误** 的，原因是 `Long` 这个类型，并没有名称为 `id` 的属性。
+在以上的示例中， **错误** 的原因是因为 `Long` 这个类型，并没有名称为 `id` 的属性，用来映射查询的结果集。
 
 在以上的场景中，可以使用如下的方法（以下代码示例是正确的）：
 ```java

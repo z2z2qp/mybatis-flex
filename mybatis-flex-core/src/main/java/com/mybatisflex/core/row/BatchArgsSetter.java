@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mybatisflex.core.mybatis;
+package com.mybatisflex.core.row;
 
-public class MappedStatementTypes {
+public interface BatchArgsSetter {
 
-    private static final ThreadLocal<Class<?>> currentTypeTL = new ThreadLocal<>();
+    Object[] NONE_ARGS = new Object[0];
 
-    public static void setCurrentType(Class<?> type){
-        currentTypeTL.set(type);
-    }
+    int getBatchSize();
 
-    public static Class<?> getCurrentType(){
-        return currentTypeTL.get();
-    }
-
-    public static void clear(){
-        currentTypeTL.remove();
-    }
-
+    Object[] getSqlArgs(int index);
 }
