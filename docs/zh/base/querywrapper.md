@@ -68,7 +68,7 @@ SELECT id, user_name FROM tb_account
 QueryWrapper query = new QueryWrapper()
     .select(
           ACCOUNT.ID.as("accountId")
-        , ACCOUNT.USER_NAME
+        , ACCOUNT.USER_NAME)
     .from(ACCOUNT.as("a"));
 ```
 
@@ -281,6 +281,23 @@ QueryWrapper queryWrapper=QueryWrapper.create()
 SELECT * FROM tb_account
 ORDER BY age ASC, user_name DESC NULLS LAST
 ```
+
+## hint
+
+```java
+QueryWrapper queryWrapper=QueryWrapper.create()
+    .select().hint("INDEX_DESC")
+    .from(ACCOUNT)
+    .orderBy(ACCOUNT.AGE.asc(), ACCOUNT.USER_NAME.desc().nullsLast());
+```
+
+其查询生成的 Sql 如下：
+
+```sql
+SELECT /*+ INDEX_DESC */  * FROM tb_account
+ORDER BY age ASC, user_name DESC NULLS LAST
+```
+
 
 ## join（left join，inner join...）
 
