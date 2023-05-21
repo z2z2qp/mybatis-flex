@@ -57,57 +57,57 @@ public class TransactionalManager {
         //上一级事务的id，支持事务嵌套
         String currentXID = TransactionContext.getXID();
         try {
-            switch (propagation) {
+            return switch (propagation) {
                 //若存在当前事务，则加入当前事务，若不存在当前事务，则创建新的事务
-                case REQUIRED:
+                case REQUIRED -> {
                     if (currentXID != null) {
-                        return supplier.get();
+                        yield supplier.get();
                     } else {
-                        return execNewTransactional(supplier);
+                        yield execNewTransactional(supplier);
                     }
-
-
-                    //若存在当前事务，则加入当前事务，若不存在当前事务，则已非事务的方式运行
-                case SUPPORTS:
-                    return supplier.get();
+                }
 
 
                 //若存在当前事务，则加入当前事务，若不存在当前事务，则已非事务的方式运行
-                case MANDATORY:
+                case SUPPORTS -> supplier.get();
+
+
+                //若存在当前事务，则加入当前事务，若不存在当前事务，则已非事务的方式运行
+                case MANDATORY -> {
                     if (currentXID != null) {
-                        return supplier.get();
+                        yield supplier.get();
                     } else {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
+                }
 
 
-                    //始终以新事务的方式运行，若存在当前事务，则暂停（挂起）当前事务。
-                case REQUIRES_NEW:
-                    return execNewTransactional(supplier);
+                //始终以新事务的方式运行，若存在当前事务，则暂停（挂起）当前事务。
+                case REQUIRES_NEW -> execNewTransactional(supplier);
 
 
                 //以非事务的方式运行，若存在当前事务，则暂停（挂起）当前事务。
-                case NOT_SUPPORTED:
+                case NOT_SUPPORTED -> {
                     if (currentXID != null) {
                         TransactionContext.release();
                     }
-                    return supplier.get();
+                    yield supplier.get();
+                }
 
 
                 //以非事务的方式运行，若存在当前事务，则抛出异常。
-                case NEVER:
+                case NEVER -> {
                     if (currentXID != null) {
                         throw new TransactionException("Existing transaction found for transaction marked with propagation 'never'");
                     }
-                    return supplier.get();
+                    yield supplier.get();
+                }
 
 
                 //暂时不支持这种事务传递方式
                 //default 为 nested 方式
-                default:
-                    throw new TransactionException("Transaction manager does not allow nested transactions");
-
-            }
+                default -> throw new TransactionException("Transaction manager does not allow nested transactions");
+            };
         } finally {
             //恢复上一级事务
             if (currentXID != null) {
