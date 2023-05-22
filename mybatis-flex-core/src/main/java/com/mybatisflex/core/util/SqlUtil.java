@@ -50,7 +50,7 @@ public class SqlUtil {
     }
 
 
-    private static final char[] UN_SAFE_CHARS = "'`\"<>&*+=#-;".toCharArray();
+    private static final char[] UN_SAFE_CHARS = "'`\"<>&+=#-;".toCharArray();
 
     private static boolean isUnSafeChar(char ch) {
         for (var c : UN_SAFE_CHARS) {
