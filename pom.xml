@@ -53,6 +53,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <mybatis.version>3.5.11</mybatis.version>
         <mybatis-spring.version>2.0.7</mybatis-spring.version>
@@ -60,7 +61,7 @@
         <mybatis-velocity.version>2.1.2</mybatis-velocity.version>
         <mybatis-thymeleaf.version>1.0.4</mybatis-thymeleaf.version>
 
-        <mysql.version>5.1.49</mysql.version>
+        <mysql.version>8.0.32</mysql.version>
         <HikariCP.version>4.0.3</HikariCP.version>
 
         <spring.version>5.3.25</spring.version>
@@ -171,8 +172,8 @@
             </dependency>
 
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.version}</version>
                 <scope>test</scope>
             </dependency>
