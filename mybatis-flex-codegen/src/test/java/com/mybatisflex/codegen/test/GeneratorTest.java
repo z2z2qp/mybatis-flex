@@ -93,7 +93,7 @@ public class GeneratorTest {
     }
 
 //    @Test
-    public void testCodeGen() {
+    public void testCodeGen() throws IOException {
         // 配置数据源
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/will?characterEncoding=utf-8");

@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.mybatisflex.test.model.table.Tables.ACCOUNT;
+
+import static com.mybatisflex.test.model.table.AccountTableDef.ACCOUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

@@ -19,6 +19,7 @@ import com.mybatisflex.core.MybatisFlexBootstrap;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.audit.MessageCollector;
+import com.mybatisflex.core.field.FieldQueryBuilder;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -26,6 +27,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static com.mybatisflex.core.query.QueryMethods.select;
 import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
@@ -57,7 +59,7 @@ public class EntityTestStarter {
         AccountMapper accountMapper = bootstrap.getMapper(AccountMapper.class);
 
         List<Account> accounts1 = accountMapper.selectListByQuery(QueryWrapper.create()
-                , accountFieldQueryBuilder -> accountFieldQueryBuilder
+                , (Consumer<FieldQueryBuilder<Account>>) accountFieldQueryBuilder -> accountFieldQueryBuilder
                         .field(Account::getArticles)
                         .type(Article.class)
                         .queryWrapper(entity ->
