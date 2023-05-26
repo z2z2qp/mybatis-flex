@@ -22,6 +22,9 @@ import com.mybatisflex.core.audit.MessageCollector;
 import com.mybatisflex.core.field.FieldQueryBuilder;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Db;
+import com.mybatisflex.core.row.Row;
+import com.mybatisflex.core.row.RowUtil;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
@@ -29,6 +32,7 @@ import javax.sql.DataSource;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.mybatisflex.core.query.QueryMethods.case_;
 import static com.mybatisflex.core.query.QueryMethods.select;
 import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
 import static com.mybatisflex.test.table.ArticleTableDef.ARTICLE;
@@ -58,15 +62,26 @@ public class EntityTestStarter {
 
         AccountMapper accountMapper = bootstrap.getMapper(AccountMapper.class);
 
-        List<Account> accounts1 = accountMapper.selectListByQuery(QueryWrapper.create()
-                , (Consumer<FieldQueryBuilder<Account>>) accountFieldQueryBuilder -> accountFieldQueryBuilder
-                        .field(Account::getArticles)
-                        .type(Article.class)
-                        .queryWrapper(entity ->
-                                select().from(ARTICLE).where(ARTICLE.ACCOUNT_ID.eq(entity.getId()))
-                        )
-        );
-        System.out.println(accounts1);
+        QueryWrapper wrapper = QueryWrapper.create().select(ACCOUNT.ID
+                , case_().when(ACCOUNT.ID.ge(2)).then("x2")
+                        .when(ACCOUNT.ID.ge(1)).then("x1")
+                        .else_("x100")
+                        .end().as("xName")
+        ).from(ACCOUNT);
+
+        List<Row> rowList = Db.selectListByQuery(wrapper);
+        RowUtil.printPretty(rowList);
+
+
+//        List<Account> accounts1 = accountMapper.selectListByQuery(QueryWrapper.create()
+//                , accountFieldQueryBuilder -> accountFieldQueryBuilder
+//                        .field(Account::getArticles)
+//                        .type(Article.class)
+//                        .queryWrapper(entity ->
+//                                select().from(ARTICLE).where(ARTICLE.ACCOUNT_ID.eq(entity.getId()))
+//                        )
+//        );
+//        System.out.println(accounts1);
 
 //        MyAccountMapper myAccountMapper = bootstrap.getMapper(MyAccountMapper.class);
 
