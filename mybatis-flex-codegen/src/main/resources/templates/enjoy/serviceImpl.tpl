@@ -1,11 +1,18 @@
-package #(globalConfig.serviceImplPackage);
+package #(packageConfig.serviceImplPackage);
 
-import #(table.buildServiceImplImport());
-import #(globalConfig.entityPackage).#(table.buildEntityClassName());
-import #(globalConfig.mapperPackage).#(table.buildMapperClassName());
+import #(serviceImplConfig.buildSuperClassImport());
+import #(packageConfig.entityPackage).#(table.buildEntityClassName());
+import #(packageConfig.mapperPackage).#(table.buildMapperClassName());
+import #(packageConfig.servicePackage).#(table.buildServiceClassName());
 import org.springframework.stereotype.Service;
 
+/**
+ * #(table.getComment()) 服务层实现。
+ *
+ * @author #(javadocConfig.getAuthor())
+ * @since #(javadocConfig.getSince())
+ */
 @Service
-public class #(table.buildServiceClassName()) extends #(table.buildServiceImplName())<#(table.buildMapperClassName()), #(table.buildEntityClassName())> {
+public class #(table.buildServiceImplClassName()) extends #(serviceImplConfig.buildSuperClassName())<#(table.buildMapperClassName()), #(table.buildEntityClassName())> implements #(table.buildServiceClassName()) {
 
 }
