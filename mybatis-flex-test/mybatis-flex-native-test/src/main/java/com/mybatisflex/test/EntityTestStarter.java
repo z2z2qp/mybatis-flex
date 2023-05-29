@@ -23,7 +23,6 @@ import com.mybatisflex.core.field.FieldQueryBuilder;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
-import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.row.RowUtil;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -32,7 +31,6 @@ import javax.sql.DataSource;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.mybatisflex.core.query.QueryMethods.case_;
 import static com.mybatisflex.core.query.QueryMethods.select;
 import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
 import static com.mybatisflex.test.table.ArticleTableDef.ARTICLE;
@@ -62,33 +60,33 @@ public class EntityTestStarter {
 
         AccountMapper accountMapper = bootstrap.getMapper(AccountMapper.class);
 
-        QueryWrapper wrapper = QueryWrapper.create().select(ACCOUNT.ID
-                , case_().when(ACCOUNT.ID.ge(2)).then("x2")
-                        .when(ACCOUNT.ID.ge(1)).then("x1")
-                        .else_("x100")
-                        .end().as("xName")
-        ).from(ACCOUNT);
-
-        List<Row> rowList = Db.selectListByQuery(wrapper);
-        RowUtil.printPretty(rowList);
-
-
-        accountMapper.updateNumberAddByQuery("age", 100, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
-        accountMapper.updateNumberAddByQuery(Account::getAge, -50, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
-
-
-        Db.updateNumberAddByQuery("tb_account", "age", 30, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
-        Db.updateNumberAddByQuery("tb_account", "age", -20, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
-
-
-        List<Account> accounts1 = accountMapper.selectListByQuery(QueryWrapper.create()
-                , accountFieldQueryBuilder -> accountFieldQueryBuilder
-                        .field(Account::getArticles)
-                        .queryWrapper(entity ->
-                                select().from(ARTICLE).where(ARTICLE.ACCOUNT_ID.eq(entity.getId()))
-                        )
-        );
-        System.out.println(accounts1);
+//        QueryWrapper wrapper = QueryWrapper.create().select(ACCOUNT.ID
+//                , case_().when(ACCOUNT.ID.ge(2)).then("x2")
+//                        .when(ACCOUNT.ID.ge(1)).then("x1")
+//                        .else_("x100")
+//                        .end().as("xName")
+//        ).from(ACCOUNT);
+//
+//        List<Row> rowList = Db.selectListByQuery(wrapper);
+//        RowUtil.printPretty(rowList);
+//
+//
+//        accountMapper.updateNumberAddByQuery("age", 100, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
+//        accountMapper.updateNumberAddByQuery(Account::getAge, -50, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
+//
+//
+//        Db.updateNumberAddByQuery("tb_account", "age", 30, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
+//        Db.updateNumberAddByQuery("tb_account", "age", -20, QueryWrapper.create().where(ACCOUNT.ID.eq(1)));
+//
+//
+//        List<Account> accounts1 = accountMapper.selectListByQuery(QueryWrapper.create()
+//                , accountFieldQueryBuilder -> accountFieldQueryBuilder
+//                        .field(Account::getArticles)
+//                        .queryWrapper(entity ->
+//                                select().from(ARTICLE).where(ARTICLE.ACCOUNT_ID.eq(entity.getId()))
+//                        )
+//        );
+//        System.out.println(accounts1);
 
 //        MyAccountMapper myAccountMapper = bootstrap.getMapper(MyAccountMapper.class);
 
@@ -118,19 +116,35 @@ public class EntityTestStarter {
 //        Object object = accountMapper.selectObjectByQuery(wrapper2);
 //        System.out.println(object);
 //
+//        QueryWrapper asWrapper = QueryWrapper.create()
+//                .select(ARTICLE.ALL_COLUMNS)
+//                .select(ACCOUNT.USER_NAME.as(ArticleDTO::getAuthorName)
+//                        , ACCOUNT.AGE.as(ArticleDTO::getAuthorAge)
+//                        , ACCOUNT.BIRTHDAY
+//                )
+//                .from(ARTICLE)
+//                .leftJoin(ACCOUNT).on(ARTICLE.ACCOUNT_ID.eq(ACCOUNT.ID))
+////                .where(ACCOUNT.ID.ge(0));
+//                .where(ARTICLE.ID.ge(0).or(ACCOUNT.ID.ge(0)));
+////
+////        List<ArticleDTO> articleDTOS = accountMapper.selectListByQueryAs(asWrapper, ArticleDTO.class);
+////        System.out.println(articleDTOS);
+//        Page<ArticleDTO> paginate = accountMapper.paginateAs(Page.of(1, 1), asWrapper, ArticleDTO.class);
+//        System.out.println(paginate);
+
+
+
         QueryWrapper asWrapper = QueryWrapper.create()
-                .select(ARTICLE.ALL_COLUMNS)
-                .select(ACCOUNT.USER_NAME.as(ArticleDTO::getAuthorName)
-                        , ACCOUNT.AGE.as(ArticleDTO::getAuthorAge)
-                        , ACCOUNT.BIRTHDAY
-                )
+                .select(ARTICLE.ALL_COLUMNS,ACCOUNT.ALL_COLUMNS)
                 .from(ARTICLE)
                 .leftJoin(ACCOUNT).on(ARTICLE.ACCOUNT_ID.eq(ACCOUNT.ID))
-                .where(ACCOUNT.ID.ge(0));
+                .where(ARTICLE.ID.ge(0).or(ACCOUNT.ID.ge(0)));
+
+        RowUtil.printPretty(Db.selectListByQuery(asWrapper));
 //
 //        List<ArticleDTO> articleDTOS = accountMapper.selectListByQueryAs(asWrapper, ArticleDTO.class);
 //        System.out.println(articleDTOS);
-        Page<ArticleDTO> paginate = accountMapper.paginateAs(Page.of(1, 1), asWrapper, ArticleDTO.class);
+        Page<ArticleDTO01> paginate = accountMapper.paginateAs(Page.of(1, 10), asWrapper, ArticleDTO01.class);
         System.out.println(paginate);
 
 

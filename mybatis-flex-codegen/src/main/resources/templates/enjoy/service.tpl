@@ -2,6 +2,8 @@ package #(packageConfig.servicePackage);
 
 import #(serviceConfig.buildSuperClassImport());
 import #(packageConfig.entityPackage).#(table.buildEntityClassName());
+import #(packageConfig.mapperPackage).#(table.buildMapperClassName());
+import org.springframework.stereotype.Service;
 
 /**
  * #(table.getComment()) 服务层。
@@ -9,6 +11,7 @@ import #(packageConfig.entityPackage).#(table.buildEntityClassName());
  * @author #(javadocConfig.getAuthor())
  * @since #(javadocConfig.getSince())
  */
-public interface #(table.buildServiceClassName()) extends #(serviceConfig.buildSuperClassName())<#(table.buildEntityClassName())> {
+@Service
+public class #(table.buildServiceClassName()) extends #(serviceConfig.buildSuperClassName())<#(table.buildMapperClassName()), #(table.buildEntityClassName())> {
 
 }

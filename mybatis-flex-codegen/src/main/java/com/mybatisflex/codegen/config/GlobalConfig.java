@@ -16,6 +16,7 @@
 package com.mybatisflex.codegen.config;
 
 import com.mybatisflex.codegen.template.ITemplate;
+import com.mybatisflex.core.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -1048,21 +1049,8 @@ public class GlobalConfig {
      * @see ServiceImplConfig#setClassSuffix(String)
      */
     public void setServiceImplClassSuffix(String serviceImplClassSuffix) {
-        this.serviceImplClassSuffix = StringUtil.trimOrNull(serviceImplClassSuffix);
-    }
-
-    public String getServiceImplPackage() {
-        if (StringUtil.isBlank(serviceImplPackage)) {
-            serviceImplPackage = basePackage + ".service";
-        }
-        return serviceImplPackage;
-    }
-
-    public void setServiceImplPackage(String serviceImplPackage) {
-        this.serviceImplPackage = StringUtil.trimOrNull(serviceImplPackage);
         getServiceImplConfig().setClassSuffix(serviceImplClassSuffix);
     }
-
     /**
      * @see ServiceImplConfig#getSupperClass()
      */

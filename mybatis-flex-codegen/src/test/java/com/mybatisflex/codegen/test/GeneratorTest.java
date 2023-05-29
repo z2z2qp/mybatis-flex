@@ -19,6 +19,7 @@ package com.mybatisflex.codegen.test;
 import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.junit.Test;
 
 import java.awt.*;
 import java.io.File;
@@ -88,8 +89,8 @@ public class GeneratorTest {
         generator.generate();
     }
 
-//    @Test
-    public void testCodeGen2() {
+    @Test
+    public void testCodeGen2() throws IOException {
         //配置数据源
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/will?characterEncoding=utf-8");
@@ -119,13 +120,13 @@ public class GeneratorTest {
                 .setBasePackage("com.test");
 
         //设置表前缀和只生成哪些表
-        globalConfig.getStrategyConfig()
-                .setTablePrefix("sys_")
-                .setGenerateTable("sys_user");
+//        globalConfig.getStrategyConfig()
+//                .setTablePrefix("sys_")
+//                .setGenerateTable("sys_user");
 
         //设置模板路径
-        globalConfig.getTemplateConfig()
-               .setEntity("D:\\Documents\\配置文件\\entity.tpl");
+//        globalConfig.getTemplateConfig()
+//               .setEntity("D:\\Documents\\配置文件\\entity.tpl");
 
         //配置生成 entity
         globalConfig.enableEntity()
@@ -138,7 +139,7 @@ public class GeneratorTest {
         //配置生成 service
         globalConfig.enableService();
         //配置生成 serviceImpl
-        globalConfig.enableServiceImpl();
+//        globalConfig.enableServiceImpl();
         //配置生成 controller
         globalConfig.enableController();
         //配置生成 tableDef

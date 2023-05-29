@@ -71,7 +71,7 @@ public class TableInfoFactory {
     private static final Set<String> initedPackageNames = new HashSet<>();
 
 
-    public synchronized static void init(String mapperPackageName){
+    public synchronized static void init(String mapperPackageName) {
         if (!initedPackageNames.contains(mapperPackageName)) {
             ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
             resolverUtil.find(new ResolverUtil.IsA(BaseMapper.class), mapperPackageName);
@@ -87,7 +87,7 @@ public class TableInfoFactory {
     public static TableInfo ofMapperClass(Class<?> mapperClass) {
         return MapUtil.computeIfAbsent(mapperTableInfoMap, mapperClass, key -> {
             Class<?> entityClass = getEntityClass(mapperClass);
-            if (entityClass == null){
+            if (entityClass == null) {
                 return null;
             }
             return ofEntityClass(entityClass);
@@ -195,7 +195,8 @@ public class TableInfoFactory {
         Set<String> defaultColumns = new LinkedHashSet<>();
 
 
-        List<Field> entityFields = ClassUtil.getAllFields(entityClass);
+        List<Field> entityFields = getColumnFields(entityClass);
+
         for (Field field : entityFields) {
 
             Column column = field.getAnnotation(Column.class);
@@ -203,20 +204,20 @@ public class TableInfoFactory {
                 continue; // ignore
             }
 
+            Class<?> fieldType = field.getType();
 
-            if (Modifier.isStatic(field.getModifiers())) {
-                //ignore static field
+            //满足一下 3 中情况，不支持该类型
+            if ((column == null || column.typeHandler() == UnknownTypeHandler.class) // 未配置 typeHandler
+                    && !fieldType.isEnum()   // 类型不是枚举
+                    && !defaultSupportColumnTypes.contains(fieldType) //默认的自动类型不包含该类型
+            ) {
+                if (!Map.class.isAssignableFrom(fieldType)
+                        && !Collection.class.isAssignableFrom(fieldType)
+                        && !fieldType.isArray()) {
+                    tableInfo.addJoinType(field.getName(), fieldType);
+                }
                 continue;
             }
-
-
-            //未配置 typeHandler 的情况下，只支持基本数据类型，不支持比如 list set 或者自定义的类等
-            if ((column == null || column.typeHandler() == UnknownTypeHandler.class)
-                    && !field.getType().isEnum()
-                    && !defaultSupportColumnTypes.contains(field.getType())) {
-                continue;
-            }
-
 
             //列名
             String columnName = column != null && StringUtil.isNotBlank(column.value())
@@ -347,5 +348,40 @@ public class TableInfoFactory {
 
 
         return tableInfo;
+    }
+
+
+    public static List<Field> getColumnFields(Class<?> entityClass) {
+        List<Field> fields = new ArrayList<>();
+        doGetFields(entityClass, fields);
+        return fields;
+    }
+
+
+    private static void doGetFields(Class<?> entityClass, List<Field> fields) {
+        if (entityClass == null || entityClass == Object.class) {
+            return;
+        }
+
+        Field[] declaredFields = entityClass.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (Modifier.isStatic(declaredField.getModifiers())
+                    || existName(fields, declaredField)) {
+                continue;
+            }
+            fields.add(declaredField);
+        }
+
+        doGetFields(entityClass.getSuperclass(), fields);
+    }
+
+
+    private static boolean existName(List<Field> fields, Field field) {
+        for (Field f : fields) {
+            if (f.getName().equalsIgnoreCase(field.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

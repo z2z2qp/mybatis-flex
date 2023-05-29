@@ -34,7 +34,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testAdd() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.add(100).as("x100"))
                 .from(ACCOUNT);
 
@@ -46,7 +46,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testAdd1() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.add(100).add(200).add(300).as("x100"))
                 .from(ACCOUNT);
 
@@ -58,7 +58,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testAdd2() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.add(ACCOUNT.ID).as("x100"))
                 .from(ACCOUNT);
 
@@ -70,7 +70,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testAdd3() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.add(ACCOUNT.ID.add(100)).as("x100"))
                 .from(ACCOUNT);
 
@@ -82,7 +82,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testAdd4() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.add(ACCOUNT.ID.add(100)).multiply(100).as("x100"))
                 .from(ACCOUNT);
 
@@ -94,7 +94,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testAdd5() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(sum(ACCOUNT.ID.multiply(ACCOUNT.AGE)).as("total_x"))
                 .from(ACCOUNT);
 
@@ -106,7 +106,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testSubtract() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.subtract(100).as("x100"))
                 .from(ACCOUNT);
 
@@ -119,7 +119,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testMultiply() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.multiply(100).as("x100"))
                 .from(ACCOUNT);
 
@@ -132,7 +132,7 @@ public class ArithmeticQueryColumnTest {
 
     @Test
     public void testDivide() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select(ACCOUNT.ID.divide(100).as("x100"))
                 .from(ACCOUNT);
 

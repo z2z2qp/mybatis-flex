@@ -17,6 +17,7 @@ package com.mybatisflex.codegen.config;
 
 
 import com.mybatisflex.core.service.IService;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 
 /**
  * 生成 Service 的配置。
@@ -40,7 +41,7 @@ public class ServiceConfig {
     /**
      * 自定义 Service 的父类。
      */
-    private Class<?> supperClass = IService.class;
+    private Class<?> supperClass = ServiceImpl.class;
 
     /**
      * 是否覆盖之前生成的文件。

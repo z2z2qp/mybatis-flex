@@ -47,7 +47,6 @@ public interface BaseMapper<T> {
         return insert(entity, false);
     }
 
-
     /**
      * 插入 entity 数据，但是忽略 null 的数据，只对有值的内容进行插入
      * 这样的好处是数据库已经配置了一些默认值，这些默认值才会生效
@@ -59,24 +58,24 @@ public interface BaseMapper<T> {
         return insert(entity, true);
     }
 
-
     /**
      * 插入 entity 数据
      *
      * @param entity 实体类
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#insert(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#insert(Map,
+     *      ProviderContext)
      */
     @InsertProvider(type = EntitySqlProvider.class, method = "insert")
     int insert(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
-
 
     /**
      * 批量插入 entity 数据，只会根据第一条数据来构建插入的字段内容
      *
      * @param entities 插入的数据列表
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#insertBatch(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#insertBatch(Map,
+     *      ProviderContext)
      * @see com.mybatisflex.core.FlexConsts#METHOD_INSERT_BATCH
      */
     @InsertProvider(type = EntitySqlProvider.class, method = FlexConsts.METHOD_INSERT_BATCH)
@@ -91,7 +90,7 @@ public interface BaseMapper<T> {
      */
     default int insertBatch(List<T> entities, int size) {
         if (size <= 0) {
-            size = 1000;//默认1000
+            size = 1000;// 默认1000
         }
         int sum = 0;
         int entitiesSize = entities.size();
@@ -125,18 +124,19 @@ public interface BaseMapper<T> {
      *
      * @param id 主键数据
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteById(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteById(Map,
+     *      ProviderContext)
      */
     @DeleteProvider(type = EntitySqlProvider.class, method = "deleteById")
     int deleteById(@Param(FlexConsts.PRIMARY_VALUE) Serializable id);
-
 
     /**
      * 根据多个 id 批量删除数据
      *
      * @param ids ids 列表
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map,
+     *      ProviderContext)
      */
     @DeleteProvider(type = EntitySqlProvider.class, method = "deleteBatchByIds")
     int deleteBatchByIds(@Param(FlexConsts.PRIMARY_VALUE) Collection<? extends Serializable> ids);
@@ -147,11 +147,12 @@ public interface BaseMapper<T> {
      * @param ids  ids 列表
      * @param size 切分大小
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map,
+     *      ProviderContext)
      */
     default int deleteBatchByIds(List<? extends Serializable> ids, int size) {
         if (size <= 0) {
-            size = 1000;//默认1000
+            size = 1000;// 默认1000
         }
         int sum = 0;
         int entitiesSize = ids.size();
@@ -162,7 +163,6 @@ public interface BaseMapper<T> {
         }
         return sum;
     }
-
 
     /**
      * 根据 map 构建的条件来删除数据
@@ -192,11 +192,11 @@ public interface BaseMapper<T> {
      *
      * @param queryWrapper query 条件
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteByQuery(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteByQuery(Map,
+     *      ProviderContext)
      */
     @DeleteProvider(type = EntitySqlProvider.class, method = "deleteByQuery")
     int deleteByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
-
 
     /**
      * 根据主键来更新数据，若 entity 属性数据为 null，该属性不会新到数据库
@@ -214,11 +214,11 @@ public interface BaseMapper<T> {
      * @param entity      数据内容
      * @param ignoreNulls 是否忽略空内容字段
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#update(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#update(Map,
+     *      ProviderContext)
      */
     @UpdateProvider(type = EntitySqlProvider.class, method = "update")
     int update(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
-
 
     /**
      * 根据 map 构建的条件来更新数据
@@ -254,7 +254,6 @@ public interface BaseMapper<T> {
         return updateByQuery(entity, ignoreNulls, QueryWrapper.create().where(condition));
     }
 
-
     /**
      * 根据 query 构建的条件来更新数据
      *
@@ -273,11 +272,12 @@ public interface BaseMapper<T> {
      * @param entity       数据内容
      * @param ignoreNulls  是否忽略空值
      * @param queryWrapper query 条件
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#updateByQuery(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#updateByQuery(Map,
+     *      ProviderContext)
      */
     @UpdateProvider(type = EntitySqlProvider.class, method = "updateByQuery")
-    int updateByQuery(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls, @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
-
+    int updateByQuery(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls,
+            @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
     /**
      * 执行类似 update table set field=field+1 where ... 的场景
@@ -288,8 +288,8 @@ public interface BaseMapper<T> {
      * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
      */
     @UpdateProvider(type = EntitySqlProvider.class, method = "updateNumberAddByQuery")
-    int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value, @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
-
+    int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value,
+            @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
     /**
      * 执行类似 update table set field=field+1 where ... 的场景
@@ -305,13 +305,13 @@ public interface BaseMapper<T> {
         return updateNumberAddByQuery(column, value, queryWrapper);
     }
 
-
     /**
      * 根据主键来选择数据
      *
      * @param id 多个主键
      * @return entity
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#selectOneById(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#selectOneById(Map,
+     *      ProviderContext)
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectOneById")
     Optional<T> selectOneById(@Param(FlexConsts.PRIMARY_VALUE) Serializable id);
@@ -330,7 +330,6 @@ public interface BaseMapper<T> {
         return result.map(cast);
     }
 
-
     /**
      * 根据 map 构建的条件来查询数据
      *
@@ -345,7 +344,6 @@ public interface BaseMapper<T> {
         return selectOneByQuery(QueryWrapper.create().where(whereConditions), cast);
     }
 
-
     /**
      * 根据 condition 来查询数据
      *
@@ -359,7 +357,6 @@ public interface BaseMapper<T> {
     default <R> Optional<R> selectOneByCondition(QueryCondition condition, Function<T, R> cast) {
         return selectOneByQuery(QueryWrapper.create().where(condition), cast);
     }
-
 
     /**
      * 根据 queryWrapper 构建的条件来查询 1 条数据
@@ -376,7 +373,6 @@ public interface BaseMapper<T> {
         var entities = selectListByQuery(queryWrapper.limit(1), cast);
         return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.get(0));
     }
-
 
     /**
      * 根据 queryWrapper 构建的条件来查询 1 条数据
@@ -395,7 +391,8 @@ public interface BaseMapper<T> {
      *
      * @param ids 主键列表
      * @return 数据列表
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#selectListByIds(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#selectListByIds(Map,
+     *      ProviderContext)
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByIds")
     List<T> selectListByIds(@Param(FlexConsts.PRIMARY_VALUE) Collection<? extends Serializable> ids);
@@ -413,7 +410,6 @@ public interface BaseMapper<T> {
         return result.stream().map(cast).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
-
     /**
      * 根据 map 来构建查询条件，查询多条数据
      *
@@ -427,7 +423,6 @@ public interface BaseMapper<T> {
     default <R> List<R> selectListByMap(Map<String, Object> whereConditions, Function<T, R> cast) {
         return selectListByQuery(QueryWrapper.create().where(whereConditions), cast);
     }
-
 
     /**
      * 根据 map 来构建查询条件，查询多条数据
@@ -443,7 +438,6 @@ public interface BaseMapper<T> {
         return selectListByQuery(QueryWrapper.create().where(whereConditions).limit(count), cast);
     }
 
-
     /**
      * 根据 condition 来查询数据
      *
@@ -457,7 +451,6 @@ public interface BaseMapper<T> {
     default <R> List<R> selectListByCondition(QueryCondition condition, Function<T, R> cast) {
         return selectListByQuery(QueryWrapper.create().where(condition), cast);
     }
-
 
     /**
      * 根据 condition 来查询数据
@@ -474,13 +467,13 @@ public interface BaseMapper<T> {
         return selectListByQuery(QueryWrapper.create().where(condition).limit(count), cast);
     }
 
-
     /**
      * 根据 query 来构建条件查询数据列表
      *
      * @param queryWrapper 查询条件
      * @return 数据列表
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#selectListByQuery(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#selectListByQuery(Map,
+     *      ProviderContext)
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
     List<T> selectListByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
@@ -498,9 +491,7 @@ public interface BaseMapper<T> {
         return result.stream().map(cast).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
-
-    default List<T> selectListByQuery(QueryWrapper queryWrapper
-            , Consumer<FieldQueryBuilder<T>>... consumers) {
+    default List<T> selectListByQuery(QueryWrapper queryWrapper, Consumer<FieldQueryBuilder<T>>... consumers) {
 
         List<T> list = selectListByQuery(queryWrapper);
         if (list == null || list.isEmpty()) {
@@ -511,7 +502,6 @@ public interface BaseMapper<T> {
 
         return list;
     }
-
 
     /**
      * 根据 query 来构建条件查询数据列表，要求返回的数据为 asType
@@ -530,9 +520,8 @@ public interface BaseMapper<T> {
         }
     }
 
-
-    default <R> List<R> selectListByQueryAs(QueryWrapper queryWrapper, Class<R> asType
-            , Consumer<FieldQueryBuilder<R>>... consumers) {
+    default <R> List<R> selectListByQueryAs(QueryWrapper queryWrapper, Class<R> asType,
+            Consumer<FieldQueryBuilder<R>>... consumers) {
         List<R> list = selectListByQueryAs(queryWrapper, asType);
         if (list == null || list.isEmpty()) {
             return Collections.emptyList();
@@ -541,7 +530,6 @@ public interface BaseMapper<T> {
             return list;
         }
     }
-
 
     /**
      * 查询全部数据
@@ -552,10 +540,10 @@ public interface BaseMapper<T> {
         return selectListByQuery(QueryWrapper.create());
     }
 
-
     /**
      * 根据 queryWrapper 1 条数据
-     * queryWrapper 执行的结果应该只有 1 列，例如 QueryWrapper.create().select(ACCOUNT.id).where...
+     * queryWrapper 执行的结果应该只有 1 列，例如
+     * QueryWrapper.create().select(ACCOUNT.id).where...
      *
      * @param queryWrapper 查询包装器
      * @return 数据量
@@ -565,10 +553,10 @@ public interface BaseMapper<T> {
         return objects == null || objects.isEmpty() ? null : objects.get(0);
     }
 
-
     /**
      * 根据 queryWrapper 来查询数据列表
-     * queryWrapper 执行的结果应该只有 1 列，例如 QueryWrapper.create().select(ACCOUNT.id).where...
+     * queryWrapper 执行的结果应该只有 1 列，例如
+     * QueryWrapper.create().select(ACCOUNT.id).where...
      *
      * @param queryWrapper 查询包装器
      * @return 数据列表
@@ -577,11 +565,11 @@ public interface BaseMapper<T> {
     @SelectProvider(type = EntitySqlProvider.class, method = "selectObjectByQuery")
     List<Object> selectObjectListByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
-
     /**
      * 对 {@link #selectObjectListByQuery(QueryWrapper)} 进行数据转换
      * 根据 queryWrapper 来查询数据列表
-     * queryWrapper 执行的结果应该只有 1 列，例如 QueryWrapper.create().select(ACCOUNT.id).where...
+     * queryWrapper 执行的结果应该只有 1 列，例如
+     * QueryWrapper.create().select(ACCOUNT.id).where...
      *
      * @param queryWrapper 查询包装器
      * @param asType       转换成的数据类型
@@ -594,7 +582,6 @@ public interface BaseMapper<T> {
         }
         return queryResults.stream().map(it -> ConvertUtil.convert(it, asType)).toList();
     }
-
 
     /**
      * 查询数据量
@@ -614,10 +601,10 @@ public interface BaseMapper<T> {
         } else if (object instanceof Number) {
             return ((Number) object).longValue();
         } else {
-            throw FlexExceptions.wrap("selectCountByQuery error, Can not get number value for queryWrapper: %s", queryWrapper);
+            throw FlexExceptions.wrap("selectCountByQuery error, Can not get number value for queryWrapper: %s",
+                    queryWrapper);
         }
     }
-
 
     /**
      * 根据条件查询数据总量
@@ -628,7 +615,6 @@ public interface BaseMapper<T> {
     default long selectCountByCondition(QueryCondition condition) {
         return selectCountByQuery(QueryWrapper.create().where(condition));
     }
-
 
     /**
      * 分页查询
@@ -647,7 +633,6 @@ public interface BaseMapper<T> {
         Page<T> page = new Page<>(pageNumber, pageSize);
         return paginate(page, queryWrapper, cast);
     }
-
 
     /**
      * 根据条件分页查询
@@ -681,11 +666,11 @@ public interface BaseMapper<T> {
         return paginate(page, queryWrapper);
     }
 
-    default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryWrapper queryWrapper, Function<T, R> cast) {
+    default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryWrapper queryWrapper,
+            Function<T, R> cast) {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, queryWrapper, cast);
     }
-
 
     /**
      * 根据条件分页查询
@@ -701,11 +686,11 @@ public interface BaseMapper<T> {
         return paginate(page, QueryWrapper.create().where(condition));
     }
 
-    default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition condition, Function<T, R> cast) {
+    default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition condition,
+            Function<T, R> cast) {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, QueryWrapper.create().where(condition), cast);
     }
-
 
     /**
      * 分页查询
@@ -718,8 +703,8 @@ public interface BaseMapper<T> {
         return paginateAs(page, queryWrapper, null, consumers);
     }
 
-
-    default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType, Consumer<FieldQueryBuilder<R>>... consumers) {
+    default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType,
+            Consumer<FieldQueryBuilder<R>>... consumers) {
         List<QueryColumn> selectColumns = CPI.getSelectColumns(queryWrapper);
         List<QueryOrderBy> orderBys = CPI.getOrderBys(queryWrapper);
 
@@ -730,16 +715,15 @@ public interface BaseMapper<T> {
         // 一般的分页场景中，只有第一页的时候有必要去查询总量，第二页以后是不需要的
         if (page.getTotalRow() < 0) {
 
-            //移除 select
+            // 移除 select
             CPI.setSelectColumns(queryWrapper, Collections.singletonList(count().as("total")));
 
-            //移除 OrderBy
+            // 移除 OrderBy
             if (CollectionUtil.isNotEmpty(orderBys)) {
                 CPI.setOrderBys(queryWrapper, null);
             }
 
-
-            //移除 left join
+            // 移除 left join
             if (joins != null && !joins.isEmpty()) {
                 for (Join join : joins) {
                     if (!Join.TYPE_LEFT.equals(CPI.getJoinType(join))) {
@@ -770,7 +754,6 @@ public interface BaseMapper<T> {
                 CPI.setJoins(queryWrapper, null);
             }
 
-
             long count = selectCountByQuery(queryWrapper);
             page.setTotalRow(count);
         }
@@ -779,15 +762,15 @@ public interface BaseMapper<T> {
             return page;
         }
 
-        //重置 selectColumns
+        // 重置 selectColumns
         CPI.setSelectColumns(queryWrapper, selectColumns);
 
-        //重置 orderBys
+        // 重置 orderBys
         if (CollectionUtil.isNotEmpty(orderBys)) {
             CPI.setOrderBys(queryWrapper, orderBys);
         }
 
-        //重置 join
+        // 重置 join
         if (removedJoins) {
             CPI.setJoins(queryWrapper, joins);
         }
@@ -811,6 +794,7 @@ public interface BaseMapper<T> {
         var r = paginate(page, queryWrapper);
         var records = r.getRecords().stream().map(cast).toList();
         return new Page<>(records, page.getPageNumber(), page.getPageSize(), page.getTotalRow());
+    }
 
     default <R> void __queryFields(List<R> list, Consumer<FieldQueryBuilder<R>>[] consumers) {
         if (CollectionUtil.isEmpty(list) || ArrayUtil.isEmpty(consumers) || consumers[0] == null) {
