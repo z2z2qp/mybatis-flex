@@ -537,7 +537,7 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     }
 
 
-    public String toDebugSQL() {
+    public String toSQL() {
         String sql = DialectFactory.getDialect().forSelectByQuery(this);
         return SqlUtil.replaceSqlParams(sql, getValueArray());
     }
