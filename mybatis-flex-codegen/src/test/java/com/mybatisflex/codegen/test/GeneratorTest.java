@@ -18,6 +18,7 @@ package com.mybatisflex.codegen.test;
 
 import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
+import com.mybatisflex.spring.service.impl.CacheableServiceImpl;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.Test;
 
@@ -140,6 +141,9 @@ public class GeneratorTest {
         globalConfig.enableService();
         //配置生成 serviceImpl
 //        globalConfig.enableServiceImpl();
+        globalConfig.enableServiceImpl()
+                .setSupperClass(CacheableServiceImpl.class)
+                .setCacheExample(true);
         //配置生成 controller
         globalConfig.enableController();
         //配置生成 tableDef
