@@ -49,15 +49,15 @@ public class Page<T> implements Serializable {
     }
 
     public Page(int pageNumber, int pageSize, long totalRow) {
-        this(Collections.emptyList(),pageNumber,pageSize,totalRow);
+        this(new ArrayList<T>(),pageNumber,pageSize,totalRow);
     }
 
+
     public Page(List<T> records, int pageNumber, int pageSize, long totalRow) {
-        this.records = records;
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-        this.totalRow = totalRow;
-        this.totalPage = totalRow % pageSize == 0 ? (totalRow / pageSize) : (totalRow / pageSize + 1);
+        this.setRecords(records);
+        this.setPageNumber(pageNumber);
+        this.setPageSize(pageSize);
+        this.setTotalRow(totalRow);
     }
 
 
@@ -66,6 +66,9 @@ public class Page<T> implements Serializable {
     }
 
     public void setRecords(List<T> records) {
+        if (records == null) {
+            records = Collections.emptyList();
+        }
         this.records = records;
     }
 
@@ -74,6 +77,9 @@ public class Page<T> implements Serializable {
     }
 
     public void setPageNumber(int pageNumber) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("pageNumber must greater than or equal 1，current value is: " + pageNumber);
+        }
         this.pageNumber = pageNumber;
     }
 
@@ -83,7 +89,11 @@ public class Page<T> implements Serializable {
     }
 
     public void setPageSize(int pageSize) {
+        if (pageSize < 0) {
+            throw new IllegalArgumentException("pageSize must greater than or equal 0，current value is: " + pageSize);
+        }
         this.pageSize = pageSize;
+        this.calcTotalPage();
     }
 
     public long getTotalPage() {
@@ -99,9 +109,22 @@ public class Page<T> implements Serializable {
     }
 
     public void setTotalRow(long totalRow) {
+        if (totalRow < 0) {
+            throw new IllegalArgumentException("totalRow must greater than or equal 0，current value is: " + totalRow);
+        }
         this.totalRow = totalRow;
-        this.totalPage = totalRow % pageSize == 0 ? (totalRow / pageSize) : (totalRow / pageSize + 1);
+        this.calcTotalPage();
     }
+
+    /**
+     * 计算总页码
+     */
+    private void calcTotalPage() {
+        if (totalPage == INIT_VALUE && pageSize != INIT_VALUE && totalRow != INIT_VALUE) {
+            totalPage = totalRow % pageSize == 0 ? (totalRow / pageSize) : (totalRow / pageSize + 1);
+        }
+    }
+
 
     public <R> Page<R> map(Function<? super T, ? extends R> mapper) {
         Page<R> newPage = new Page<>();

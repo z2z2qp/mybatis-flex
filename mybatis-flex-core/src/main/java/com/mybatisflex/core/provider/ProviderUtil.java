@@ -1,17 +1,17 @@
-/**
- * Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ *  Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
+ *  <p>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  <p>
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  <p>
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package com.mybatisflex.core.provider;
 
@@ -30,7 +30,7 @@ import java.util.Map;
 
 class ProviderUtil {
 
-    private static final Object[] NULL_ARGS = new Object[0];
+    private ProviderUtil() {}
 
     public static String getSqlString(Map params) {
         return (String) params.get(FlexConsts.SQL);
@@ -40,6 +40,10 @@ class ProviderUtil {
         params.put(FlexConsts.SQL_ARGS, args);
     }
 
+    public static String getSchemaName(Map params) {
+        Object schemaNameObj = params.get(FlexConsts.SCHEMA_NAME);
+        return schemaNameObj != null ? schemaNameObj.toString().trim() : null;
+    }
     public static String getTableName(Map params) {
         Object tableNameObj = params.get(FlexConsts.TABLE_NAME);
         return tableNameObj != null ? tableNameObj.toString().trim() : null;
@@ -60,7 +64,7 @@ class ProviderUtil {
     public static Object[] getPrimaryValues(Map params) {
         Object primaryValue = params.get(FlexConsts.PRIMARY_VALUE);
         if (primaryValue == null) {
-            return NULL_ARGS;
+            return FlexConsts.EMPTY_ARRAY;
         }
         if (primaryValue.getClass().isArray()) {
             return (Object[]) primaryValue;

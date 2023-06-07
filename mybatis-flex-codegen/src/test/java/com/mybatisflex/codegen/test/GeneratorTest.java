@@ -20,12 +20,13 @@ import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.mybatisflex.spring.service.impl.CacheableServiceImpl;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.Test;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.UnaryOperator;
+
+import org.junit.Test;
 
 public class GeneratorTest {
 

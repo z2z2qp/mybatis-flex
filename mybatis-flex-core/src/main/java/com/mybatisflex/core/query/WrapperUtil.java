@@ -1,21 +1,22 @@
-/**
- * Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ *  Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
+ *  <p>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  <p>
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  <p>
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package com.mybatisflex.core.query;
 
 
+import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.dialect.IDialect;
 import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.EnumWrapper;
@@ -29,19 +30,18 @@ import java.util.List;
 
 class WrapperUtil {
 
+    private WrapperUtil() {}
 
     static String buildAsAlias(String alias, IDialect dialect) {
         return StringUtil.isBlank(alias) ? "" : " AS " + dialect.wrap(alias);
     }
 
-    static final Object[] NULL_PARA_ARRAY = new Object[0];
-
-    static List<QueryWrapper> getChildSelect(QueryCondition condition) {
+    static List<QueryWrapper> getChildQueryWrapper(QueryCondition condition) {
         List<QueryWrapper> list = null;
         while (condition != null) {
             if (condition.checkEffective()) {
                 if (condition instanceof Brackets) {
-                    List<QueryWrapper> childQueryWrapper = getChildSelect(((Brackets) condition).getChild());
+                    List<QueryWrapper> childQueryWrapper = getChildQueryWrapper(((Brackets) condition).getChildCondition());
                     if (!childQueryWrapper.isEmpty()) {
                         if (list == null) {
                             list = new ArrayList<>();
@@ -80,13 +80,13 @@ class WrapperUtil {
 
     static Object[] getValues(QueryCondition condition) {
         if (condition == null) {
-            return NULL_PARA_ARRAY;
+            return FlexConsts.EMPTY_ARRAY;
         }
 
         List<Object> params = new ArrayList<>();
         getValues(condition, params);
 
-        return params.isEmpty() ? NULL_PARA_ARRAY : params.toArray();
+        return params.isEmpty() ? FlexConsts.EMPTY_ARRAY : params.toArray();
     }
 
 
@@ -98,7 +98,7 @@ class WrapperUtil {
         Object value = condition.getValue();
         if (value == null
                 || value instanceof QueryColumn
-                || value instanceof RawValue) {
+                || value instanceof RawFragment) {
             getValues(condition.next, params);
             return;
         }

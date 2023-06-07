@@ -512,6 +512,10 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default <R> List<R> selectListByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        if (Number.class.isAssignableFrom(asType)
+                || String.class == asType) {
+            return selectObjectListByQueryAs(queryWrapper, asType);
+        }
         try {
             MappedStatementTypes.setCurrentType(asType);
             return (List<R>) selectListByQuery(queryWrapper);
