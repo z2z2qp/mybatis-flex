@@ -129,6 +129,8 @@ public class GeneratorTest {
         //设置模板路径
 //        globalConfig.getTemplateConfig()
 //               .setEntity("D:\\Documents\\配置文件\\entity.tpl");
+        globalConfig.getTemplateConfig()
+                        .setServiceImpl("D:\\code\\mybatis-flex\\mybatis-flex-codegen\\src\\main\\resources\\templates\\enjoy\\myService.tpl");
 
         //配置生成 entity
         globalConfig.enableEntity()
@@ -139,7 +141,7 @@ public class GeneratorTest {
         //配置生成 mapper
         globalConfig.enableMapper();
         //配置生成 service
-        globalConfig.enableService();
+//        globalConfig.enableService();
         //配置生成 serviceImpl
 //        globalConfig.enableServiceImpl();
         globalConfig.enableServiceImpl()

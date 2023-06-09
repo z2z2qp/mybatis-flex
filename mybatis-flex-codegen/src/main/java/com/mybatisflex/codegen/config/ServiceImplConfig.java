@@ -35,7 +35,7 @@ public class ServiceImplConfig {
     /**
      * ServiceImpl 类的后缀。
      */
-    private String classSuffix = "ServiceImpl";
+    private String classSuffix = "Service";
 
     /**
      * 自定义 ServiceImpl 的父类。

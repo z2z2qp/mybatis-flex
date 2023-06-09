@@ -35,7 +35,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelectWithSchemaSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select()
                 .from(ACCOUNT01);
 
@@ -46,7 +46,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelectWithSchemaSql01() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select()
                 .from(ACCOUNT01).leftJoin(ACCOUNT).on(ACCOUNT01.ID.eq(ACCOUNT.ID))
                 .where(ACCOUNT01.ID.ge(100))
@@ -66,7 +66,7 @@ public class AccountSqlTester {
 
     @Test
     public void testSelectWithSchemaSql02() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select()
                 .from(ACCOUNT01).as("a1").leftJoin(ACCOUNT).on(ACCOUNT01.ID.eq(ACCOUNT.ID))
                 .where(ACCOUNT01.ID.ge(100))
