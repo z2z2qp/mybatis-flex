@@ -47,7 +47,7 @@ public class Joiner<M> {
     }
 
     public M on(Consumer<QueryWrapper> consumer) {
-        QueryWrapper newWrapper = new QueryWrapper();
+        QueryWrapper newWrapper = QueryWrapper.create();
         consumer.accept(newWrapper);
         join.on(newWrapper.whereQueryCondition);
         return queryWrapper;
