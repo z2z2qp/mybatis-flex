@@ -101,6 +101,11 @@ public class ClassUtil {
                 || clazz == double[].class;
     }
 
+    public static boolean canInstance(int mod) {
+        return !Modifier.isAbstract(mod) || !Modifier.isInterface(mod);
+    }
+
+
     public static <T> T newInstance(Class<T> clazz) {
         try {
             Constructor<?> defaultConstructor = null;

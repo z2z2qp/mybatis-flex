@@ -20,6 +20,7 @@ import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.mybatisflex.spring.service.impl.CacheableServiceImpl;
 import com.zaxxer.hikari.HikariDataSource;
+import org.junit.Test;
 
 import java.awt.*;
 import java.io.File;
