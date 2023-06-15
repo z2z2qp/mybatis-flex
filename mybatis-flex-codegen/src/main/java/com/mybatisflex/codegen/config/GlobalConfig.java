@@ -503,7 +503,7 @@ public class GlobalConfig {
     /**
      * @see StrategyConfig#setTablePrefix(String)
      */
-    public void setTablePrefix(String tablePrefix) {
+    public void setTablePrefix(String... tablePrefix) {
         getStrategyConfig().setTablePrefix(tablePrefix);
     }
 
@@ -611,6 +611,22 @@ public class GlobalConfig {
     public void setGenerateForView(boolean generateForView) {
         getStrategyConfig().setGenerateForView(generateForView);
     }
+
+
+    /**
+     * @see StrategyConfig#getGenerateSchema()
+     */
+    public String getGenerateSchema() {
+        return getStrategyConfig().getGenerateSchema();
+    }
+
+    /**
+     * @see StrategyConfig#setGenerateSchema(String)
+     */
+    public void setGenerateSchema(String generateSchema) {
+        getStrategyConfig().setGenerateSchema(generateSchema);
+    }
+
 
     /**
      * @see StrategyConfig#getGenerateTables()
