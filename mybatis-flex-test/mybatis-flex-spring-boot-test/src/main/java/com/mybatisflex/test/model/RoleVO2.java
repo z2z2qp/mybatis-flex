@@ -16,50 +16,36 @@
 
 package com.mybatisflex.test.model;
 
-import com.mybatisflex.annotation.Id;
-
 /**
  * @author 王帅
- * @since 2023-06-07
+ * @since 2023-06-15
  */
+public class RoleVO2<T, K> {
 
-public class UserVO3 {
+    private T roleName;
+    private RoleKey<K> roleKey;
 
-    @Id
-    private String userId;
-    private String userName;
-    private RoleVO3 roleVO3;
-
-    public String getUserId() {
-        return userId;
+    public T getRoleName() {
+        return roleName;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setRoleName(T roleName) {
+        this.roleName = roleName;
     }
 
-    public String getUserName() {
-        return userName;
+    public RoleKey<K> getRoleKey() {
+        return roleKey;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public RoleVO3 getRoleVO3() {
-        return roleVO3;
-    }
-
-    public void setRoleVO3(RoleVO3 roleVO3) {
-        this.roleVO3 = roleVO3;
+    public void setRoleKey(RoleKey<K> roleKey) {
+        this.roleKey = roleKey;
     }
 
     @Override
     public String toString() {
-        return "UserVO3{" +
-                "userId='" + userId + '\'' +
-                ", userName='" + userName + '\'' +
-                ", roleVO3=" + roleVO3 +
+        return "RoleName{" +
+                "roleName=" + roleName +
+                ", roleKey=" + roleKey +
                 '}';
     }
 }

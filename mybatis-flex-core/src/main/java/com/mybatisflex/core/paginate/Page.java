@@ -24,7 +24,7 @@ import java.util.function.Function;
 public class Page<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private static final int INIT_VALUE = -1;
+    public static final int INIT_VALUE = -1;
 
     private List<T> records;
     private int pageNumber;
@@ -109,9 +109,6 @@ public class Page<T> implements Serializable {
     }
 
     public void setTotalRow(long totalRow) {
-        if (totalRow < 0) {
-            throw new IllegalArgumentException("totalRow must greater than or equal 0，current value is: " + totalRow);
-        }
         this.totalRow = totalRow;
         this.calcTotalPage();
     }
@@ -120,7 +117,9 @@ public class Page<T> implements Serializable {
      * 计算总页码
      */
     private void calcTotalPage() {
-        if (totalPage == INIT_VALUE && pageSize != INIT_VALUE && totalRow != INIT_VALUE) {
+        if (pageSize < 0 || totalRow < 0) {
+            totalPage = INIT_VALUE;
+        } else {
             totalPage = totalRow % pageSize == 0 ? (totalRow / pageSize) : (totalRow / pageSize + 1);
         }
     }
