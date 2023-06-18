@@ -14,28 +14,33 @@
  *  limitations under the License.
  */
 
-package com.mybatisflex.test.model;
+package com.mybatisflex.test.entity;
 
-import java.util.List;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+
+import java.util.Date;
 
 /**
  * @author 王帅
- * @since 2023-06-07
+ * @since 2023-06-18
  */
+@Table("tb_account")
+public class Account {
 
-public class UserVO2 {
-
-    private String userId;
+    @Id(keyType = KeyType.Auto)
+    private Long id;
     private String userName;
-    private List<String> roles;
-    private List<Integer> roleIds;
+    private Integer age;
+    private Date birthday;
 
-    public String getUserId() {
-        return userId;
+    public Long getId() {
+        return id;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUserName() {
@@ -46,29 +51,29 @@ public class UserVO2 {
         this.userName = userName;
     }
 
-    public List<String> getRoles() {
-        return roles;
+    public Integer getAge() {
+        return age;
     }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
+    public void setAge(Integer age) {
+        this.age = age;
     }
 
-    public List<Integer> getRoleIds() {
-        return roleIds;
+    public Date getBirthday() {
+        return birthday;
     }
 
-    public void setRoleIds(List<Integer> roleIds) {
-        this.roleIds = roleIds;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     @Override
     public String toString() {
-        return "UserVO2{" +
-                "userId='" + userId + '\'' +
+        return "Account{" +
+                "id=" + id +
                 ", userName='" + userName + '\'' +
-                ", roles=" + roles +
-                ", roleIds=" + roleIds +
+                ", age=" + age +
+                ", birthday=" + birthday +
                 '}';
     }
 }
