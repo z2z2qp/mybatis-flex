@@ -56,7 +56,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <mybatis.version>3.5.13</mybatis.version>
-        <mybatis-spring.version>2.1.0</mybatis-spring.version>
+        <mybatis-spring.version>2.1.1</mybatis-spring.version>
         <mybatis-freemarker.version>1.2.4</mybatis-freemarker.version>
         <mybatis-velocity.version>2.1.2</mybatis-velocity.version>
         <mybatis-thymeleaf.version>1.0.4</mybatis-thymeleaf.version>
@@ -65,7 +65,7 @@
         <HikariCP.version>4.0.3</HikariCP.version>
 
         <spring.version>5.3.27</spring.version>
-        <spring-boot.version>2.7.11</spring-boot.version>
+        <spring-boot.version>2.7.12</spring-boot.version>
         <solon.version>2.3.1</solon.version>
 
         <junit.version>4.13.2</junit.version>
