@@ -38,11 +38,11 @@ import java.util.Map;
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(MybatisFlexProperties.class)
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
-@AutoConfigureBefore(value = DataSourceAutoConfiguration.class, name = "com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure")
+@AutoConfigureBefore(value = DataSourceAutoConfiguration.class
+        , name = "com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure")
 public class MultiDataSourceAutoConfiguration {
 
     private final Map<String, Map<String, String>> dataSourceProperties;
-
 
     public MultiDataSourceAutoConfiguration(MybatisFlexProperties properties) {
         dataSourceProperties = properties.getDatasource();

@@ -73,7 +73,6 @@ public interface BaseMapper<T> {
     int insert(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
 
 
-
     default int insertWithPk(T entity) {
         return insertWithPk(entity, true);
     }
@@ -192,7 +191,7 @@ public interface BaseMapper<T> {
      * @return 返回影响的行数
      */
     default int deleteByMap(Map<String, Object> whereConditions) {
-        if (ObjectUtil.areNull(whereConditions) || whereConditions.isEmpty()) {
+        if (whereConditions == null || whereConditions.isEmpty()) {
             throw FlexExceptions.wrap("deleteByMap is not allow empty map.");
         }
         return deleteByQuery(QueryWrapper.create().where(whereConditions));
@@ -205,6 +204,9 @@ public interface BaseMapper<T> {
      * @return 返回影响的行数
      */
     default int deleteByCondition(QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         return deleteByQuery(QueryWrapper.create().where(condition));
     }
 
@@ -249,6 +251,9 @@ public interface BaseMapper<T> {
      * @return 返回影响的行数
      */
     default int updateByMap(T entity, Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            throw FlexExceptions.wrap("updateByMap is not allow empty map.");
+        }
         return updateByQuery(entity, QueryWrapper.create().where(map));
     }
 
@@ -260,6 +265,9 @@ public interface BaseMapper<T> {
      * @return 返回影响的行数
      */
     default int updateByCondition(T entity, QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         return updateByQuery(entity, QueryWrapper.create().where(condition));
     }
 
@@ -272,6 +280,9 @@ public interface BaseMapper<T> {
      * @return 返回影响的行数
      */
     default int updateByCondition(T entity, boolean ignoreNulls, QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         return updateByQuery(entity, ignoreNulls, QueryWrapper.create().where(condition));
     }
 
@@ -321,6 +332,10 @@ public interface BaseMapper<T> {
      * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
      */
     default int updateNumberAddByQuery(LambdaGetter<T> fn, Number value, QueryWrapper queryWrapper) {
+        if (value == null) {
+            throw FlexExceptions.wrap("value can not be null.");
+        }
+
         TableInfo tableInfo = TableInfoFactory.ofMapperClass(ClassUtil.getUsefulClass(getClass()));
         String column = tableInfo.getColumnByProperty(LambdaUtil.getFieldName(fn));
         return updateNumberAddByQuery(column, value, queryWrapper);
@@ -354,10 +369,13 @@ public interface BaseMapper<T> {
     /**
      * 根据 map 构建的条件来查询数据
      *
-     * @param whereConditions where 条件
+     * @param map where 条件
      * @return entity 数据
      */
     default Optional<T> selectOneByMap(Map<String, Object> whereConditions) {
+        if (whereConditions == null || whereConditions.isEmpty()) {
+            throw FlexExceptions.wrap("map can not be null or empty.");
+        }
         return selectOneByQuery(QueryWrapper.create().where(whereConditions));
     }
 
@@ -372,6 +390,9 @@ public interface BaseMapper<T> {
      * @return 1 条数据
      */
     default Optional<T> selectOneByCondition(QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         return selectOneByQuery(QueryWrapper.create().where(condition));
     }
 
@@ -432,11 +453,14 @@ public interface BaseMapper<T> {
     /**
      * 根据 map 来构建查询条件，查询多条数据
      *
-     * @param whereConditions 条件列表
+     * @param map 条件列表
      * @return 数据列表
      */
-    default List<T> selectListByMap(Map<String, Object> whereConditions) {
-        return selectListByQuery(QueryWrapper.create().where(whereConditions));
+    default List<T> selectListByMap(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            throw FlexExceptions.wrap("map can not be null or empty.");
+        }
+        return selectListByQuery(QueryWrapper.create().where(map));
     }
 
     default <R> List<R> selectListByMap(Map<String, Object> whereConditions, Function<T, R> cast) {
@@ -446,11 +470,14 @@ public interface BaseMapper<T> {
     /**
      * 根据 map 来构建查询条件，查询多条数据
      *
-     * @param whereConditions 条件列表
+     * @param map 条件列表
      * @return 数据列表
      */
-    default List<T> selectListByMap(Map<String, Object> whereConditions, int count) {
-        return selectListByQuery(QueryWrapper.create().where(whereConditions).limit(count));
+    default List<T> selectListByMap(Map<String, Object> map, int count) {
+        if (map == null || map.isEmpty()) {
+            throw FlexExceptions.wrap("map can not be null or empty.");
+        }
+        return selectListByQuery(QueryWrapper.create().where(map).limit(count));
     }
 
     default <R> List<R> selectListByMap(Map<String, Object> whereConditions, int count, Function<T, R> cast) {
@@ -464,6 +491,9 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default List<T> selectListByCondition(QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         return selectListByQuery(QueryWrapper.create().where(condition));
     }
 
@@ -479,6 +509,9 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default List<T> selectListByCondition(QueryCondition condition, int count) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         return selectListByQuery(QueryWrapper.create().where(condition).limit(count));
     }
 
@@ -650,6 +683,9 @@ public interface BaseMapper<T> {
      * @return 数据量
      */
     default long selectCountByCondition(QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         return selectCountByQuery(QueryWrapper.create().where(condition));
     }
 
@@ -719,6 +755,9 @@ public interface BaseMapper<T> {
      * @return 返回 Page 数据
      */
     default Page<T> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, QueryWrapper.create().where(condition));
     }

@@ -27,7 +27,8 @@ import java.util.function.Predicate;
  */
 public class ClassUtil {
 
-    private ClassUtil() {}
+    private ClassUtil() {
+    }
 
     //proxy frameworks
     private static final List<String> PROXY_CLASS_NAMES = Arrays.asList("net.sf.cglib.proxy.Factory"
@@ -228,6 +229,10 @@ public class ClassUtil {
         var methods = new ArrayList<Method>();
         doGetMethods(clazz, methods, predicate, false);
         return methods;
+    }
+
+    public static Method getAnyMethod(Class<?> clazz, String... methodNames) {
+        return getFirstMethod(clazz, method -> ArrayUtil.contains(methodNames, method.getName()));
     }
 
     public static Method getFirstMethod(Class<?> clazz, Predicate<Method> predicate) {
