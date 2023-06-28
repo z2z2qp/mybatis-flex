@@ -381,7 +381,7 @@ public interface BaseMapper<T> {
     /**
      * 根据 map 构建的条件来查询数据
      *
-     * @param map where 条件
+     * @param whereConditions where 条件
      * @return entity 数据
      */
     default Optional<T> selectOneByMap(Map<String, Object> whereConditions) {
