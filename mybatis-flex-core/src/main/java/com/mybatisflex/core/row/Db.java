@@ -585,7 +585,7 @@ public class Db {
      * @param whereColumns where条件
      */
     public static Row selectOneByMap(String schema,String tableName, Map whereColumns) {
-        return invoker().selectOneByQuery(schema,tableName, QueryWrapper.create().where(whereColumns));
+        return invoker().selectOneByQuery(schema,tableName, QueryWrapper.create().where(whereColumns).limit(1));
     }
 
 
@@ -596,7 +596,7 @@ public class Db {
      * @param whereColumns where条件
      */
     public static Row selectOneByMap(String tableName, Map whereColumns) {
-        return invoker().selectOneByQuery(null,tableName, QueryWrapper.create().where(whereColumns));
+        return invoker().selectOneByQuery(null,tableName, QueryWrapper.create().where(whereColumns).limit(1));
     }
 
     /**
@@ -607,7 +607,7 @@ public class Db {
      * @param condition 条件
      */
     public static Row selectOneByCondition(String schema,String tableName, QueryCondition condition) {
-        return invoker().selectOneByQuery(schema,tableName, QueryWrapper.create().where(condition));
+        return invoker().selectOneByQuery(schema,tableName, QueryWrapper.create().where(condition).limit(1));
     }
 
     /**
@@ -617,7 +617,7 @@ public class Db {
      * @param condition 条件
      */
     public static Row selectOneByCondition(String tableName, QueryCondition condition) {
-        return invoker().selectOneByQuery(null,tableName, QueryWrapper.create().where(condition));
+        return invoker().selectOneByQuery(null,tableName, QueryWrapper.create().where(condition).limit(1));
     }
 
 

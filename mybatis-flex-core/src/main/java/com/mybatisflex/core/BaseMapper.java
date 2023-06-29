@@ -388,7 +388,7 @@ public interface BaseMapper<T> {
         if (whereConditions == null || whereConditions.isEmpty()) {
             throw FlexExceptions.wrap("map can not be null or empty.");
         }
-        return selectOneByQuery(QueryWrapper.create().where(whereConditions));
+        return selectOneByQuery(QueryWrapper.create().where(whereConditions).limit(1));
     }
 
     default <R> Optional<R> selectOneByMap(Map<String, Object> whereConditions, Function<T, R> cast) {
@@ -405,7 +405,7 @@ public interface BaseMapper<T> {
         if (condition == null) {
             throw FlexExceptions.wrap("condition can not be null.");
         }
-        return selectOneByQuery(QueryWrapper.create().where(condition));
+        return selectOneByQuery(QueryWrapper.create().where(condition).limit(1));
     }
 
     default <R> Optional<R> selectOneByCondition(QueryCondition condition, Function<T, R> cast) {
