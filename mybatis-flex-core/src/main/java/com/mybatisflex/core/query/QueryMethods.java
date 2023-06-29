@@ -15,6 +15,7 @@
  */
 package com.mybatisflex.core.query;
 
+import com.mybatisflex.core.util.ArrayUtil;
 import com.mybatisflex.core.util.LambdaGetter;
 import com.mybatisflex.core.util.LambdaUtil;
 
@@ -163,6 +164,21 @@ public class QueryMethods {
         return new StringFunctionQueryColumn(CONVERT, params);
     }
 
+    ///CONCAT
+    public static FunctionQueryColumn concat(String column1, String column2, String... more) {
+        String[] columns = new String[]{column1, column2};
+        columns = ArrayUtil.concat(columns, more);
+        return new FunctionQueryColumn("CONCAT", columns);
+    }
+
+    public static FunctionQueryColumn concat(QueryColumn column1, QueryColumn column2, QueryColumn... more) {
+        QueryColumn[] columns = new QueryColumn[]{column1, column2};
+        columns = ArrayUtil.concat(columns, more);
+        return new FunctionQueryColumn("CONCAT", columns);
+    }
+
+
+    ///column
     public static StringQueryColumn column(String column) {
         return new StringQueryColumn(column);
     }
