@@ -15,7 +15,7 @@ public class WithSQLTester {
 
     @Test
     public void testWithSql1() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .with("CTE").asSelect(
                         select().from(ARTICLE).where(ARTICLE.ID.ge(100))
                 )
@@ -29,7 +29,7 @@ public class WithSQLTester {
 
     @Test
     public void testWithSql2() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .withRecursive("CTE").asSelect(
                         select().from(ARTICLE).where(ARTICLE.ID.ge(100))
                 )
@@ -41,7 +41,7 @@ public class WithSQLTester {
 
     @Test
     public void testWithSql3() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .withRecursive("CTE", "id", "value").asSelect(
                         QueryWrapper.create().from(ARTICLE).where(ARTICLE.ID.ge(100))
                 )
@@ -55,7 +55,7 @@ public class WithSQLTester {
 
     @Test
     public void testWithSql4() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .with("CTE").asSelect(
                         select().from(ARTICLE).where(ARTICLE.ID.ge(100))
                 )
@@ -71,7 +71,7 @@ public class WithSQLTester {
 
     @Test
     public void testWithSql5() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .withRecursive("CTE").asSelect(
                         select().from(ARTICLE).where(ARTICLE.ID.ge(100))
                 )

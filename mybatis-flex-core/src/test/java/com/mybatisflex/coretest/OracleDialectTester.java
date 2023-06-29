@@ -17,7 +17,7 @@ public class OracleDialectTester {
 
     @Test
     public void testSelectSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
                 .select()
                 .from(ACCOUNT);
 
