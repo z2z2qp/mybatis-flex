@@ -13,24 +13,43 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.core.audit;
 
-import com.mybatisflex.core.FlexConsts;
-import com.mybatisflex.core.audit.http.HttpUtil;
+package com.mybatisflex.test.model;
 
 /**
- * 默认的审计消息创建器，用来创建带有 hostIp 的审计消息。
+ * 用户 VO 对象。
+ *
+ * @author 王帅
+ * @since 2023-06-30
  */
-public class DefaultMessageFactory implements MessageFactory {
 
-    private final String hostIp = HttpUtil.getHostIp();
+public class UserVO4 {
 
-    @Override
-    public AuditMessage create() {
-        AuditMessage message = new AuditMessage();
-        message.setPlatform(FlexConsts.NAME);
-        message.setHostIp(hostIp);
-        return message;
+    private String userId;
+
+    private String userName;
+
+    public String getUserId() {
+        return userId;
     }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    @Override
+    public String toString() {
+        return "UserVO{" +
+                "userId='" + userId + '\'' +
+                ", userName='" + userName + '\'' +
+                '}';
+    }
 }

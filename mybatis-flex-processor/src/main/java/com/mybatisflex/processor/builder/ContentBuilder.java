@@ -17,10 +17,10 @@
 package com.mybatisflex.processor.builder;
 
 import com.mybatisflex.annotation.Table;
+import com.mybatisflex.processor.entity.ColumnInfo;
 import com.mybatisflex.processor.util.StrUtil;
 
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 /**
@@ -53,38 +53,44 @@ public class ContentBuilder {
     /**
      * 构建 TableDef 文件内容。
      */
-    public static String buildTableDef(Table table, String entityClass, String entityClassName, boolean allInTables,
+    public static String buildTableDef(Table table, String entityClass, String entityClassName, boolean allInTablesEnable,
                                        String tableDefPackage, String tableDefClassName,
-                                       String tablesNameStyle, String tablesDefSuffix,
-                                       Map<String, String> propertyAndColumns, List<String> defaultColumns) {
+                                       String tableDefPropertiesNameStyle, String tableDefInstanceSuffix,
+                                       List<ColumnInfo> columnInfoList, List<String> defaultColumns) {
         StringBuilder content = new StringBuilder("package ");
         content.append(tableDefPackage).append(";\n\n");
         content.append("import com.mybatisflex.core.query.QueryColumn;\n");
         content.append("import com.mybatisflex.core.table.TableDef;\n\n");
         content.append("// Auto generate by mybatis-flex, do not modify it.\n");
         content.append("public class ").append(tableDefClassName).append(" extends TableDef {\n\n");
-        if (!allInTables) {
+        if (!allInTablesEnable) {
             String schema = !StrUtil.isBlank(table.schema())
                     ? table.schema()
                     : "";
             String tableName = !StrUtil.isBlank(table.value())
                     ? table.value()
                     : StrUtil.firstCharToLowerCase(entityClassName);
-            content.append("    public static final ").append(tableDefClassName).append(' ').append(StrUtil.buildFieldName(entityClassName.concat(tablesDefSuffix != null ? tablesDefSuffix.trim() : ""), tablesNameStyle))
+            content.append("    public static final ").append(tableDefClassName).append(' ').append(StrUtil.buildFieldName(entityClassName.concat(tableDefInstanceSuffix != null ? tableDefInstanceSuffix.trim() : ""), tableDefPropertiesNameStyle))
                     .append(" = new ").append(tableDefClassName).append("(\"").append(schema).append("\", \"").append(tableName).append("\");\n\n");
         }
-        propertyAndColumns.forEach((property, column) -> content.append("    public QueryColumn ")
-                .append(StrUtil.buildFieldName(property, tablesNameStyle))
-                .append(" = new QueryColumn(this, \"")
-                .append(column).append("\");\n"));
-        content.append("    public QueryColumn ").append(StrUtil.buildFieldName("allColumns", tablesNameStyle)).append(" = new QueryColumn(this, \"*\");\n");
+        columnInfoList.forEach((columnInfo) -> {
+            content.append("    public QueryColumn ")
+                    .append(StrUtil.buildFieldName(columnInfo.getProperty(), tableDefPropertiesNameStyle))
+                    .append(" = new QueryColumn(this, \"")
+                    .append(columnInfo.getColumn()).append("\"");
+            if (columnInfo.getAlias() != null && columnInfo.getAlias().length > 0) {
+                content.append(", \"").append(columnInfo.getAlias()[0]).append("\"");
+            }
+            content.append(");\n");
+        });
+        content.append("    public QueryColumn ").append(StrUtil.buildFieldName("allColumns", tableDefPropertiesNameStyle)).append(" = new QueryColumn(this, \"*\");\n");
         StringJoiner defaultColumnJoiner = new StringJoiner(", ");
-        propertyAndColumns.forEach((property, column) -> {
-            if (defaultColumns.contains(column)) {
-                defaultColumnJoiner.add(StrUtil.buildFieldName(property, tablesNameStyle));
+        columnInfoList.forEach((columnInfo) -> {
+            if (defaultColumns.contains(columnInfo.getColumn())) {
+                defaultColumnJoiner.add(StrUtil.buildFieldName(columnInfo.getProperty(), tableDefPropertiesNameStyle));
             }
         });
-        content.append("    public QueryColumn[] ").append(StrUtil.buildFieldName("defaultColumns", tablesNameStyle)).append(" = new QueryColumn[]{").append(defaultColumnJoiner).append("};\n\n");
+        content.append("    public QueryColumn[] ").append(StrUtil.buildFieldName("defaultColumns", tableDefPropertiesNameStyle)).append(" = new QueryColumn[]{").append(defaultColumnJoiner).append("};\n\n");
         content.append("    public ").append(tableDefClassName).append("(String schema, String tableName) {\n")
                 .append("       super(schema, tableName);\n")
                 .append("    }\n\n}\n");
@@ -110,9 +116,9 @@ public class ContentBuilder {
      * 构建 Tables 文件常量属性。
      */
     public static void buildTablesField(StringBuilder importBuilder, StringBuilder fieldBuilder, Table table,
-                                        String entityClass, String entityClassName, String tablesNameStyle, String tablesDefSuffix) {
+                                        String entityClass, String entityClassName, String tableDefClassSuffix, String tableDefPropertiesNameStyle, String tableDefInstanceSuffix) {
         String tableDefPackage = StrUtil.buildTableDefPackage(entityClass);
-        String tableDefClassName = entityClassName.concat("TableDef");
+        String tableDefClassName = entityClassName.concat(tableDefClassSuffix);
         importBuilder.append("import ").append(tableDefPackage).append('.').append(tableDefClassName).append(";\n");
         String schema = !StrUtil.isBlank(table.schema())
                 ? table.schema()
@@ -121,7 +127,7 @@ public class ContentBuilder {
                 ? table.value()
                 : StrUtil.firstCharToLowerCase(entityClassName);
         fieldBuilder.append("   public static final ").append(tableDefClassName).append(' ')
-                .append(StrUtil.buildFieldName(entityClassName.concat(tablesDefSuffix != null ? tablesDefSuffix.trim() : ""), tablesNameStyle))
+                .append(StrUtil.buildFieldName(entityClassName.concat(tableDefInstanceSuffix != null ? tableDefInstanceSuffix.trim() : ""), tableDefPropertiesNameStyle))
                 .append(" = new ").append(tableDefClassName).append("(\"").append(schema).append("\", \"").append(tableName).append("\");\n");
     }
 

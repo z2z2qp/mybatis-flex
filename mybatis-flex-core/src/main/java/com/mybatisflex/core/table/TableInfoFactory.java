@@ -33,10 +33,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.type.UnknownTypeHandler;
 import org.apache.ibatis.util.MapUtil;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -283,11 +280,26 @@ public class TableInfoFactory {
             Id id = field.getAnnotation(Id.class);
             ColumnInfo columnInfo;
             if (id != null) {
-                columnInfo = new IdInfo(columnName, field.getName(), fieldType, id);
+                columnInfo = new IdInfo(id);
                 idInfos.add((IdInfo) columnInfo);
             } else {
                 columnInfo = new ColumnInfo();
                 columnInfoList.add(columnInfo);
+            }
+
+            ColumnAlias columnAlias = null;
+            // 属性上没有别名，查找 getter 方法上有没有别名
+            Method getterMethod = ClassUtil.getFirstMethod(entityClass, m -> ClassUtil.isGetterMethod(m, field.getName()));
+            if (getterMethod != null) {
+                columnAlias = getterMethod.getAnnotation(ColumnAlias.class);
+            }
+
+            if (columnAlias == null) {
+                columnAlias = field.getAnnotation(ColumnAlias.class);
+            }
+
+            if (columnAlias != null) {
+                columnInfo.setAlias(columnAlias.value());
             }
 
             columnInfo.setColumn(columnName);
@@ -350,6 +362,7 @@ public class TableInfoFactory {
         if (!largeColumns.isEmpty()) {
             tableInfo.setLargeColumns(largeColumns.toArray(new String[0]));
         }
+
         if (!defaultColumns.isEmpty()) {
             tableInfo.setDefaultColumns(defaultColumns.toArray(new String[0]));
         }

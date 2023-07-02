@@ -13,24 +13,42 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.core.audit;
 
-import com.mybatisflex.core.FlexConsts;
-import com.mybatisflex.core.audit.http.HttpUtil;
+package com.mybatisflex.test.entity;
+
+import com.mybatisflex.annotation.Table;
 
 /**
- * 默认的审计消息创建器，用来创建带有 hostIp 的审计消息。
+ * @author 王帅
+ * @since 2023-07-01
  */
-public class DefaultMessageFactory implements MessageFactory {
+@Table("tb_inner")
+public class Inner {
 
-    private final String hostIp = HttpUtil.getHostIp();
+    private Integer id;
+    private String type;
 
-    @Override
-    public AuditMessage create() {
-        AuditMessage message = new AuditMessage();
-        message.setPlatform(FlexConsts.NAME);
-        message.setHostIp(hostIp);
-        return message;
+    public Integer getId() {
+        return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "Inner{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

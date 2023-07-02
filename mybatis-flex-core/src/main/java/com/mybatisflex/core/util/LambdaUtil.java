@@ -22,7 +22,6 @@ import com.mybatisflex.core.table.TableInfoFactory;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 import org.apache.ibatis.util.MapUtil;
 
-import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -43,13 +42,20 @@ public class LambdaUtil {
     }
 
 
+    public static <T> String getAliasName(LambdaGetter<T> getter, boolean withPrefix) {
+        QueryColumn queryColumn = getQueryColumn(getter);
+        String alias = StringUtil.isNotBlank(queryColumn.getAlias()) ? queryColumn.getAlias() : queryColumn.getName();
+        return withPrefix ? queryColumn.getTable().getName() + "$" + alias : alias;
+    }
+
+
     public static <T> QueryColumn getQueryColumn(LambdaGetter<T> getter) {
         SerializedLambda lambda = getSerializedLambda(getter);
         String methodName = lambda.getImplMethodName();
-        String implClass = lambda.getImplClass();
+        String implClass = getImplClass(lambda);
         Class<?> entityClass = MapUtil.computeIfAbsent(classMap, implClass, s -> {
             try {
-                return Class.forName(s.replace("/","."));
+                return Class.forName(s.replace("/", "."));
             } catch (ClassNotFoundException e) {
                 throw FlexExceptions.wrap(e);
             }
@@ -59,7 +65,7 @@ public class LambdaUtil {
     }
 
 
-    private static SerializedLambda getSerializedLambda(Serializable getter) {
+    private static <T> SerializedLambda getSerializedLambda(LambdaGetter<T> getter) {
         return MapUtil.computeIfAbsent(lambdaMap, getter.getClass(), aClass -> {
             try {
                 Method method = getter.getClass().getDeclaredMethod("writeReplace");
@@ -69,6 +75,12 @@ public class LambdaUtil {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+
+    public static String getImplClass(SerializedLambda lambda) {
+        String type = lambda.getInstantiatedMethodType();
+        return type.substring(2, type.indexOf(";"));
     }
 
 }
