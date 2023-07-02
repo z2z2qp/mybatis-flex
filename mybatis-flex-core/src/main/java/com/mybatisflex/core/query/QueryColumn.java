@@ -35,6 +35,8 @@ public class QueryColumn implements CloneSupport<QueryColumn> {
     protected String name;
     protected String alias;
 
+    private boolean returnCopyByAsMethod = false;
+
 
     public QueryColumn() {
     }
@@ -56,16 +58,30 @@ public class QueryColumn implements CloneSupport<QueryColumn> {
         this.name = name;
     }
 
-    public QueryColumn(TableDef tableDef, String name) {
+    public QueryColumn(String schema, String tableName, String name, String alias) {
         SqlUtil.keepColumnSafely(name);
-        this.table = new QueryTable(tableDef);
+        this.returnCopyByAsMethod = true;
+        this.table = new QueryTable(schema, tableName);
         this.name = name;
+        this.alias = alias;
     }
 
     public QueryColumn(QueryTable queryTable, String name) {
         SqlUtil.keepColumnSafely(name);
         this.table = queryTable;
         this.name = name;
+    }
+
+    public QueryColumn(TableDef tableDef, String name) {
+        this(tableDef, name, null);
+    }
+
+    public QueryColumn(TableDef tableDef, String name, String alias) {
+        SqlUtil.keepColumnSafely(name);
+        this.returnCopyByAsMethod = true;
+        this.table = new QueryTable(tableDef);
+        this.name = name;
+        this.alias = alias;
     }
 
 
@@ -94,16 +110,25 @@ public class QueryColumn implements CloneSupport<QueryColumn> {
     }
 
     public <T> QueryColumn as(LambdaGetter<T> fn) {
-        return as(LambdaUtil.getFieldName(fn));
+        return as(fn, false);
+    }
+
+    public <T> QueryColumn as(LambdaGetter<T> fn, boolean withPrefix) {
+        return as(LambdaUtil.getAliasName(fn, withPrefix));
     }
 
     public QueryColumn as(String alias) {
         SqlUtil.keepColumnSafely(alias);
-        QueryColumn newColumn = new QueryColumn();
-        newColumn.table = this.table;
-        newColumn.name = this.name;
-        newColumn.alias = alias;
-        return newColumn;
+        if (returnCopyByAsMethod) {
+            QueryColumn newColumn = new QueryColumn();
+            newColumn.table = this.table;
+            newColumn.name = this.name;
+            newColumn.alias = alias;
+            return newColumn;
+        } else {
+            this.alias = alias;
+            return this;
+        }
     }
 
 
