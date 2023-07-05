@@ -24,6 +24,8 @@ import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.row.RowCPI;
 import com.mybatisflex.core.table.TableInfo;
+import com.mybatisflex.core.table.TableInfoFactory;
+import com.mybatisflex.core.update.RawValue;
 import com.mybatisflex.core.util.ArrayUtil;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.StringUtil;
@@ -71,12 +73,12 @@ public class CommonsDialectImpl implements IDialect {
         StringBuilder fields = new StringBuilder();
         StringBuilder questions = new StringBuilder();
 
-        Set<String> attrs = row.obtainModifyAttrs();
+        Set<String> modifyAttrs = RowCPI.getModifyAttrs(row);
         int index = 0;
-        for (String attr : attrs) {
+        for (String attr : modifyAttrs) {
             fields.append(wrap(attr));
             questions.append(PLACEHOLDER);
-            if (index != attrs.size() - 1) {
+            if (index != modifyAttrs.size() - 1) {
                 fields.append(DELIMITER);
                 questions.append(DELIMITER);
             }
@@ -100,7 +102,7 @@ public class CommonsDialectImpl implements IDialect {
         StringBuilder questions = new StringBuilder();
 
         Row firstRow = rows.get(0);
-        Set<String> attrs = firstRow.obtainModifyAttrs();
+        Set<String> attrs = RowCPI.getModifyAttrs(firstRow);
         int index = 0;
         for (String column : attrs) {
             fields.append(wrap(column));
@@ -198,7 +200,8 @@ public class CommonsDialectImpl implements IDialect {
     public String forUpdateById(String schema, String tableName, Row row) {
         StringBuilder sql = new StringBuilder();
 
-        Set<String> modifyAttrs = row.obtainModifyAttrs();
+        Set<String> modifyAttrs = RowCPI.getModifyAttrs(row);
+        Map<String, RawValue> rawValueMap = RowCPI.getRawValueMap(row);
         String[] primaryKeys = RowCPI.obtainsPrimaryKeyStrings(row);
 
         sql.append(UPDATE);
@@ -213,7 +216,14 @@ public class CommonsDialectImpl implements IDialect {
                 if (index > 0) {
                     sql.append(DELIMITER);
                 }
-                sql.append(wrap(colName)).append(EQUALS_PLACEHOLDER);
+                sql.append(wrap(colName));
+
+                if (rawValueMap.containsKey(colName)) {
+                    sql.append(EQUALS).append(rawValueMap.get(colName).toSql(this));
+                } else {
+                    sql.append(EQUALS_PLACEHOLDER);
+                }
+
                 index++;
             }
         }
@@ -232,7 +242,8 @@ public class CommonsDialectImpl implements IDialect {
     public String forUpdateByQuery(QueryWrapper queryWrapper, Row row) {
         StringBuilder sql = new StringBuilder();
 
-        Set<String> modifyAttrs = row.obtainModifyAttrs();
+        Set<String> modifyAttrs = RowCPI.getModifyAttrs(row);
+        Map<String, RawValue> rawValueMap = RowCPI.getRawValueMap(row);
 
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables == null || queryTables.size() != 1) {
@@ -247,7 +258,15 @@ public class CommonsDialectImpl implements IDialect {
             if (index > 0) {
                 sql.append(DELIMITER);
             }
-            sql.append(wrap(modifyAttr)).append(EQUALS_PLACEHOLDER);
+
+            sql.append(wrap(modifyAttr));
+
+            if (rawValueMap.containsKey(modifyAttr)) {
+                sql.append(EQUALS).append(rawValueMap.get(modifyAttr).toSql(this));
+            } else {
+                sql.append(EQUALS_PLACEHOLDER);
+            }
+
             index++;
         }
 
@@ -298,28 +317,36 @@ public class CommonsDialectImpl implements IDialect {
     @Override
     public String buildSelectSql(QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
+
         List<QueryTable> joinTables = CPI.getJoinTables(queryWrapper);
         List<QueryTable> allTables = CollectionUtil.merge(queryTables, joinTables);
 
         List<QueryColumn> selectColumns = CPI.getSelectColumns(queryWrapper);
 
-        int queryTablesCount = queryTables.size();
+        int queryTablesCount = queryTables == null ? 0 : queryTables.size();
         int joinTablesCount = joinTables != null ? joinTables.size() : 0;
 
         //多表查询时，自动映射
-        if (queryTablesCount + joinTablesCount > 1) {
+        if (queryTablesCount > 0 && queryTablesCount + joinTablesCount > 1) {
             QueryTable firstTable = queryTables.get(0);
-            if (selectColumns != null && !selectColumns.isEmpty()) {
-                for (int i = 0; i < selectColumns.size(); i++) {
-                    QueryColumn selectColumn = selectColumns.get(i);
-                    QueryTable selectColumnTable = selectColumn.getTable();
+            if (!(firstTable instanceof SelectQueryTable)) {
+                TableInfo tableInfo = TableInfoFactory.ofTableName(firstTable.getName());
+                if (tableInfo != null && selectColumns != null && !selectColumns.isEmpty()) {
+                    String[] firstTableColumns = tableInfo.getColumns();
+                    for (int i = 0; i < selectColumns.size(); i++) {
+                        QueryColumn selectColumn = selectColumns.get(i);
+                        QueryTable selectColumnTable = selectColumn.getTable();
 
-                    //用户未配置别名的情况下，自动未用户添加别名
-                    if (StringUtil.isBlank(selectColumn.getAlias())
-                            && !(selectColumnTable instanceof SelectQueryTable)
-                            && !CPI.isSameTable(firstTable, selectColumnTable)) {
-                        QueryColumn newSelectColumn = selectColumn.as(selectColumnTable.getName() + "$" + selectColumn.getName());
-                        selectColumns.set(i, newSelectColumn);
+                        //用户未配置别名的情况下，自动未用户添加别名
+                        if (selectColumnTable != null
+                                && StringUtil.isBlank(selectColumn.getAlias())
+                                && !(selectColumnTable instanceof SelectQueryTable)
+                                && !CPI.isSameTable(firstTable, selectColumnTable)
+                                && ArrayUtil.contains(firstTableColumns, selectColumn.getName())
+                        ) {
+                            QueryColumn newSelectColumn = selectColumn.as(selectColumnTable.getName() + "$" + selectColumn.getName());
+                            selectColumns.set(i, newSelectColumn);
+                        }
                     }
                 }
             }
@@ -690,15 +717,20 @@ public class CommonsDialectImpl implements IDialect {
     public String forUpdateEntity(TableInfo tableInfo, Object entity, boolean ignoreNulls) {
         StringBuilder sql = new StringBuilder();
 
-        Set<String> modifyAttrs = tableInfo.obtainUpdateColumns(entity, ignoreNulls, false);
+        Set<String> updateColumns = tableInfo.obtainUpdateColumns(entity, ignoreNulls, false);
+        Map<String, RawValue> rawValueMap = tableInfo.obtainUpdateRawValueMap(entity);
         String[] primaryKeys = tableInfo.getPrimaryKeys();
 
         sql.append(UPDATE).append(tableInfo.getWrapSchemaAndTableName(this)).append(SET);
 
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
 
-        for (String modifyAttr : modifyAttrs) {
-            stringJoiner.add(wrap(modifyAttr) + EQUALS_PLACEHOLDER);
+        for (String modifyAttr : updateColumns) {
+            if (rawValueMap.containsKey(modifyAttr)) {
+                stringJoiner.add(wrap(modifyAttr) + EQUALS + rawValueMap.get(modifyAttr).toSql(this));
+            } else {
+                stringJoiner.add(wrap(modifyAttr) + EQUALS_PLACEHOLDER);
+            }
         }
 
         Map<String, String> onUpdateColumns = tableInfo.getOnUpdateColumns();
@@ -756,16 +788,22 @@ public class CommonsDialectImpl implements IDialect {
     public String forUpdateEntityByQuery(TableInfo tableInfo, Object entity, boolean ignoreNulls, QueryWrapper queryWrapper) {
         StringBuilder sql = new StringBuilder();
 
-        Set<String> modifyAttrs = tableInfo.obtainUpdateColumns(entity, ignoreNulls, true);
+        Set<String> updateColumns = tableInfo.obtainUpdateColumns(entity, ignoreNulls, true);
+        Map<String, RawValue> rawValueMap = tableInfo.obtainUpdateRawValueMap(entity);
 
         sql.append(UPDATE).append(forHint(CPI.getHint(queryWrapper)))
                 .append(tableInfo.getWrapSchemaAndTableName(this)).append(SET);
 
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
 
-        for (String modifyAttr : modifyAttrs) {
-            stringJoiner.add(wrap(modifyAttr) + EQUALS_PLACEHOLDER);
+        for (String modifyAttr : updateColumns) {
+            if (rawValueMap.containsKey(modifyAttr)) {
+                stringJoiner.add(wrap(modifyAttr) + EQUALS + rawValueMap.get(modifyAttr).toSql(this));
+            } else {
+                stringJoiner.add(wrap(modifyAttr) + EQUALS_PLACEHOLDER);
+            }
         }
+
 
         Map<String, String> onUpdateColumns = tableInfo.getOnUpdateColumns();
         if (onUpdateColumns != null && !onUpdateColumns.isEmpty()) {

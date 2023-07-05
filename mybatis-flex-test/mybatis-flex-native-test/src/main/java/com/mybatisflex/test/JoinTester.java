@@ -20,14 +20,14 @@ import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.audit.MessageCollector;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.mapper.ArticleMapper;
+import com.mybatisflex.core.util.MapperUtil;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 import java.util.List;
 
-public class MapperProxyCacheTestStarter {
+public class JoinTester {
 
     public static void main(String[] args) {
         DataSource dataSource = new EmbeddedDatabaseBuilder()
@@ -38,12 +38,8 @@ public class MapperProxyCacheTestStarter {
 
         MybatisFlexBootstrap bootstrap = MybatisFlexBootstrap.getInstance()
                 .setDataSource(dataSource)
-                .addMapper(MyBaseMapper.class)
-                .addMapper(ArticleMapper.class)
-                .addMapper(AccountMapper.class)
                 .addMapper(AccountMapper.class)
                 .start();
-
 
         //开启审计功能
         AuditManager.setAuditEnable(true);
@@ -54,16 +50,12 @@ public class MapperProxyCacheTestStarter {
 
 
         AccountMapper accountMapper = bootstrap.getMapper(AccountMapper.class);
-        ArticleMapper articleMapper = bootstrap.getMapper(ArticleMapper.class);
 
-        for (int i = 0; i < 10; i++) {
-            List<Account> accounts = accountMapper.selectListByQuery(QueryWrapper.create());
-            List<Article> articles = articleMapper.selectListByQuery(QueryWrapper.create());
-        }
+        List<Account> accounts = accountMapper.selectAll();
+        System.out.println(accounts);
 
-
-
-        System.out.println(">>>>>>finished!!!");
+        QueryWrapper queryWrapper = MapperUtil.rawCountQueryWrapper(QueryWrapper.create().from("tb_account"));
+        System.out.println(">>>>>>> count: " + accountMapper.selectCountByQuery(queryWrapper));
 
 
     }
