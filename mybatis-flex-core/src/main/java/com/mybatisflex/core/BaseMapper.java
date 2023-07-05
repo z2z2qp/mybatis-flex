@@ -20,10 +20,7 @@ import com.mybatisflex.core.field.FieldQueryBuilder;
 import com.mybatisflex.core.mybatis.MappedStatementTypes;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.provider.EntitySqlProvider;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.util.*;
@@ -332,8 +329,22 @@ public interface BaseMapper<T> {
      * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
      */
     @UpdateProvider(type = EntitySqlProvider.class, method = "updateNumberAddByQuery")
-    int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value,
-            @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
+    int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value, @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
+
+    /**
+     * 执行类似 update table set field=field+1 where ... 的场景
+     *
+     * @param column       字段名
+     * @param value        值（ >=0 加，小于 0 减）
+     * @param queryWrapper 条件
+     * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
+     */
+    default int updateNumberAddByQuery(QueryColumn column, Number value, QueryWrapper queryWrapper) {
+        if (value == null) {
+            throw FlexExceptions.wrap("value can not be null.");
+        }
+        return updateNumberAddByQuery(column.getName(), value, queryWrapper);
+    }
 
     /**
      * 执行类似 update table set field=field+1 where ... 的场景
@@ -683,18 +694,28 @@ public interface BaseMapper<T> {
     default long selectCountByQuery(QueryWrapper queryWrapper) {
         List<QueryColumn> selectColumns = CPI.getSelectColumns(queryWrapper);
         try {
+            List<Object> objects;
             if (CollectionUtil.isEmpty(selectColumns)) {
+                // 未设置 COUNT(...) 列，默认使用 COUNT(*) 查询
                 queryWrapper.select(count());
-            }
-            List<Object> objects = selectObjectListByQuery(queryWrapper);
-            Object object = objects == null || objects.isEmpty() ? null : objects.get(0);
-            if (object == null) {
-                return 0;
-            } else if (object instanceof Number number) {
-                return number.longValue();
+                objects = selectObjectListByQuery(queryWrapper);
+            } else if (selectColumns.get(0) instanceof CountQueryColumn) {
+                // 自定义 COUNT 函数，COUNT 函数必须在第一列
+                // 可以使用 COUNT(1)、COUNT(列名) 代替默认的 COUNT(*)
+                objects = selectObjectListByQuery(queryWrapper);
             } else {
-                throw FlexExceptions.wrap("selectCountByQuery error, Can not get number value for queryWrapper: %s", queryWrapper);
+                // 查询列中的第一列不是 COUNT 函数
+                if (MapperUtil.hasDistinct(selectColumns)) {
+                    // 查询列中包含 DISTINCT 去重
+                    // 使用子查询 SELECT COUNT(*) FROM (SELECT DISTINCT ...) AS `t`
+                    objects = selectObjectListByQuery(MapperUtil.rawCountQueryWrapper(queryWrapper));
+                } else {
+                    // 使用 COUNT(*) 替换所有的查询列
+                    queryWrapper.select(count());
+                    objects = selectObjectListByQuery(queryWrapper);
+                }
             }
+            return MapperUtil.getLongNumber(objects);
         } finally {
             //fixed https://github.com/mybatis-flex/mybatis-flex/issues/49
             CPI.setSelectColumns(queryWrapper, selectColumns);

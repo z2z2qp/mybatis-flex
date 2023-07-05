@@ -96,6 +96,19 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
+    public QueryWrapper select(QueryColumn[]... queryColumns) {
+        for (QueryColumn[] columnArray : queryColumns) {
+            if (columnArray != null) {
+                for (QueryColumn column : columnArray) {
+                    if (column != null) {
+                        addSelectColumn(column);
+                    }
+                }
+            }
+        }
+        return this;
+    }
+
 
     public QueryWrapper from(TableDef... tableDefs) {
         for (TableDef tableDef : tableDefs) {
@@ -679,14 +692,31 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
 
     List<QueryWrapper> getChildSelect() {
 
+        List<QueryWrapper> tableChildQuery = null;
+        List<QueryTable> queryTables = getQueryTables();
+        if (CollectionUtil.isNotEmpty(queryTables)) {
+            for (QueryTable queryTable : queryTables) {
+                if (queryTable instanceof SelectQueryTable) {
+                    if (tableChildQuery == null) {
+                        tableChildQuery = new ArrayList<>();
+                    }
+                    tableChildQuery.add(((SelectQueryTable) queryTable).getQueryWrapper());
+                }
+            }
+        }
+
+
         List<QueryWrapper> whereChildQuery = WrapperUtil.getChildQueryWrapper(whereQueryCondition);
         List<QueryWrapper> havingChildQuery = WrapperUtil.getChildQueryWrapper(havingQueryCondition);
 
-        if (whereChildQuery.isEmpty() && havingChildQuery.isEmpty()) {
+        if (tableChildQuery == null && whereChildQuery.isEmpty() && havingChildQuery.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<QueryWrapper> childQueryWrappers = new ArrayList<>(whereChildQuery);
+
+        List<QueryWrapper> childQueryWrappers = tableChildQuery == null
+                ? new ArrayList<>() : new ArrayList<>(tableChildQuery);
+        childQueryWrappers.addAll(whereChildQuery);
         childQueryWrappers.addAll(havingChildQuery);
 
         return childQueryWrappers;

@@ -14,7 +14,31 @@
  *  limitations under the License.
  */
 
-/**
- * 处理部分字段更新。
- */
-package com.mybatisflex.core.javassist;
+package com.mybatisflex.test;
+
+import com.mybatisflex.annotation.ColumnAlias;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+
+import java.io.Serializable;
+
+@Table(value = "tb_account_1")
+public class Account1 extends Account implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id(keyType = KeyType.Auto)
+    private Long id;
+
+    private String userName;
+
+    private int age;
+    private int ageVV;
+
+    @Override
+    @ColumnAlias("account_1_id")
+    public Long getId() {
+        return id;
+    }
+}

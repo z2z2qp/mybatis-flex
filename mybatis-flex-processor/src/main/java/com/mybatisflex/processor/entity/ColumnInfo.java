@@ -16,6 +16,8 @@
 
 package com.mybatisflex.processor.entity;
 
+import java.util.Objects;
+
 /**
  * 列详细信息。
  *
@@ -61,6 +63,23 @@ public class ColumnInfo {
 
     public void setAlias(String[] alias) {
         this.alias = alias;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ColumnInfo that = (ColumnInfo) o;
+        return Objects.equals(property, that.property);
+    }
+
+    @Override
+    public int hashCode() {
+        return property != null ? property.hashCode() : 0;
     }
 
 }

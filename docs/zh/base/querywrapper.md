@@ -127,21 +127,10 @@ FROM tb_account
 
 
 
-目前，MyBatis-Flex 内置的函数支持如下：
-
-- count
-- max
-- min
-- avg
-- sum
-- year
-- month
-- day
-- convert
-- concat
-
-更多的函数，用户可以参考 [QueryMethods](https://gitee.com/mybatis-flex/mybatis-flex/blob/main/mybatis-flex-core/src/main/java/com/mybatisflex/core/query/QueryMethods.java)
-，然后再自己的项目里进行自定义扩展。
+目前，MyBatis-Flex 已支持 110+ 个常见的 SQL
+函数，查看已支持的 [所有函数](https://gitee.com/mybatis-flex/mybatis-flex/blob/main/mybatis-flex-core/src/main/java/com/mybatisflex/core/constant/FuncName.java)。
+若还不满足，您可以参考 [QueryMethods](https://gitee.com/mybatis-flex/mybatis-flex/blob/main/mybatis-flex-core/src/main/java/com/mybatisflex/core/query/QueryMethods.java)
+，然后在自己的项目里进行自定义扩展。
 
 
 ## select 列计算

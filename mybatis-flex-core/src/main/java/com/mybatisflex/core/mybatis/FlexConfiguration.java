@@ -150,7 +150,7 @@ public class FlexConfiguration extends Configuration {
         //动态 resultsMap，方法名称为：selectListByQuery
         Class<?> asType = MappedStatementTypes.getCurrentType();
         if (asType != null) {
-            return MapUtil.computeIfAbsent(dynamicMappedStatementCache, asType,
+            return MapUtil.computeIfAbsent(dynamicMappedStatementCache, id + ":" + asType.getName(),
                     aClass -> replaceResultMap(ms, TableInfoFactory.ofEntityClass(asType))
             );
         }

@@ -33,6 +33,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
@@ -62,6 +63,9 @@ public class EntityTestStarter {
 
 
         AccountMapper accountMapper = bootstrap.getMapper(AccountMapper.class);
+
+        List<Account> accounts = accountMapper.selectAll();
+        System.out.println(accounts);
 
 //        QueryWrapper wrapper = QueryWrapper.create().select(ACCOUNT.ID
 //                , case_().when(ACCOUNT.ID.ge(2)).then("x2")
