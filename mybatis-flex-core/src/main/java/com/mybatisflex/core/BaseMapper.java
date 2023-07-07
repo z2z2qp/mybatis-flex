@@ -15,12 +15,14 @@
  */
 package com.mybatisflex.core;
 
+import com.mybatisflex.core.constant.FuncName;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.field.FieldQueryBuilder;
 import com.mybatisflex.core.mybatis.MappedStatementTypes;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.provider.EntitySqlProvider;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.util.*;
@@ -424,6 +426,58 @@ public interface BaseMapper<T> {
         return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
     }
 
+
+    /**
+     * 根据 map 构建的条件来查询数据
+     *
+     * @param map where 条件
+     * @return entity 数据
+     */
+    default T selectOneWithRelationsByMap(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            throw FlexExceptions.wrap("map can not be null or empty.");
+        }
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(map).limit(1));
+    }
+
+
+    /**
+     * 根据 condition 来查询数据
+     *
+     * @param condition 条件
+     * @return 1 条数据
+     */
+    default T selectOneWithRelationsByCondition(QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(condition).limit(1));
+    }
+
+
+    /**
+     * 根据 queryWrapper 构建的条件来查询 1 条数据
+     *
+     * @param queryWrapper query 条件
+     * @return entity 数据
+     */
+    default T selectOneWithRelationsByQuery(QueryWrapper queryWrapper) {
+        return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+    }
+
+
+    /**
+     * 根据 queryWrapper 构建的条件来查询 1 条数据
+     *
+     * @param queryWrapper query 条件
+     * @param asType       接收类型
+     * @return 数据内容
+     */
+    default <R> R selectOneWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType)));
+    }
+
+
     /**
      * 根据多个主键来查询多条数据
      *
@@ -526,6 +580,15 @@ public interface BaseMapper<T> {
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
     Cursor<T> selectCursorByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
+    /**
+     * 根据 query 来构建条件查询 Row
+     *
+     * @param queryWrapper 查询条件
+     * @return Row
+     */
+    @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
+    List<Row> selectRowsByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
+
 
     /**
      * 根据 query 来构建条件查询数据列表，要求返回的数据为 asType
@@ -540,6 +603,11 @@ public interface BaseMapper<T> {
                 || String.class == asType) {
             return selectObjectListByQueryAs(queryWrapper, asType);
         }
+
+        if (Map.class.isAssignableFrom(asType)) {
+            return (List<R>) selectRowsByQuery(queryWrapper);
+        }
+
         try {
             MappedStatementTypes.setCurrentType(asType);
             return (List<R>) selectListByQuery(queryWrapper);
@@ -549,6 +617,14 @@ public interface BaseMapper<T> {
     }
 
 
+    /**
+     * 根据 query 来构建条件查询数据列表，要求返回的数据为 asType
+     *
+     * @param queryWrapper 查询条件
+     * @param asType       接收的数据类型
+     * @param consumers    字段查询
+     * @return 数据列表
+     */
     default <R> List<R> selectListByQueryAs(QueryWrapper queryWrapper, Class<R> asType
             , Consumer<FieldQueryBuilder<R>>... consumers) {
         List<R> list = selectListByQueryAs(queryWrapper, asType);
@@ -562,12 +638,79 @@ public interface BaseMapper<T> {
 
 
     /**
+     * 查询 entity 及其 relation 注解字段
+     *
+     * @param queryWrapper 查询条件
+     */
+    default List<T> selectListWithRelationsByQuery(QueryWrapper queryWrapper) {
+        return MapperUtil.queryRelations(this, selectListByQuery(queryWrapper));
+    }
+
+
+    /**
+     * 查询 entity 及其 relation 注解字段
+     *
+     * @param queryWrapper 查询条件
+     * @param asType       要求返回的数据类型
+     * @return 数据列表
+     */
+    default <R> List<R> selectListWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        if (Number.class.isAssignableFrom(asType)
+                || String.class == asType) {
+            return selectObjectListByQueryAs(queryWrapper, asType);
+        }
+
+        if (Map.class.isAssignableFrom(asType)) {
+            return (List<R>) selectRowsByQuery(queryWrapper);
+        }
+
+        try {
+            MappedStatementTypes.setCurrentType(asType);
+            return MapperUtil.queryRelations(this, (List<R>) selectListByQuery(queryWrapper));
+        } finally {
+            MappedStatementTypes.clear();
+        }
+    }
+
+
+    /**
+     * 查询 entity 及其 relation 注解字段
+     *
+     * @param queryWrapper 查询条件
+     * @param asType       返回的类型
+     * @param consumers    字段查询
+     * @return 数据列表
+     */
+    default <R> List<R> selectListWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType
+            , Consumer<FieldQueryBuilder<R>>... consumers) {
+        List<R> list = selectListByQueryAs(queryWrapper, asType);
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            MapperUtil.queryRelations(this, list);
+            MapperUtil.queryFields(this, list, consumers);
+            return list;
+        }
+    }
+
+
+    /**
      * 查询全部数据
      *
      * @return 数据列表
      */
     default List<T> selectAll() {
         return selectListByQuery(new QueryWrapper());
+    }
+
+
+    /**
+     * 查询全部数据，及其 relation 字段内容
+     *
+     * @return 数据列表
+     */
+    default List<T> selectAllWithRelations() {
+        return MapperUtil.queryRelations(this, selectListByQuery(new QueryWrapper()));
     }
 
 
@@ -643,9 +786,15 @@ public interface BaseMapper<T> {
                 // 未设置 COUNT(...) 列，默认使用 COUNT(*) 查询
                 queryWrapper.select(count());
                 objects = selectObjectListByQuery(queryWrapper);
-            } else if (selectColumns.get(0) instanceof CountQueryColumn) {
-                // 自定义 COUNT 函数，COUNT 函数必须在第一列
-                // 可以使用 COUNT(1)、COUNT(列名) 代替默认的 COUNT(*)
+            } else if (selectColumns.get(0) instanceof FunctionQueryColumn) {
+                // COUNT 函数必须在第一列
+                if (!FuncName.COUNT.equalsIgnoreCase(
+                        ((FunctionQueryColumn) selectColumns.get(0)).getFnName()
+                )) {
+                    // 第一个查询列不是 COUNT 函数，使用 COUNT(*) 替换所有的查询列
+                    queryWrapper.select(count());
+                }
+                // 第一个查询列是 COUNT 函数，可以使用 COUNT(1)、COUNT(列名) 代替默认的 COUNT(*)
                 objects = selectObjectListByQuery(queryWrapper);
             } else {
                 // 查询列中的第一列不是 COUNT 函数
@@ -748,6 +897,7 @@ public interface BaseMapper<T> {
      * @param queryWrapper 查询条件
      * @return page 数据
      */
+    @SuppressWarnings("unchecked")
     default Page<T> paginate(Page<T> page, QueryWrapper queryWrapper, Consumer<FieldQueryBuilder<T>>... consumers) {
         return paginateAs(page, queryWrapper, null, consumers);
     }
