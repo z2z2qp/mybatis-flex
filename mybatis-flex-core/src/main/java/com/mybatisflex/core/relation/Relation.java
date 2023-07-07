@@ -16,18 +16,20 @@
 package com.mybatisflex.core.relation;
 
 import com.mybatisflex.core.BaseMapper;
+import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.table.IdInfo;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.FieldWrapper;
-import org.apache.ibatis.reflection.Reflector;
-import org.apache.ibatis.reflection.TypeParameterResolver;
+import com.mybatisflex.core.util.StringUtil;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 abstract class Relation<SelfEntity> {
 
@@ -52,19 +54,7 @@ abstract class Relation<SelfEntity> {
         this.selfFieldWrapper = FieldWrapper.of(entityClass, selfField);
 
 
-        Reflector reflector = new Reflector(entityClass);
-        Class<?> targetClass = reflector.getGetterType(relationField.getName());
-
-        if (Collection.class.isAssignableFrom(targetClass)) {
-            Type genericType = TypeParameterResolver.resolveFieldType(relationField, entityClass);
-            if (genericType instanceof ParameterizedType) {
-                this.targetEntityClass = (Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0];
-            }
-        } else if (targetClass.isArray()) {
-            this.targetEntityClass = targetClass.getComponentType();
-        } else {
-            this.targetEntityClass = targetClass;
-        }
+        this.targetEntityClass = relationFieldWrapper.getMappingType();
 
         this.targetField = ClassUtil.getFirstField(targetEntityClass, field -> field.getName().equals(targetField));
         this.targetFieldWrapper = FieldWrapper.of(targetEntityClass, targetField);
@@ -166,5 +156,24 @@ abstract class Relation<SelfEntity> {
 
     public Class<?> getMappingType() {
         return relationFieldWrapper.getMappingType();
+    }
+
+
+    protected static Class<?> getTargetEntityClass(Class<?> entityClass, Field relationField) {
+        return FieldWrapper.of(entityClass, relationField.getName()).getMappingType();
+    }
+
+    protected static String getDefaultPrimaryProperty(String key, Class<?> entityClass, String message) {
+        if (StringUtil.isNotBlank(key)) {
+            return key;
+        }
+
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(entityClass);
+        List<IdInfo> primaryKeyList = tableInfo.getPrimaryKeyList();
+        if (primaryKeyList == null || primaryKeyList.size() != 1) {
+            throw FlexExceptions.wrap(message);
+        }
+
+        return primaryKeyList.get(0).getProperty();
     }
 }

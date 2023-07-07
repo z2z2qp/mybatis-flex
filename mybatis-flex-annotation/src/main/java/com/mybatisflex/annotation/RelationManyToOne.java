@@ -24,6 +24,6 @@ public @interface RelationManyToOne {
 
     String selfField();
 
-    String targetField();
-   
+    String targetField() default "";
+
 }

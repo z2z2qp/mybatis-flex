@@ -24,7 +24,6 @@ import com.mybatisflex.codegen.config.TableConfig;
 import com.mybatisflex.codegen.config.TableDefConfig;
 import com.mybatisflex.spring.service.impl.CacheableServiceImpl;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.Test;
 
 import java.awt.*;
 import java.io.File;
@@ -169,7 +168,7 @@ public class GeneratorTest {
         Desktop.getDesktop().open(new File(globalConfig.getSourceDir()));
     }
 
-    @Test
+//    @Test
     public void testCodeGen3() {
         //配置数据源
         HikariDataSource dataSource = new HikariDataSource();

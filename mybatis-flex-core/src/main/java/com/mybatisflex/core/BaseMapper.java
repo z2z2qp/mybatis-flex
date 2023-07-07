@@ -890,6 +890,11 @@ public interface BaseMapper<T> {
         Page<T> page = new Page<>(pageNumber, pageSize);
         return paginate(page, queryWrapper, cast);
     }
+    default Page<T> paginateWithRelations(int pageNumber, int pageSize, QueryWrapper queryWrapper) {
+        Page<T> page = new Page<>(pageNumber, pageSize);
+        return paginateWithRelations(page, queryWrapper);
+    }
+
 
     /**
      * 根据条件分页查询
@@ -907,6 +912,11 @@ public interface BaseMapper<T> {
     default <R> Page<R> paginate(int pageNumber, int pageSize, QueryCondition condition, Function<T, R> cast) {
         Page<T> page = new Page<>(pageNumber, pageSize);
         return paginate(page, QueryWrapper.create().where(condition), cast);
+    }
+
+    default Page<T> paginateWithRelations(int pageNumber, int pageSize, QueryCondition condition) {
+        Page<T> page = new Page<>(pageNumber, pageSize);
+        return paginateWithRelations(page, QueryWrapper.create().where(condition));
     }
 
     /**
@@ -928,6 +938,11 @@ public interface BaseMapper<T> {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, queryWrapper, cast);
     }
+    default Page<T> paginateWithRelations(int pageNumber, int pageSize, int totalRow, QueryWrapper queryWrapper) {
+        Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
+        return paginateWithRelations(page, queryWrapper);
+    }
+
 
     /**
      * 根据条件分页查询
@@ -952,6 +967,15 @@ public interface BaseMapper<T> {
         return paginate(page, QueryWrapper.create().where(condition), cast);
     }
 
+    default Page<T> paginateWithRelations(int pageNumber, int pageSize, int totalRow, QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
+        Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
+        return paginateWithRelations(page, QueryWrapper.create().where(condition));
+    }
+
+
     /**
      * 分页查询
      *
@@ -964,8 +988,21 @@ public interface BaseMapper<T> {
         return paginateAs(page, queryWrapper, null, consumers);
     }
 
-    default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType,
-            Consumer<FieldQueryBuilder<R>>... consumers) {
+    default Page<T> paginateWithRelations(Page<T> page, QueryWrapper queryWrapper, Consumer<FieldQueryBuilder<T>>... consumers) {
+        return doPaginate(page, queryWrapper, null, true, consumers);
+    }
+
+
+    default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType, Consumer<FieldQueryBuilder<R>>... consumers) {
+        return doPaginate(page, queryWrapper, asType, false, consumers);
+    }
+
+    default <R> Page<R> paginateWithRelationsAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType, Consumer<FieldQueryBuilder<R>>... consumers) {
+        return doPaginate(page, queryWrapper, asType, true, consumers);
+    }
+
+
+    default <R> Page<R> doPaginate(Page<R> page, QueryWrapper queryWrapper, Class<R> asType, boolean withRelations, Consumer<FieldQueryBuilder<R>>... consumers) {
         try {
             // 只有 totalRow 小于 0 的时候才会去查询总量
             // 这样方便用户做总数缓存，而非每次都要去查询总量
@@ -992,6 +1029,11 @@ public interface BaseMapper<T> {
             } else {
                 records = (List<R>) selectListByQuery(queryWrapper);
             }
+
+            if (withRelations) {
+                MapperUtil.queryRelations(this, records);
+            }
+
             MapperUtil.queryFields(this, records, consumers);
             page.setRecords(records);
 
