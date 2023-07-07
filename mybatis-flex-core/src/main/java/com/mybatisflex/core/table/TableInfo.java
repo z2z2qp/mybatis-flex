@@ -78,7 +78,7 @@ public class TableInfo {
     private String[] columns = new String[0];
 
     //主键字段
-    private String[] primaryKeys = new String[0];
+    private String[] primaryColumns = new String[0];
 
     // 默认查询列
     private String[] defaultColumns = new String[0];
@@ -261,12 +261,12 @@ public class TableInfo {
         this.columns = columns;
     }
 
-    public String[] getPrimaryKeys() {
-        return primaryKeys;
+    public String[] getPrimaryColumns() {
+        return primaryColumns;
     }
 
-    public void setPrimaryKeys(String[] primaryKeys) {
-        this.primaryKeys = primaryKeys;
+    public void setPrimaryColumns(String[] primaryColumns) {
+        this.primaryColumns = primaryColumns;
     }
 
 
@@ -354,12 +354,12 @@ public class TableInfo {
 
     void setPrimaryKeyList(List<IdInfo> primaryKeyList) {
         this.primaryKeyList = primaryKeyList;
-        this.primaryKeys = new String[primaryKeyList.size()];
+        this.primaryColumns = new String[primaryKeyList.size()];
 
         List<String> insertIdFields = new ArrayList<>();
         for (int i = 0; i < primaryKeyList.size(); i++) {
             IdInfo idInfo = primaryKeyList.get(i);
-            primaryKeys[i] = idInfo.getColumn();
+            primaryColumns[i] = idInfo.getColumn();
 
             if (idInfo.getKeyType() != KeyType.Auto && (idInfo.getBefore() != null && idInfo.getBefore())) {
                 insertIdFields.add(idInfo.getColumn());
@@ -455,11 +455,11 @@ public class TableInfo {
      */
     public String[] obtainInsertColumnsWithPk(Object entity, boolean ignoreNulls) {
         if (!ignoreNulls) {
-            return ArrayUtil.concat(primaryKeys, columns);
+            return ArrayUtil.concat(primaryColumns, columns);
         } else {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
             List<String> retColumns = new ArrayList<>();
-            for (String primaryKey : primaryKeys) {
+            for (String primaryKey : primaryColumns) {
                 Object value = buildColumnSqlArg(metaObject, primaryKey);
                 if (value == null) {
                     throw new IllegalArgumentException("Entity Primary Key value must not be null.");
@@ -528,7 +528,7 @@ public class TableInfo {
                     continue;
                 }
 
-                if (!includePrimary && ArrayUtil.contains(primaryKeys, column)) {
+                if (!includePrimary && ArrayUtil.contains(primaryColumns, column)) {
                     continue;
                 }
 
@@ -603,7 +603,7 @@ public class TableInfo {
                     continue;
                 }
 
-                if (!includePrimary && ArrayUtil.contains(primaryKeys, column)) {
+                if (!includePrimary && ArrayUtil.contains(primaryColumns, column)) {
                     continue;
                 }
 
@@ -667,9 +667,9 @@ public class TableInfo {
      */
     public Object[] buildPkSqlArgs(Object entity) {
         MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
-        Object[] values = new Object[primaryKeys.length];
-        for (int i = 0; i < primaryKeys.length; i++) {
-            values[i] = buildColumnSqlArg(metaObject, primaryKeys[i]);
+        Object[] values = new Object[primaryColumns.length];
+        for (int i = 0; i < primaryColumns.length; i++) {
+            values[i] = buildColumnSqlArg(metaObject, primaryColumns[i]);
         }
         return values;
     }
@@ -831,15 +831,15 @@ public class TableInfo {
 
 
     public ResultMap buildResultMap(Configuration configuration) {
-        return doBuildResultMap(configuration, new HashSet<>(), new HashSet<>(), false);
+        return doBuildResultMap(configuration, new HashSet<>(), new HashSet<>(), false, getTableNameWithSchema());
     }
 
-    private ResultMap doBuildResultMap(Configuration configuration, Set<String> resultMapIds, Set<String> existMappingColumns, boolean isNested) {
+    private ResultMap doBuildResultMap(Configuration configuration, Set<String> resultMapIds, Set<String> existMappingColumns, boolean isNested, String nestedPrefix) {
 
-        String resultMapId = isNested ? "nested:" + entityClass.getName() : entityClass.getName();
+        String resultMapId = isNested ? "nested-" + nestedPrefix + ":" + entityClass.getName() : entityClass.getName();
 
         //是否有循环引用
-        boolean withCircularReference = resultMapIds.contains(resultMapId);
+        boolean withCircularReference = resultMapIds.contains(resultMapId) || resultMapIds.contains(entityClass.getName());
         if (withCircularReference) {
             return null;
         }
@@ -869,7 +869,7 @@ public class TableInfo {
                 // 获取嵌套类型的信息，也就是 javaType 属性
                 TableInfo tableInfo = TableInfoFactory.ofEntityClass(fieldType);
                 // 构建嵌套类型的 ResultMap 对象，也就是 <association> 标签下的内容
-                ResultMap nestedResultMap = tableInfo.doBuildResultMap(configuration, resultMapIds, existMappingColumns, true);
+                ResultMap nestedResultMap = tableInfo.doBuildResultMap(configuration, resultMapIds, existMappingColumns, true, nestedPrefix);
                 if (nestedResultMap != null) {
                     resultMappings.add(new ResultMapping.Builder(configuration, fieldName)
                             .javaType(fieldType)
@@ -902,7 +902,7 @@ public class TableInfo {
                     // 获取集合泛型类型的信息，也就是 ofType 属性
                     TableInfo tableInfo = TableInfoFactory.ofEntityClass(genericClass);
                     // 构建嵌套类型的 ResultMap 对象，也就是 <collection> 标签下的内容
-                    ResultMap nestedResultMap = tableInfo.doBuildResultMap(configuration, resultMapIds, existMappingColumns, true);
+                    ResultMap nestedResultMap = tableInfo.doBuildResultMap(configuration, resultMapIds, existMappingColumns, true, nestedPrefix);
                     if (nestedResultMap != null) {
                         resultMappings.add(new ResultMapping.Builder(configuration, field.getName())
                                 .javaType(field.getType())
