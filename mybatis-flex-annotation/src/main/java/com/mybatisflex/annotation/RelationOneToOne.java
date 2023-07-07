@@ -13,29 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.mybatisflex.annotation;
 
-package com.mybatisflex.core.query;
+import java.lang.annotation.*;
 
-import static com.mybatisflex.core.constant.FuncName.COUNT;
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+public @interface RelationOneToOne {
 
-/**
- * COUNT 查询列。
- *
- * @author 王帅
- * @since 2023-07-04
- */
-public class CountQueryColumn extends FunctionQueryColumn {
+    String selfField();
 
-    public CountQueryColumn() {
-        super(COUNT, new StringQueryColumn("*"));
-    }
-
-    public CountQueryColumn(String column) {
-        super(COUNT, column);
-    }
-
-    public CountQueryColumn(QueryColumn column) {
-        super(COUNT, column);
-    }
+    String targetField();
 
 }

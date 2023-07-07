@@ -15,12 +15,14 @@
  */
 package com.mybatisflex.core;
 
+import com.mybatisflex.core.constant.FuncName;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.field.FieldQueryBuilder;
 import com.mybatisflex.core.mybatis.MappedStatementTypes;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.provider.EntitySqlProvider;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.util.*;
@@ -69,7 +71,6 @@ public interface BaseMapper<T> {
     @InsertProvider(type = EntitySqlProvider.class, method = "insert")
     int insert(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
 
-
     default int insertWithPk(T entity) {
         return insertWithPk(entity, true);
     }
@@ -80,11 +81,11 @@ public interface BaseMapper<T> {
      * @param entity      带有主键的实体类
      * @param ignoreNulls 是否忽略 null 值
      * @return 返回影响的行数
-     * @see com.mybatisflex.core.provider.EntitySqlProvider#insertWithPk(Map, ProviderContext)
+     * @see com.mybatisflex.core.provider.EntitySqlProvider#insertWithPk(Map,
+     *      ProviderContext)
      */
     @InsertProvider(type = EntitySqlProvider.class, method = "insertWithPk")
     int insertWithPk(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
-
 
     /**
      * 批量插入 entity 数据，只会根据第一条数据来构建插入的字段内容
@@ -128,7 +129,6 @@ public interface BaseMapper<T> {
     default int insertOrUpdate(T entity) {
         return insertOrUpdate(entity, false);
     }
-
 
     /**
      * 新增 或者 更新，若主键有值，则更新，若没有主键值，则插入
@@ -329,7 +329,8 @@ public interface BaseMapper<T> {
      * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
      */
     @UpdateProvider(type = EntitySqlProvider.class, method = "updateNumberAddByQuery")
-    int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value, @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
+    int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value,
+            @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
     /**
      * 执行类似 update table set field=field+1 where ... 的场景
@@ -429,7 +430,7 @@ public interface BaseMapper<T> {
      * @param queryWrapper query 条件
      * @return entity 数据
      */
-     default Optional<T> selectOneByQuery(QueryWrapper queryWrapper) {
+    default Optional<T> selectOneByQuery(QueryWrapper queryWrapper) {
         return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
     }
 
@@ -447,6 +448,54 @@ public interface BaseMapper<T> {
      */
     default <R> R selectOneByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
         return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+    }
+
+    /**
+     * 根据 map 构建的条件来查询数据
+     *
+     * @param map where 条件
+     * @return entity 数据
+     */
+    default T selectOneWithRelationsByMap(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            throw FlexExceptions.wrap("map can not be null or empty.");
+        }
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(map).limit(1));
+    }
+
+    /**
+     * 根据 condition 来查询数据
+     *
+     * @param condition 条件
+     * @return 1 条数据
+     */
+    default T selectOneWithRelationsByCondition(QueryCondition condition) {
+        if (condition == null) {
+            throw FlexExceptions.wrap("condition can not be null.");
+        }
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(condition).limit(1));
+    }
+
+    /**
+     * 根据 queryWrapper 构建的条件来查询 1 条数据
+     *
+     * @param queryWrapper query 条件
+     * @return entity 数据
+     */
+    default T selectOneWithRelationsByQuery(QueryWrapper queryWrapper) {
+        return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+    }
+
+    /**
+     * 根据 queryWrapper 构建的条件来查询 1 条数据
+     *
+     * @param queryWrapper query 条件
+     * @param asType       接收类型
+     * @return 数据内容
+     */
+    default <R> R selectOneWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        return MapperUtil.queryRelations(this,
+                MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType)));
     }
 
     /**
@@ -588,6 +637,14 @@ public interface BaseMapper<T> {
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
     Cursor<T> selectCursorByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
+    /**
+     * 根据 query 来构建条件查询 Row
+     *
+     * @param queryWrapper 查询条件
+     * @return Row
+     */
+    @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
+    List<Row> selectRowsByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
     /**
      * 根据 query 来构建条件查询数据列表，要求返回的数据为 asType
@@ -602,6 +659,11 @@ public interface BaseMapper<T> {
                 || String.class == asType) {
             return selectObjectListByQueryAs(queryWrapper, asType);
         }
+
+        if (Map.class.isAssignableFrom(asType)) {
+            return (List<R>) selectRowsByQuery(queryWrapper);
+        }
+
         try {
             MappedStatementTypes.setCurrentType(asType);
             return (List<R>) selectListByQuery(queryWrapper);
@@ -610,6 +672,14 @@ public interface BaseMapper<T> {
         }
     }
 
+    /**
+     * 根据 query 来构建条件查询数据列表，要求返回的数据为 asType
+     *
+     * @param queryWrapper 查询条件
+     * @param asType       接收的数据类型
+     * @param consumers    字段查询
+     * @return 数据列表
+     */
     default <R> List<R> selectListByQueryAs(QueryWrapper queryWrapper, Class<R> asType,
             Consumer<FieldQueryBuilder<R>>... consumers) {
         List<R> list = selectListByQueryAs(queryWrapper, asType);
@@ -622,12 +692,75 @@ public interface BaseMapper<T> {
     }
 
     /**
+     * 查询 entity 及其 relation 注解字段
+     *
+     * @param queryWrapper 查询条件
+     */
+    default List<T> selectListWithRelationsByQuery(QueryWrapper queryWrapper) {
+        return MapperUtil.queryRelations(this, selectListByQuery(queryWrapper));
+    }
+
+    /**
+     * 查询 entity 及其 relation 注解字段
+     *
+     * @param queryWrapper 查询条件
+     * @param asType       要求返回的数据类型
+     * @return 数据列表
+     */
+    default <R> List<R> selectListWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        if (Number.class.isAssignableFrom(asType)
+                || String.class == asType) {
+            return selectObjectListByQueryAs(queryWrapper, asType);
+        }
+
+        if (Map.class.isAssignableFrom(asType)) {
+            return (List<R>) selectRowsByQuery(queryWrapper);
+        }
+
+        try {
+            MappedStatementTypes.setCurrentType(asType);
+            return MapperUtil.queryRelations(this, (List<R>) selectListByQuery(queryWrapper));
+        } finally {
+            MappedStatementTypes.clear();
+        }
+    }
+
+    /**
+     * 查询 entity 及其 relation 注解字段
+     *
+     * @param queryWrapper 查询条件
+     * @param asType       返回的类型
+     * @param consumers    字段查询
+     * @return 数据列表
+     */
+    default <R> List<R> selectListWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType,
+            Consumer<FieldQueryBuilder<R>>... consumers) {
+        List<R> list = selectListByQueryAs(queryWrapper, asType);
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            MapperUtil.queryRelations(this, list);
+            MapperUtil.queryFields(this, list, consumers);
+            return list;
+        }
+    }
+
+    /**
      * 查询全部数据
      *
      * @return 数据列表
      */
     default List<T> selectAll() {
         return selectListByQuery(QueryWrapper.create());
+    }
+
+    /**
+     * 查询全部数据，及其 relation 字段内容
+     *
+     * @return 数据列表
+     */
+    default List<T> selectAllWithRelations() {
+        return MapperUtil.queryRelations(this, selectListByQuery(QueryWrapper.create()));
     }
 
     /**
@@ -644,7 +777,8 @@ public interface BaseMapper<T> {
 
     /**
      * 根据 queryWrapper 1 条数据
-     * queryWrapper 执行的结果应该只有 1 列，例如 QueryWrapper.create().select(ACCOUNT.id).where...
+     * queryWrapper 执行的结果应该只有 1 列，例如
+     * QueryWrapper.create().select(ACCOUNT.id).where...
      *
      * @param queryWrapper 查询包装器
      * @param asType       转换成的数据类型
@@ -653,7 +787,6 @@ public interface BaseMapper<T> {
     default <R> R selectObjectByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
         return MapperUtil.getSelectOneResult(selectObjectListByQueryAs(queryWrapper, asType));
     }
-
 
     /**
      * 根据 queryWrapper 来查询数据列表
@@ -699,9 +832,14 @@ public interface BaseMapper<T> {
                 // 未设置 COUNT(...) 列，默认使用 COUNT(*) 查询
                 queryWrapper.select(count());
                 objects = selectObjectListByQuery(queryWrapper);
-            } else if (selectColumns.get(0) instanceof CountQueryColumn) {
-                // 自定义 COUNT 函数，COUNT 函数必须在第一列
-                // 可以使用 COUNT(1)、COUNT(列名) 代替默认的 COUNT(*)
+            } else if (selectColumns.get(0) instanceof FunctionQueryColumn) {
+                // COUNT 函数必须在第一列
+                if (!FuncName.COUNT.equalsIgnoreCase(
+                        ((FunctionQueryColumn) selectColumns.get(0)).getFnName())) {
+                    // 第一个查询列不是 COUNT 函数，使用 COUNT(*) 替换所有的查询列
+                    queryWrapper.select(count());
+                }
+                // 第一个查询列是 COUNT 函数，可以使用 COUNT(1)、COUNT(列名) 代替默认的 COUNT(*)
                 objects = selectObjectListByQuery(queryWrapper);
             } else {
                 // 查询列中的第一列不是 COUNT 函数
@@ -717,7 +855,7 @@ public interface BaseMapper<T> {
             }
             return MapperUtil.getLongNumber(objects);
         } finally {
-            //fixed https://github.com/mybatis-flex/mybatis-flex/issues/49
+            // fixed https://github.com/mybatis-flex/mybatis-flex/issues/49
             CPI.setSelectColumns(queryWrapper, selectColumns);
         }
     }
@@ -821,12 +959,13 @@ public interface BaseMapper<T> {
      * @param queryWrapper 查询条件
      * @return page 数据
      */
+    @SuppressWarnings("unchecked")
     default Page<T> paginate(Page<T> page, QueryWrapper queryWrapper, Consumer<FieldQueryBuilder<T>>... consumers) {
         return paginateAs(page, queryWrapper, null, consumers);
     }
 
-
-    default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType, Consumer<FieldQueryBuilder<R>>... consumers) {
+    default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType,
+            Consumer<FieldQueryBuilder<R>>... consumers) {
         try {
             // 只有 totalRow 小于 0 的时候才会去查询总量
             // 这样方便用户做总数缓存，而非每次都要去查询总量
