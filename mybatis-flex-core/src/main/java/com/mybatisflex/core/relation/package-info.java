@@ -13,19 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.core.util;
 
-import org.apache.ibatis.reflection.Reflector;
-import org.apache.ibatis.util.MapUtil;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-public class Reflectors {
-
-    private static final  ConcurrentMap<Class<?>, Reflector> reflectorMap = new ConcurrentHashMap<>();
-
-    public static Reflector of(Class<?> type){
-        return  MapUtil.computeIfAbsent(reflectorMap, type, Reflector::new);
-    }
-}
+/**
+ * 多表关联注解实现。
+ */
+package com.mybatisflex.core.relation;

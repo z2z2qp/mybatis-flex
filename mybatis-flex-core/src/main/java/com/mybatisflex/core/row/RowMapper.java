@@ -60,6 +60,7 @@ public interface RowMapper {
      * @param args 参数
      * @return 执行影响的行数
      * @see Db#insertBySql(String, Object...)
+     * @see RowSqlProvider#providerRawSql(Map)
      */
     @InsertProvider(value = RowSqlProvider.class, method = RowSqlProvider.METHOD_RAW_SQL)
     int insertBySql(@Param(FlexConsts.SQL) String sql, @Param(FlexConsts.SQL_ARGS) Object... args);
@@ -87,6 +88,7 @@ public interface RowMapper {
      * @param sql  delete sql 语句
      * @param args 参数
      * @return 执行影响的行数
+     * @see RowSqlProvider#providerRawSql(Map)
      */
     @DeleteProvider(value = RowSqlProvider.class, method = RowSqlProvider.METHOD_RAW_SQL)
     int deleteBySql(@Param(FlexConsts.SQL) String sql, @Param(FlexConsts.SQL_ARGS) Object... args);
@@ -152,6 +154,7 @@ public interface RowMapper {
      * @param sql  sql 语句
      * @param args 参数内容
      * @return 执行影响的行数
+     * @see RowSqlProvider#providerRawSql(Map)
      */
     @UpdateProvider(value = RowSqlProvider.class, method = RowSqlProvider.METHOD_RAW_SQL)
     int updateBySql(@Param(FlexConsts.SQL) String sql, @Param(FlexConsts.SQL_ARGS) Object... args);
@@ -396,10 +399,11 @@ public interface RowMapper {
      *
      * @param queryWrapper 查询包装器
      * @return 数据列表
-     * @see RowSqlProvider#selectObjectByQuery(Map)
+     * @see RowSqlProvider#selectListByQuery(Map)
      */
-    @SelectProvider(type = RowSqlProvider.class, method = "selectObjectByQuery")
-    List<Object> selectObjectListByQuery(@Param(FlexConsts.SCHEMA_NAME) String schema, @Param(FlexConsts.TABLE_NAME) String tableName, @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
+    @SelectProvider(type = RowSqlProvider.class, method = "selectListByQuery")
+    List<Object> selectObjectListByQuery(@Param(FlexConsts.SCHEMA_NAME) String schema
+            , @Param(FlexConsts.TABLE_NAME) String tableName, @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
 
     /**
