@@ -21,6 +21,9 @@ import java.util.Date;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 
+import static com.mybatisflex.core.constant.SqlConsts.*;
+import static com.mybatisflex.core.constant.SqlConsts.BRACKET_RIGHT;
+
 public class SqlUtil {
 
     private SqlUtil() {
@@ -49,7 +52,7 @@ public class SqlUtil {
     /**
      * 仅支持字母、数字、下划线、空格、逗号、小数点（支持多个字段排序）
      */
-    private static String SQL_ORDER_BY_PATTERN = "[a-zA-Z0-9_\\ \\,\\.]+";
+    private static final String SQL_ORDER_BY_PATTERN = "[a-zA-Z0-9_\\ \\,\\.]+";
 
     public static void keepOrderBySqlSafely(String value) {
         if (!value.matches(SQL_ORDER_BY_PATTERN)) {
@@ -126,5 +129,17 @@ public class SqlUtil {
         return sql;
     }
 
+
+    public static String buildSqlParamPlaceholder(int count) {
+        StringBuilder sb = new StringBuilder(BRACKET_LEFT);
+        for (int i = 0; i < count; i++) {
+            sb.append(PLACEHOLDER);
+            if (i != count - 1) {
+                sb.append(DELIMITER);
+            }
+        }
+        sb.append(BRACKET_RIGHT);
+        return sb.toString();
+    }
 
 }
