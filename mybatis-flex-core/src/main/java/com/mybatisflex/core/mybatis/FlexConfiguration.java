@@ -90,9 +90,9 @@ public class FlexConfiguration extends Configuration {
          *  {@link SelectKeyGenerator#SELECT_KEY_SUFFIX}
          */
         if (!mappedStatementId.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)
-                && parameterObject instanceof Map
-                && ((Map<?, ?>) parameterObject).containsKey(FlexConsts.SQL_ARGS)) {
-            SqlArgsParameterHandler sqlArgsParameterHandler = new SqlArgsParameterHandler(mappedStatement, (Map) parameterObject, boundSql);
+                && parameterObject instanceof Map map
+                && map.containsKey(FlexConsts.SQL_ARGS)) {
+            SqlArgsParameterHandler sqlArgsParameterHandler = new SqlArgsParameterHandler(mappedStatement, map, boundSql);
             return (ParameterHandler) interceptorChain.pluginAll(sqlArgsParameterHandler);
         } else {
             return super.newParameterHandler(mappedStatement, parameterObject, boundSql);
@@ -317,8 +317,8 @@ public class FlexConfiguration extends Configuration {
         Type[] genericInterfaces = type.getGenericInterfaces();
         boolean isGenericInterface = false;
         for (Type genericInterface : genericInterfaces) {
-            if (genericInterface instanceof ParameterizedType) {
-                Type actualTypeArgument = ((ParameterizedType) genericInterface).getActualTypeArguments()[0];
+            if (genericInterface instanceof ParameterizedType pt) {
+                Type actualTypeArgument = pt.getActualTypeArguments()[0];
                 if (actualTypeArgument instanceof TypeVariable) {
                     isGenericInterface = true;
                     break;

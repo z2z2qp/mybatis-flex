@@ -12,8 +12,7 @@ public class AgeHandleListener implements InsertListener {
 
     @Override
     public void onInsert(Object entity) {
-        if (entity instanceof AgeAware) {
-            AgeAware ageAware = (AgeAware) entity;
+        if (entity instanceof AgeAware ageAware) {
             int age = ageAware.getAge();
             if (age < 0) {
                 ageAware.setAge(0);

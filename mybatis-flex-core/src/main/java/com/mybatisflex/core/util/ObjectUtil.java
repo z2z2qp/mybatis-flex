@@ -25,8 +25,8 @@ public class ObjectUtil {
 
     public static Object cloneObject(Object value) {
         // ROLE.ROLE_ID.ge(USER.USER_ID)
-        if (value instanceof CloneSupport) {
-            return ((CloneSupport<?>) value).clone();
+        if (value instanceof CloneSupport cs) {
+            return cs.clone();
         }
         return value;
     }

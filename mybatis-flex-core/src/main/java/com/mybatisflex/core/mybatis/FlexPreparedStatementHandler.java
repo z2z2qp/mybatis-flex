@@ -52,9 +52,9 @@ public class FlexPreparedStatementHandler extends PreparedStatementHandler {
             }
         }
         // 多主键的场景
-        else if (keyGenerator instanceof IMultiKeyGenerator) {
+        else if (keyGenerator instanceof IMultiKeyGenerator multiKeyGenerator ) {
             if (((IMultiKeyGenerator) keyGenerator).hasGeneratedKeys()) {
-                String[] keyColumnNames = ((IMultiKeyGenerator) keyGenerator).getKeyColumnNames();
+                String[] keyColumnNames = multiKeyGenerator.getKeyColumnNames();
                 if (ArrayUtil.isNotEmpty(keyColumnNames)) {
                     return connection.prepareStatement(sql, keyColumnNames);
                 } else {

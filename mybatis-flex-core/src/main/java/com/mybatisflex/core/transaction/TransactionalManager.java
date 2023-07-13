@@ -134,7 +134,7 @@ public class TransactionalManager {
         } finally {
             if (!isRollback) {
                 if (!withResult) {
-                    if (result instanceof Boolean && (Boolean) result) {
+                    if (result instanceof Boolean r && r) {
                         commit(xid);
                     }
                     //null or false
