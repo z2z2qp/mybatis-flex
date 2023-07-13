@@ -23,8 +23,13 @@ class ManyToOne<SelfEntity> extends ToOneRelation<SelfEntity> {
 
 	public ManyToOne(RelationManyToOne annotation, Class<SelfEntity> entityClass, Field relationField) {
 		super(annotation.selfField()
+            , annotation.targetSchema()
+            , annotation.targetTable()
 			, getDefaultPrimaryProperty(annotation.targetField(), getTargetEntityClass(entityClass, relationField)
 				, "@RelationManyToOne.selfField can not be empty in field: \"" + entityClass.getName() + "." + relationField.getName() + "\"")
+            , annotation.joinTable()
+            , annotation.joinSelfColumn()
+            , annotation.joinTargetColumn()
 			, annotation.dataSource()
 			, entityClass
 			, relationField);

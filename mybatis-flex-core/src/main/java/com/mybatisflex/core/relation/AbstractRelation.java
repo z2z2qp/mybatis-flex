@@ -15,9 +15,9 @@
  */
 package com.mybatisflex.core.relation;
 
-import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.IdInfo;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
@@ -26,13 +26,14 @@ import com.mybatisflex.core.util.FieldWrapper;
 import com.mybatisflex.core.util.StringUtil;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static com.mybatisflex.core.query.QueryMethods.column;
 
 abstract class AbstractRelation<SelfEntity> {
 
+    protected String name;
+    protected String simpleName;
     protected Class<SelfEntity> selfEntityClass;
     protected Field relationField;
     protected FieldWrapper relationFieldWrapper;
@@ -40,17 +41,36 @@ abstract class AbstractRelation<SelfEntity> {
     protected Field selfField;
     protected FieldWrapper selfFieldWrapper;
 
+    protected String targetSchema;
+    protected String targetTable;
     protected Field targetField;
     protected Class<?> targetEntityClass;
     protected TableInfo targetTableInfo;
     protected FieldWrapper targetFieldWrapper;
 
+    protected String joinTable;
+    protected String joinSelfColumn;
+    protected String joinTargetColumn;
+
     protected String dataSource;
 
-    public AbstractRelation(String selfField, String targetField, String dataSource, Class<SelfEntity> entityClass, Field relationField) {
+    protected String extraConditionSql;
+    protected List<String> extraConditionParamKeys;
+
+    public AbstractRelation(String selfField, String targetSchema, String targetTable, String targetField,
+                            String joinTable, String joinSelfColumn, String joinTargetColumn,
+                            String dataSource, Class<SelfEntity> entityClass, Field relationField,
+                            String extraCondition
+    ) {
+        this.name = entityClass.getSimpleName()+"."+relationField.getName();
+        this.simpleName = relationField.getName();
         this.selfEntityClass = entityClass;
         this.relationField = relationField;
         this.relationFieldWrapper = FieldWrapper.of(entityClass, relationField.getName());
+
+        this.joinTable = joinTable;
+        this.joinSelfColumn = joinSelfColumn;
+        this.joinTargetColumn = joinTargetColumn;
 
         this.dataSource = dataSource;
 
@@ -59,13 +79,71 @@ abstract class AbstractRelation<SelfEntity> {
 
 
         this.targetEntityClass = relationFieldWrapper.getMappingType();
+        this.targetSchema = targetSchema;
+        this.targetTable = targetTable;
 
         this.targetField = ClassUtil.getFirstField(targetEntityClass, field -> field.getName().equals(targetField));
         this.targetFieldWrapper = FieldWrapper.of(targetEntityClass, targetField);
 
         this.targetTableInfo = TableInfoFactory.ofEntityClass(targetEntityClass);
+
+        initExtraCondition(extraCondition);
     }
 
+    protected void initExtraCondition(String extraCondition) {
+        if (StringUtil.isBlank(extraCondition)) {
+            return;
+        }
+
+
+        List<String> sqlParamKeys = null;
+        char[] chars = extraCondition.toCharArray();
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append(chars[0]);
+        char prev, current;
+        boolean keyStart = false;
+        StringBuilder currentKey = null;
+        for (int i = 1; i < chars.length; i++) {
+            prev = chars[i - 1];
+            current = chars[i];
+            if (prev == ' ' && current == ':') {
+                keyStart = true;
+                currentKey = new StringBuilder();
+            } else if (keyStart) {
+                if (current != ' ' && current != ')') {
+                    currentKey.append(current);
+                } else {
+                    if (sqlParamKeys == null) {
+                        sqlParamKeys = new ArrayList<>();
+                    }
+                    sqlParamKeys.add(currentKey.toString());
+                    sqlBuilder.append("?").append(current);
+                    keyStart = false;
+                    currentKey = null;
+                }
+            } else {
+                sqlBuilder.append(current);
+            }
+        }
+        if (keyStart && currentKey != null && currentKey.length() > 0) {
+            if (sqlParamKeys == null) {
+                sqlParamKeys = new ArrayList<>();
+            }
+            sqlParamKeys.add(currentKey.toString());
+            sqlBuilder.append(" ?");
+        }
+
+        this.extraConditionSql = sqlBuilder.toString();
+        this.extraConditionParamKeys = sqlParamKeys != null ? sqlParamKeys : Collections.emptyList();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSimpleName() {
+        return simpleName;
+    }
 
     public Class<SelfEntity> getSelfEntityClass() {
         return selfEntityClass;
@@ -139,13 +217,52 @@ abstract class AbstractRelation<SelfEntity> {
         this.targetFieldWrapper = targetFieldWrapper;
     }
 
-    protected Set<Object> getSelfFieldValues(List<SelfEntity> list) {
-        if (list == null || list.isEmpty()) {
+    public String getTargetSchema() {
+        return targetSchema;
+    }
+
+    public void setTargetSchema(String targetSchema) {
+        this.targetSchema = targetSchema;
+    }
+
+    public String getTargetTable() {
+        return targetTable;
+    }
+
+    public void setTargetTable(String targetTable) {
+        this.targetTable = targetTable;
+    }
+
+    public String getJoinTable() {
+        return joinTable;
+    }
+
+    public void setJoinTable(String joinTable) {
+        this.joinTable = joinTable;
+    }
+
+    public String getJoinSelfColumn() {
+        return joinSelfColumn;
+    }
+
+    public void setJoinSelfColumn(String joinSelfColumn) {
+        this.joinSelfColumn = joinSelfColumn;
+    }
+
+    public String getJoinTargetColumn() {
+        return joinTargetColumn;
+    }
+
+    public void setJoinTargetColumn(String joinTargetColumn) {
+        this.joinTargetColumn = joinTargetColumn;
+    }
+
+    public Set<Object> getSelfFieldValues(List<SelfEntity> selfEntities) {
+        if (selfEntities == null || selfEntities.isEmpty()) {
             return Collections.emptySet();
         }
-
         Set<Object> values = new LinkedHashSet<>();
-        list.forEach(self -> {
+        selfEntities.forEach(self -> {
             Object value = selfFieldWrapper.get(self);
             if (value != null && !"".equals(value)) {
                 values.add(value);
@@ -159,15 +276,28 @@ abstract class AbstractRelation<SelfEntity> {
         return relationFieldWrapper.getMappingType();
     }
 
-	public String getDataSource() {
-		return dataSource;
-	}
+    public String getDataSource() {
+        return dataSource;
+    }
 
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
-	}
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
+    }
 
-	protected static Class<?> getTargetEntityClass(Class<?> entityClass, Field relationField) {
+    public String getTargetTableWithSchema() {
+        if (StringUtil.isNotBlank(targetTable)) {
+            return StringUtil.isNotBlank(targetSchema) ? targetSchema + "." + targetTable : targetTable;
+        } else {
+            return targetTableInfo.getTableNameWithSchema();
+        }
+    }
+
+    protected boolean isRelationByMiddleTable() {
+        return StringUtil.isNotBlank(joinTable);
+    }
+
+
+    protected static Class<?> getTargetEntityClass(Class<?> entityClass, Field relationField) {
         return FieldWrapper.of(entityClass, relationField.getName()).getMappingType();
     }
 
@@ -186,20 +316,48 @@ abstract class AbstractRelation<SelfEntity> {
     }
 
 
+    /**
+     * 构建查询目标对象的 QueryWrapper
+     *
+     * @param targetValues 条件的值
+     * @return QueryWrapper
+     */
+    public QueryWrapper buildQueryWrapper(Set<Object> targetValues) {
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .select()
+            .from(getTargetTableWithSchema());
 
-	/**
-	 * 把 Relations 的配置转换为查询的 QueryWrapper
-	 * @param selfEntities 当前的实体类
-	 * @return QueryWrapper
-	 */
-	public abstract QueryWrapper toQueryWrapper(List<SelfEntity> selfEntities);
+        if (targetValues.size() > 1) {
+            queryWrapper.where(column(targetTableInfo.getColumnByProperty(targetField.getName())).in(targetValues));
+        } else {
+            queryWrapper.where(column(targetTableInfo.getColumnByProperty(targetField.getName())).eq(targetValues.iterator().next()));
+        }
+
+        if (StringUtil.isNotBlank(extraConditionSql)) {
+            queryWrapper.and(extraConditionSql, RelationManager.getExtraConditionParams(extraConditionParamKeys));
+        }
+
+        customizeQueryWrapper(queryWrapper);
+
+        return queryWrapper;
+    }
 
 
-	/**
-	 * 通过 {@link AbstractRelation#toQueryWrapper(List)} 查询到的结果，通过此方法进行内存 join
-	 * @param selfEntities 当前的实体类列表
-	 * @param targetObjectList 查询到的结果
-	 * @param mapper 查询的 Mapper
-	 */
-	public abstract void join(List<SelfEntity> selfEntities, List<?> targetObjectList, BaseMapper<?> mapper);
+    /**
+     * 方便子类最近自定义的条件
+     *
+     * @param queryWrapper 查询条件
+     */
+    public void customizeQueryWrapper(QueryWrapper queryWrapper) {
+        //do thing
+    }
+
+
+    /**
+     * @param selfEntities     当前的实体类列表
+     * @param targetObjectList 查询到的结果
+     * @param mappingRows      中间表的映射数据，非中间表查询的场景下，mappingRows 永远为 null
+     */
+    public abstract void join(List<SelfEntity> selfEntities, List<?> targetObjectList, List<Row> mappingRows);
+
 }

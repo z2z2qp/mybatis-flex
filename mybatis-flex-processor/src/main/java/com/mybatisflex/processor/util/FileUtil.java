@@ -17,6 +17,9 @@
 package com.mybatisflex.processor.util;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 文件工具类。
@@ -27,6 +30,18 @@ import java.io.File;
 public class FileUtil {
 
     private FileUtil() {
+    }
+
+    private static Set<String> flagFileNames = new HashSet<>(Arrays.asList("pom.xml", "build.gradle", "build.gradle.kts"));
+
+
+    public static boolean existsBuildFile(File file) {
+        for (String fileName : flagFileNames) {
+            if (new File(file, fileName).exists()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isFromTestSource(String path) {
@@ -53,7 +68,7 @@ public class FileUtil {
         if (file.isFile()) {
             return getProjectRootPath(file.getParentFile(), --count);
         } else {
-            if (new File(file, "pom.xml").exists() && !new File(file.getParentFile(), "pom.xml").exists()) {
+            if (existsBuildFile(file) && !existsBuildFile(file.getParentFile())) {
                 return file.getAbsolutePath();
             } else {
                 return getProjectRootPath(file.getParentFile(), --count);

@@ -330,6 +330,19 @@ public interface BaseMapper<T> {
     }
 
     /**
+     * 根据 Map 构建的条件来更新数据。
+     *
+     * @param entity          实体类
+     * @param ignoreNulls     是否忽略 {@code null} 数据
+     * @param whereConditions 条件
+     * @return 受影响的行数
+     */
+    default int updateByMap(T entity, boolean ignoreNulls, Map<String, Object> whereConditions) {
+        FlexAssert.notEmpty(whereConditions, "updateByMap is not allow empty map.");
+        return updateByQuery(entity, ignoreNulls, QueryWrapper.create().where(whereConditions));
+    }
+
+    /**
      * 根据查询条件来更新数据。
      *
      * @param entity          实体类
@@ -765,12 +778,14 @@ public interface BaseMapper<T> {
             return (List<R>) selectRowsByQuery(queryWrapper);
         }
 
+        List<T> result;
         try {
             MappedStatementTypes.setCurrentType(asType);
-            return MapperUtil.queryRelations(this, (List<R>) selectListByQuery(queryWrapper));
+            result = selectListByQuery(queryWrapper);
         } finally {
             MappedStatementTypes.clear();
         }
+        return MapperUtil.queryRelations(this, (List<R>) result);
     }
 
     /**
@@ -875,10 +890,9 @@ public interface BaseMapper<T> {
                 // 未设置 COUNT(...) 列，默认使用 COUNT(*) 查询
                 queryWrapper.select(count());
                 objects = selectObjectListByQuery(queryWrapper);
-            } else if (selectColumns.get(0) instanceof FunctionQueryColumn) {
+            } else if (selectColumns.get(0) instanceof FunctionQueryColumn fqc) {
                 // COUNT 函数必须在第一列
-                if (!FuncName.COUNT.equalsIgnoreCase(
-                        ((FunctionQueryColumn) selectColumns.get(0)).getFnName())) {
+                if (!FuncName.COUNT.equalsIgnoreCase(fqc.getFnName())) {
                     // 第一个查询列不是 COUNT 函数，使用 COUNT(*) 替换所有的查询列
                     queryWrapper.select(count());
                 }

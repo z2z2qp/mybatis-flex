@@ -114,6 +114,9 @@ public class Table {
     }
 
     public List<Column> getColumns() {
+        // 生成字段排序
+        columns.sort(Comparator.comparingInt((Column c) -> c.getProperty().length())
+            .thenComparing(Column::getProperty));
         return columns;
     }
 
@@ -234,7 +237,7 @@ public class Table {
                 tableAnnotation.append(", onUpdate = ").append(tableConfig.getUpdateListenerClass().getSimpleName()).append(".class");
             }
             if (tableConfig.getSetListenerClass() != null) {
-                tableAnnotation.append(", onSet = ").append(tableConfig.getUpdateListenerClass().getSimpleName()).append(".class");
+                tableAnnotation.append(", onSet = ").append(tableConfig.getSetListenerClass().getSimpleName()).append(".class");
             }
             if (Boolean.FALSE.equals(tableConfig.getMapperGenerateEnable())) {
                 tableAnnotation.append(", mapperGenerateEnable = false");
