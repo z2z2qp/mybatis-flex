@@ -52,14 +52,14 @@ public class SqlArgsParameterHandler extends DefaultParameterHandler {
             int index = 1;
             for (Object value : sqlArgs) {
                 //通过配置的 TypeHandler 去设置内容
-                if (value instanceof TypeHandlerObject) {
-                    ((TypeHandlerObject) value).setParameter(ps, index++);
+                if (value instanceof TypeHandlerObject tho) {
+                    tho.setParameter(ps, index++);
                 }
                 //在 Oracle、SqlServer 中 TIMESTAMP、DATE 类型的数据是支持 java.util.Date 给值的
-                else if (value instanceof java.util.Date) {
-                    setDateParameter(ps, (Date) value, index++);
-                } else if (value instanceof byte[]) {
-                    ps.setBytes(index++, (byte[]) value);
+                else if (value instanceof java.util.Date date) {
+                    setDateParameter(ps, date, index++);
+                } else if (value instanceof byte[] bs) {
+                    ps.setBytes(index++, bs);
                 } else {
                     /** 在 MySql，Oracle 等驱动中，通过 PreparedStatement.setObject 后，驱动会自动根据 value 内容进行转换
                      * 源码可参考： {{@link com.mysql.jdbc.PreparedStatement#setObject(int, Object)}
@@ -82,10 +82,10 @@ public class SqlArgsParameterHandler extends DefaultParameterHandler {
      * @throws SQLException
      */
     private void setDateParameter(PreparedStatement ps, Date value, int index) throws SQLException {
-        if (value instanceof java.sql.Date) {
-            ps.setDate(index, (java.sql.Date) value);
-        } else if (value instanceof java.sql.Timestamp) {
-            ps.setTimestamp(index, (java.sql.Timestamp) value);
+        if (value instanceof java.sql.Date date) {
+            ps.setDate(index, date);
+        } else if (value instanceof java.sql.Timestamp date) {
+            ps.setTimestamp(index, date);
         } else {
             ps.setTimestamp(index, new java.sql.Timestamp(value.getTime()));
         }

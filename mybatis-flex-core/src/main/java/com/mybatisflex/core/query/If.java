@@ -51,20 +51,20 @@ public class If {
             return false;
         }
 
-        if (object instanceof Collection) {
-            return !((Collection<?>) object).isEmpty();
+        if (object instanceof Collection collection) {
+            return !collection.isEmpty();
         }
 
         if (ClassUtil.isArray(object.getClass())) {
             return Array.getLength(object) > 0;
         }
 
-        if (object instanceof Map) {
-            return !((Map<?, ?>) object).isEmpty();
+        if (object instanceof Map map) {
+            return !map.isEmpty();
         }
 
-        if (object instanceof String) {
-            return StringUtil.isNotBlank((String) object);
+        if (object instanceof String str) {
+            return StringUtil.isNotBlank(str);
         }
         return true;
     }

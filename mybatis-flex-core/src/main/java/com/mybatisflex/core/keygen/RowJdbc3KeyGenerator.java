@@ -86,10 +86,10 @@ public class RowJdbc3KeyGenerator implements KeyGenerator {
         if (parameter instanceof ParamMap || parameter instanceof StrictMap) {
             // Multi-param or single param with @Param
             assignKeysToParamMap(configuration, rs, rsmd, keyProperties, (Map<String, ?>) parameter);
-        } else if (parameter instanceof ArrayList && !((ArrayList<?>) parameter).isEmpty()
-                && ((ArrayList<?>) parameter).get(0) instanceof ParamMap) {
+        } else if (parameter instanceof ArrayList list && !list.isEmpty()
+                && list.get(0) instanceof ParamMap) {
             // Multi-param or single param with @Param in batch operation
-            assignKeysToParamMapList(configuration, rs, rsmd, keyProperties, (ArrayList<ParamMap<?>>) parameter);
+            assignKeysToParamMapList(configuration, rs, rsmd, keyProperties, list);
         } else {
             // Single param without @Param
             assignKeysToParam(configuration, rs, rsmd, keyProperties, parameter);
@@ -209,10 +209,10 @@ public class RowJdbc3KeyGenerator implements KeyGenerator {
     }
 
     private static Collection<?> collectionize(Object param) {
-        if (param instanceof Collection) {
-            return (Collection<?>) param;
-        } else if (param instanceof Object[]) {
-            return Arrays.asList((Object[]) param);
+        if (param instanceof Collection collection) {
+            return collection;
+        } else if (param instanceof Object[] objects) {
+            return Arrays.asList(objects);
         } else {
             return Arrays.asList(param);
         }

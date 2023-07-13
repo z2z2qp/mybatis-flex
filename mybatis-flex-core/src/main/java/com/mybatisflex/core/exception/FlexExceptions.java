@@ -31,8 +31,8 @@ public final class FlexExceptions {
      * @return MybatisFlexException
      */
     public static MybatisFlexException wrap(Throwable throwable) {
-        if (throwable instanceof MybatisFlexException) {
-            return (MybatisFlexException) throwable;
+        if (throwable instanceof MybatisFlexException e) {
+            return e;
         }
         return new MybatisFlexException(throwable);
     }
