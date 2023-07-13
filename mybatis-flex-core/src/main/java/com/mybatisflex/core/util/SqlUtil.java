@@ -113,10 +113,10 @@ public class SqlUtil {
                 else {
                     StringBuilder sb = new StringBuilder();
                     sb.append("'");
-                    if (value instanceof Date) {
-                        sb.append(DateUtil.toDateTimeString((Date) value));
-                    } else if (value instanceof LocalDateTime) {
-                        sb.append(DateUtil.toDateTimeString(DateUtil.toDate((LocalDateTime) value)));
+                    if (value instanceof Date date) {
+                        sb.append(DateUtil.toDateTimeString(date));
+                    } else if (value instanceof LocalDateTime ldt) {
+                        sb.append(DateUtil.toDateTimeString(DateUtil.toDate(ldt)));
                     } else {
                         sb.append(value);
                     }

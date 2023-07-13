@@ -261,8 +261,8 @@ public class MapperUtil {
         Object object = objects == null || objects.isEmpty() ? null : objects.get(0);
         if (object == null) {
             return 0;
-        } else if (object instanceof Number) {
-            return ((Number) object).longValue();
+        } else if (object instanceof Number number) {
+            return number.longValue();
         } else {
             throw FlexExceptions.wrap("selectCountByQuery error, can not get number value of result: \"" + object + "\"");
         }

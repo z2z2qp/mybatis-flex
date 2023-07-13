@@ -366,8 +366,8 @@ public interface RowMapper {
         Object object = selectObject(sql, args);
         if (object == null) {
             return 0;
-        } else if (object instanceof Number) {
-            return ((Number) object).longValue();
+        } else if (object instanceof Number num) {
+            return num.longValue();
         } else {
             throw FlexExceptions.wrap("selectCount error, Can not get number value for sql: %s", sql);
         }

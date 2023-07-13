@@ -46,8 +46,8 @@ public @interface ConditionalOnMybatisFlexDatasource {
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
             Environment env = context.getEnvironment();
-            if (env instanceof AbstractEnvironment) {
-                MutablePropertySources propertySources = ((AbstractEnvironment) env).getPropertySources();
+            if (env instanceof AbstractEnvironment ae) {
+                MutablePropertySources propertySources = ae.getPropertySources();
                 Iterator<PropertySource<?>> it = propertySources.stream().iterator();
                 while (it.hasNext()) {
                     PropertySource<?> ps = it.next();

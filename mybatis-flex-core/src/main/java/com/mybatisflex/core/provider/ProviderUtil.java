@@ -71,8 +71,8 @@ class ProviderUtil {
         }
         if (primaryValue.getClass().isArray()) {
             return (Object[]) primaryValue;
-        } else if (primaryValue instanceof Collection) {
-            return ((Collection<?>) primaryValue).toArray();
+        } else if (primaryValue instanceof Collection collection) {
+            return collection.toArray();
         } else {
             return new Object[]{primaryValue};
         }

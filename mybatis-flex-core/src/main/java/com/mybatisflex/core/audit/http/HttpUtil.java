@@ -133,9 +133,9 @@ public class HttpUtil {
     private static HttpURLConnection getHttpConnection(String url, String method, Map<String, String> headers) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, KeyManagementException {
         URL _url = new URL(url);
         HttpURLConnection conn = (HttpURLConnection) _url.openConnection();
-        if (conn instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) conn).setSSLSocketFactory(sslSocketFactory);
-            ((HttpsURLConnection) conn).setHostnameVerifier(trustAnyHostnameVerifier);
+        if (conn instanceof HttpsURLConnection huc) {
+            huc.setSSLSocketFactory(sslSocketFactory);
+            huc.setHostnameVerifier(trustAnyHostnameVerifier);
         }
 
         conn.setRequestMethod(method);

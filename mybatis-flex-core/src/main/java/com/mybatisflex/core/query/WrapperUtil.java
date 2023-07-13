@@ -40,8 +40,8 @@ class WrapperUtil {
         List<QueryWrapper> list = null;
         while (condition != null) {
             if (condition.checkEffective()) {
-                if (condition instanceof Brackets) {
-                    List<QueryWrapper> childQueryWrapper = getChildQueryWrapper(((Brackets) condition).getChildCondition());
+                if (condition instanceof Brackets brackets) {
+                    List<QueryWrapper> childQueryWrapper = getChildQueryWrapper(brackets.getChildCondition());
                     if (!childQueryWrapper.isEmpty()) {
                         if (list == null) {
                             list = new ArrayList<>();
@@ -52,21 +52,21 @@ class WrapperUtil {
                 // not Brackets
                 else {
                     Object value = condition.getValue();
-                    if (value instanceof QueryWrapper) {
+                    if (value instanceof QueryWrapper qw) {
                         if (list == null) {
                             list = new ArrayList<>();
                         }
-                        list.add((QueryWrapper) value);
-                        list.addAll(((QueryWrapper) value).getChildSelect());
+                        list.add(qw);
+                        list.addAll(qw.getChildSelect());
                     } else if (value != null && value.getClass().isArray()) {
                         for (int i = 0; i < Array.getLength(value); i++) {
                             Object arrayValue = Array.get(value, i);
-                            if (arrayValue instanceof QueryWrapper) {
+                            if (arrayValue instanceof QueryWrapper qw) {
                                 if (list == null) {
                                     list = new ArrayList<>();
                                 }
-                                list.add((QueryWrapper) arrayValue);
-                                list.addAll(((QueryWrapper) arrayValue).getChildSelect());
+                                list.add(qw);
+                                list.addAll(qw.getChildSelect());
                             }
                         }
                     }
@@ -114,8 +114,8 @@ class WrapperUtil {
             for (int i = 0; i < Array.getLength(value); i++) {
                 addParam(paras, Array.get(value, i));
             }
-        } else if (value instanceof QueryWrapper) {
-            Object[] valueArray = ((QueryWrapper) value).getValueArray();
+        } else if (value instanceof QueryWrapper qw) {
+            Object[] valueArray = qw.getValueArray();
             paras.addAll(Arrays.asList(valueArray));
         } else if (value.getClass().isEnum()) {
             EnumWrapper enumWrapper = EnumWrapper.of(value.getClass());
@@ -133,10 +133,10 @@ class WrapperUtil {
     static String buildValue(Object value) {
         if (value instanceof Number || value instanceof Boolean) {
             return String.valueOf(value);
-        } else if (value instanceof RawFragment) {
-            return ((RawFragment) value).getContent();
-        } else if (value instanceof QueryColumn) {
-            return ((QueryColumn) value).toConditionSql(null, DialectFactory.getDialect());
+        } else if (value instanceof RawFragment rf) {
+            return rf.getContent();
+        } else if (value instanceof QueryColumn qc) {
+            return qc.toConditionSql(null, DialectFactory.getDialect());
         } else {
             return SqlConsts.SINGLE_QUOTE + value + SqlConsts.SINGLE_QUOTE;
         }

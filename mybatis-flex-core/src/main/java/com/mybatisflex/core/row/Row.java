@@ -360,8 +360,8 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper 
     Map<String, RawValue> getRawValueMap() {
         Map<String, RawValue> map = new HashMap<>();
         forEach((s, o) -> {
-            if (o instanceof RawValue) {
-                map.put(s, (RawValue) o);
+            if (o instanceof RawValue rv) {
+                map.put(s, rv);
             }
         });
         return map;

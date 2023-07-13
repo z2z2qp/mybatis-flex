@@ -82,8 +82,8 @@ public interface UpdateWrapper extends Serializable {
 
 
     static UpdateWrapper of(Object entity) {
-        if (entity instanceof UpdateWrapper) {
-            return (UpdateWrapper) entity;
+        if (entity instanceof UpdateWrapper uw) {
+            return uw;
         } else {
             return (UpdateWrapper) UpdateEntity.ofNotNull(entity);
         }

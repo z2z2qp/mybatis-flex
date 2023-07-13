@@ -131,8 +131,8 @@ public class ArithmeticQueryColumn extends QueryColumn {
 
         private String toSql(List<QueryTable> queryTables, IDialect dialect, int index) {
             String valueSql;
-            if (value instanceof QueryColumn) {
-                valueSql = ((QueryColumn) value).toConditionSql(queryTables, dialect);
+            if (value instanceof QueryColumn qc) {
+                valueSql = qc.toConditionSql(queryTables, dialect);
             } else {
                 valueSql = String.valueOf(value);
             }

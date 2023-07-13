@@ -80,8 +80,8 @@ public class FunctionQueryColumn extends QueryColumn implements HasParamsColumn 
         List<Object> params = new ArrayList<>();
 
         for (QueryColumn queryColumn : columns) {
-            if (queryColumn instanceof HasParamsColumn) {
-                Object[] paramValues = ((HasParamsColumn) queryColumn).getParamValues();
+            if (queryColumn instanceof HasParamsColumn hpc) {
+                Object[] paramValues = hpc.getParamValues();
                 params.addAll(Arrays.asList(paramValues));
             }
         }
