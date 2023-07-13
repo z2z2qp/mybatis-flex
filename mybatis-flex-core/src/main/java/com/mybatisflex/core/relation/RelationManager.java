@@ -20,101 +20,233 @@ import com.mybatisflex.annotation.RelationManyToOne;
 import com.mybatisflex.annotation.RelationOneToMany;
 import com.mybatisflex.annotation.RelationOneToOne;
 import com.mybatisflex.core.BaseMapper;
+import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.datasource.DataSourceKey;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.mybatisflex.core.query.QueryMethods.column;
 
 /**
  * @author michael
  */
 public class RelationManager {
 
-	private static Map<Class<?>, List<AbstractRelation>> classRelations = new ConcurrentHashMap<>();
+    private RelationManager() {
+    }
 
-	private static List<AbstractRelation> getRelations(Class<?> clazz) {
-		return MapUtil.computeIfAbsent(classRelations, clazz, RelationManager::doGetRelations);
-	}
+    private static Map<Class<?>, List<AbstractRelation>> classRelations = new ConcurrentHashMap<>();
 
-	private static List<AbstractRelation> doGetRelations(Class<?> entityClass) {
-		List<Field> allFields = ClassUtil.getAllFields(entityClass);
-		List<AbstractRelation> relations = new ArrayList<>();
-		for (Field field : allFields) {
-			RelationManyToMany manyToManyAnnotation = field.getAnnotation(RelationManyToMany.class);
-			if (manyToManyAnnotation != null) {
-				relations.add(new ManyToMany<>(manyToManyAnnotation, entityClass, field));
-			}
+    /**
+     * 递归查询深度，默认为 2，在一些特殊场景下可以修改这个值
+     */
+    private static ThreadLocal<Integer> depthThreadLocal = ThreadLocal.withInitial(() -> 2);
 
-			RelationManyToOne manyToOneAnnotation = field.getAnnotation(RelationManyToOne.class);
-			if (manyToOneAnnotation != null) {
-				relations.add(new ManyToOne<>(manyToOneAnnotation, entityClass, field));
-			}
-
-			RelationOneToMany oneToManyAnnotation = field.getAnnotation(RelationOneToMany.class);
-			if (oneToManyAnnotation != null) {
-				relations.add(new OneToMany<>(oneToManyAnnotation, entityClass, field));
-			}
-
-			RelationOneToOne oneToOneAnnotation = field.getAnnotation(RelationOneToOne.class);
-			if (oneToOneAnnotation != null) {
-				relations.add(new OneToOne<>(oneToOneAnnotation, entityClass, field));
-			}
-		}
-		return relations;
-	}
+    /**
+     * 附加条件的查询参数
+     */
+    private static ThreadLocal<Map<String, Object>> extraConditionParams = new ThreadLocal<>();
 
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public static <Entity> void queryRelations(BaseMapper<?> mapper, List<Entity> entities) {
-		if (CollectionUtil.isEmpty(entities)) {
-			return;
-		}
+    /**
+     * 查询时，可忽略某些已经添加 Relation 注解的属性
+     */
+    private static ThreadLocal<Set<String>> ignoreRelations = new ThreadLocal<>();
 
-		Class<Entity> objectClass = (Class<Entity>) entities.get(0).getClass();
-		List<AbstractRelation> relations = getRelations(objectClass);
-		if (relations.isEmpty()) {
-			return;
-		}
 
-		String currentDsKey = DataSourceKey.get();
+    private static List<AbstractRelation> getRelations(Class<?> clazz) {
+        return MapUtil.computeIfAbsent(classRelations, clazz, RelationManager::doGetRelations);
+    }
 
-		try {
-			relations.forEach(relation -> {
+    private static List<AbstractRelation> doGetRelations(Class<?> entityClass) {
+        List<Field> allFields = ClassUtil.getAllFields(entityClass);
+        List<AbstractRelation> relations = new ArrayList<>();
+        for (Field field : allFields) {
+            RelationManyToMany manyToManyAnnotation = field.getAnnotation(RelationManyToMany.class);
+            if (manyToManyAnnotation != null) {
+                relations.add(new ManyToMany<>(manyToManyAnnotation, entityClass, field));
+            }
 
-				QueryWrapper queryWrapper = relation.toQueryWrapper(entities);
-				Class<?> mappingType = relation.getMappingType();
+            RelationManyToOne manyToOneAnnotation = field.getAnnotation(RelationManyToOne.class);
+            if (manyToOneAnnotation != null) {
+                relations.add(new ManyToOne<>(manyToOneAnnotation, entityClass, field));
+            }
 
-				String dataSource = relation.getDataSource();
-				if (StringUtil.isBlank(dataSource) && currentDsKey != null) {
-					dataSource = currentDsKey;
-				}
+            RelationOneToMany oneToManyAnnotation = field.getAnnotation(RelationOneToMany.class);
+            if (oneToManyAnnotation != null) {
+                relations.add(new OneToMany<>(oneToManyAnnotation, entityClass, field));
+            }
 
-				try {
-					if (StringUtil.isNotBlank(dataSource)) {
-						DataSourceKey.use(dataSource);
-					}
-					List<?> targetObjectList = mapper.selectListByQueryAs(queryWrapper, mappingType);
-					if (CollectionUtil.isNotEmpty(targetObjectList)) {
-						relation.join(entities, targetObjectList, mapper);
-					}
-				} finally {
-					if (StringUtil.isNotBlank(dataSource)) {
-						DataSourceKey.clear();
-					}
-				}
-			});
-		} finally {
-			if (currentDsKey != null) {
-				DataSourceKey.use(currentDsKey);
-			}
-		}
-	}
+            RelationOneToOne oneToOneAnnotation = field.getAnnotation(RelationOneToOne.class);
+            if (oneToOneAnnotation != null) {
+                relations.add(new OneToOne<>(oneToOneAnnotation, entityClass, field));
+            }
+        }
+        return relations;
+    }
+
+    public static void setMaxDepth(int maxDepth) {
+        depthThreadLocal.set(maxDepth);
+    }
+
+    public static int getMaxDepth() {
+        return depthThreadLocal.get();
+    }
+
+    public static void setExtraConditionParams(Map<String, Object> params) {
+        extraConditionParams.set(params);
+    }
+
+    public static void addExtraConditionParam(String key, String value) {
+        Map<String, Object> params = extraConditionParams.get();
+        if (params == null) {
+            params = new HashMap<>();
+            extraConditionParams.set(params);
+        }
+        params.put(key, value);
+    }
+
+    public static Map<String, Object> getExtraConditionParams() {
+        return extraConditionParams.get();
+    }
+
+    public static void setIgnoreRelations(Set<String> ignoreRelations) {
+        RelationManager.ignoreRelations.set(ignoreRelations);
+    }
+
+    public static void addIgnoreRelations(String... ignoreRelations) {
+        Set<String> relations = RelationManager.ignoreRelations.get();
+        if (relations == null) {
+            relations = new HashSet<>();
+            setIgnoreRelations(relations);
+        }
+        relations.addAll(Arrays.asList(ignoreRelations));
+    }
+
+    public static Set<String> getIgnoreRelations() {
+        return ignoreRelations.get();
+    }
+
+
+    static Object[] getExtraConditionParams(List<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return FlexConsts.EMPTY_ARRAY;
+        }
+        Map<String, Object> paramMap = extraConditionParams.get();
+        if (paramMap == null || paramMap.isEmpty()) {
+            return new Object[keys.size()];
+        }
+
+        Object[] params = new Object[keys.size()];
+        for (int i = 0; i < keys.size(); i++) {
+            params[i] = paramMap.get(keys.get(i));
+        }
+
+        return params;
+    }
+
+
+    public static <Entity> void queryRelations(BaseMapper<?> mapper, List<Entity> entities) {
+        doQueryRelations(mapper, entities, 0, depthThreadLocal.get(), ignoreRelations.get());
+    }
+
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static <Entity> void doQueryRelations(BaseMapper<?> mapper, List<Entity> entities, int currentDepth, int maxDepth, Set<String> ignoreRelations) {
+        if (CollectionUtil.isEmpty(entities)) {
+            return;
+        }
+        Class<Entity> objectClass = (Class<Entity>) entities.get(0).getClass();
+
+        if (currentDepth >= maxDepth) {
+            return;
+        }
+
+        List<AbstractRelation> relations = getRelations(objectClass);
+        if (relations.isEmpty()) {
+            return;
+        }
+        String currentDsKey = DataSourceKey.get();
+        try {
+            relations.forEach(relation -> {
+
+                //ignore
+                if (ignoreRelations != null && (ignoreRelations.contains(relation.getSimpleName())
+                    || ignoreRelations.contains(relation.getName()))) {
+                    return;
+                }
+
+                Set<Object> targetValues;
+                List<Row> mappingRows = null;
+
+                //通过中间表关联查询
+                if (relation.isRelationByMiddleTable()) {
+                    targetValues = new HashSet<>();
+                    Set selfFieldValues = relation.getSelfFieldValues(entities);
+                    QueryWrapper queryWrapper = QueryWrapper.create().select()
+                        .from(relation.getJoinTable());
+                    if (selfFieldValues.size() > 1) {
+                        queryWrapper.where(column(relation.getJoinSelfColumn()).in(selfFieldValues));
+                    } else {
+                        queryWrapper.where(column(relation.getJoinTargetColumn()).eq(selfFieldValues.iterator().next()));
+                    }
+
+                    mappingRows = mapper.selectListByQueryAs(queryWrapper, Row.class);
+                    if (CollectionUtil.isEmpty(mappingRows)) {
+                        return;
+                    }
+
+                    for (Row mappingData : mappingRows) {
+                        Object targetValue = mappingData.getIgnoreCase(relation.getJoinTargetColumn());
+                        if (targetValue != null) {
+                            targetValues.add(targetValue);
+                        }
+                    }
+                }
+                //通过外键字段关联查询
+                else {
+                    targetValues = relation.getSelfFieldValues(entities);
+                }
+
+                if (CollectionUtil.isEmpty(targetValues)) {
+                    return;
+                }
+
+
+                String dataSource = relation.getDataSource();
+                if (StringUtil.isBlank(dataSource) && currentDsKey != null) {
+                    dataSource = currentDsKey;
+                }
+
+                try {
+                    if (StringUtil.isNotBlank(dataSource)) {
+                        DataSourceKey.use(dataSource);
+                    }
+
+                    QueryWrapper queryWrapper = relation.buildQueryWrapper(targetValues);
+                    List<?> targetObjectList = mapper.selectListByQueryAs(queryWrapper, relation.getMappingType());
+                    if (CollectionUtil.isNotEmpty(targetObjectList)) {
+                        doQueryRelations(mapper, targetObjectList, currentDepth + 1, maxDepth, ignoreRelations);
+                        relation.join(entities, targetObjectList, mappingRows);
+                    }
+                } finally {
+                    if (StringUtil.isNotBlank(dataSource)) {
+                        DataSourceKey.clear();
+                    }
+                }
+            });
+        } finally {
+            if (currentDsKey != null) {
+                DataSourceKey.use(currentDsKey);
+            }
+        }
+    }
 }
