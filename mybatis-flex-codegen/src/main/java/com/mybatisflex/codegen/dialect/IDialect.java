@@ -15,10 +15,15 @@
  */
 package com.mybatisflex.codegen.dialect;
 
+import com.alibaba.druid.pool.DruidPooledConnection;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.mybatisflex.codegen.entity.Table;
+import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.StringUtil;
+import com.zaxxer.hikari.pool.HikariProxyConnection;
+import oracle.jdbc.driver.OracleConnection;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -62,6 +67,29 @@ public interface IDialect {
         public ResultSet getTablesResultSet(DatabaseMetaData dbMeta, Connection conn, String schema, String[] types) throws SQLException {
             return dbMeta.getTables(conn.getCatalog(), StringUtil.isNotBlank(schema) ? schema : dbMeta.getUserName(), null, types);
         }
+
+        @Override
+        protected ResultSet forRemarks(String schema, Table table, DatabaseMetaData dbMeta, Connection conn) throws SQLException {
+            if (conn instanceof  OracleConnection){
+                ((OracleConnection) conn).setRemarksReporting(true);
+                return dbMeta.getColumns(conn.getCatalog(), StringUtil.isNotBlank(schema) ? schema : dbMeta.getUserName(), table.getName(), null);
+            }else if ("com.zaxxer.hikari.pool.HikariProxyConnection".equals(conn.getClass().getName())){
+                return forRemarks(schema,table,dbMeta,getOriginalConn(HikariProxyConnection.class,"delegate",conn));
+            }else if ("com.alibaba.druid.pool.DruidPooledConnection".equals(conn.getClass().getName())){
+                return forRemarks(schema,table,dbMeta,getOriginalConn(DruidPooledConnection.class,"conn",conn));
+            }
+            return null;
+       }
+
+       private Connection getOriginalConn(Class<?> clazz,String attr,Connection conn){
+           Field delegate = ClassUtil.getFirstField(clazz, field -> field.getName().equals(attr));
+           try {
+               delegate.setAccessible(true);
+               return (Connection) delegate.get(conn);
+           } catch (IllegalAccessException e) {
+               throw new RuntimeException(e);
+           }
+       }
     };
 
     /**
@@ -72,13 +100,14 @@ public interface IDialect {
     /**
      * 构建表和列的信息。
      *
+     * @param schemaName
      * @param table        存入的表对象
      * @param globalConfig 全局配置
      * @param dbMeta       数据库元数据
      * @param conn         连接
      * @throws SQLException 发生 SQL 异常时抛出
      */
-    void buildTableColumns(Table table, GlobalConfig globalConfig, DatabaseMetaData dbMeta, Connection conn) throws SQLException;
+    void buildTableColumns(String schemaName, Table table, GlobalConfig globalConfig, DatabaseMetaData dbMeta, Connection conn) throws SQLException;
 
     /**
      * 获取表的描述信息。
