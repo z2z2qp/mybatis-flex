@@ -88,8 +88,13 @@ public class WithSQLTester {
     @Test
     public void testWithSql5() {
         QueryWrapper query = QueryWrapper.create()
-                .withRecursive("CTE").asSelect(
-                        select().from(ARTICLE).where(ARTICLE.ID.ge(100))
+            .withRecursive("CTE").asSelect(
+                select().from(ARTICLE).where(ARTICLE.ID.ge(100))
+            )
+            .with("xxx", "id", "name").asValues(
+                Arrays.asList("a", "b"),
+                union(
+                    select().from(ARTICLE).where(ARTICLE.ID.ge(200))
                 )
 
             )

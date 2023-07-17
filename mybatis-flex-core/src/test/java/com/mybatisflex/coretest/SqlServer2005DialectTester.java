@@ -30,7 +30,7 @@ public class SqlServer2005DialectTester {
 
     @Test
     public void testSelectSql() {
-        QueryWrapper query = new QueryWrapper()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(ACCOUNT.ID.in("100", "200"))
