@@ -91,7 +91,7 @@ public class FieldWrapper {
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType pt) {
                 Type actualTypeArgument = pt.getActualTypeArguments()[0];
-                return (Class<?>) actualTypeArgument;
+                fieldWrapper.mappingType = (Class<?>) actualTypeArgument;
             }
         } else if (Map.class.isAssignableFrom(fieldType)) {
             Type genericType = field.getGenericType();
