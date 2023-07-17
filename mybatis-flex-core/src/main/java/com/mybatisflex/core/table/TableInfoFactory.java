@@ -117,11 +117,11 @@ public class TableInfoFactory {
         Type[] genericInterfaces = mapperClass.getGenericInterfaces();
         if (genericInterfaces.length == 1) {
             Type type = genericInterfaces[0];
-            if (type instanceof ParameterizedType pt) {
-                Type actualTypeArgument = pt.getActualTypeArguments()[0];
-                return actualTypeArgument instanceof Class clazz ? clazz : null;
-            } else if (type instanceof Class clazz) {
-                return getEntityClass(clazz);
+            if (type instanceof ParameterizedType) {
+                Type actualTypeArgument = ((ParameterizedType) type).getActualTypeArguments()[0];
+                return actualTypeArgument instanceof Class ? (Class<?>) actualTypeArgument : null;
+            } else if (type instanceof Class) {
+                return getEntityClass((Class<?>) type);
             }
         }
         return getEntityClass(mapperClass.getSuperclass());
@@ -216,8 +216,8 @@ public class TableInfoFactory {
                 // 集合嵌套
                 if (Collection.class.isAssignableFrom(fieldType)) {
                     Type genericType = TypeParameterResolver.resolveFieldType(field, entityClass);
-                    if (genericType instanceof ParameterizedType pt) {
-                        Class<?> actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
+                    if (genericType instanceof ParameterizedType) {
+                        Class<?> actualTypeArgument = (Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0];
                         tableInfo.addCollectionType(field, actualTypeArgument);
                     }
                 }

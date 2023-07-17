@@ -109,7 +109,8 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
 
     public <T> QueryCondition when(Predicate<T> fn) {
         Object val = this.value;
-        if (SqlConsts.LIKE.equals(logic) && val instanceof String valStr) {
+        if (SqlConsts.LIKE.equals(logic) && val instanceof String) {
+            String valStr = (String) val;
             if (valStr.startsWith(SqlConsts.PERCENT_SIGN)) {
                 valStr = valStr.substring(1);
             }
@@ -175,18 +176,18 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
             sql.append(logic);
 
             //值（或者问号）
-            if (value instanceof QueryColumn qc) {
-                sql.append(qc.toConditionSql(queryTables, dialect));
+            if (value instanceof QueryColumn) {
+                sql.append(((QueryColumn) value).toConditionSql(queryTables, dialect));
             }
             //子查询
-            else if (value instanceof QueryWrapper qw) {
+            else if (value instanceof QueryWrapper) {
                 sql.append(SqlConsts.BRACKET_LEFT)
                     .append(dialect.buildSelectSql((QueryWrapper) value))
                     .append(SqlConsts.BRACKET_RIGHT);
             }
             //原生sql
-            else if (value instanceof RawFragment rf) {
-                sql.append(rf.getContent());
+            else if (value instanceof RawFragment) {
+                sql.append(((RawFragment) value).getContent());
             }
             //正常查询，构建问号
             else {

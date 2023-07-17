@@ -611,8 +611,8 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         List<QueryColumn> selectColumns = getSelectColumns();
         if (CollectionUtil.isNotEmpty(selectColumns)) {
             for (QueryColumn selectColumn : selectColumns) {
-                if (selectColumn instanceof HasParamsColumn hpc) {
-                    Object[] paramValues = hpc.getParamValues();
+                if (selectColumn instanceof HasParamsColumn) {
+                    Object[] paramValues = ((HasParamsColumn) selectColumn).getParamValues();
                     if (ArrayUtil.isNotEmpty(paramValues)) {
                         if (columnValues == null) {
                             columnValues = new ArrayList<>(paramValues.length);
@@ -694,11 +694,11 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         List<QueryTable> queryTables = getQueryTables();
         if (CollectionUtil.isNotEmpty(queryTables)) {
             for (QueryTable queryTable : queryTables) {
-                if (queryTable instanceof SelectQueryTable sqt) {
+                if (queryTable instanceof SelectQueryTable) {
                     if (tableChildQuery == null) {
                         tableChildQuery = new ArrayList<>();
                     }
-                    tableChildQuery.add(sqt.getQueryWrapper());
+                    tableChildQuery.add(((SelectQueryTable) queryTable).getQueryWrapper());
                 }
             }
         }

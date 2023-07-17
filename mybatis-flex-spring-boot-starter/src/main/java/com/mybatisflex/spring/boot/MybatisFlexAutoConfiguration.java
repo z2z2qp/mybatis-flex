@@ -221,8 +221,8 @@ public class MybatisFlexAutoConfiguration implements InitializingBean {
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
 
-        if (dataSource instanceof FlexDataSource fds && DataSourceManager.getDecipher() != null) {
-            Map<String, DataSource> dataSourceMap = fds.getDataSourceMap();
+        if (dataSource instanceof FlexDataSource && DataSourceManager.getDecipher() != null) {
+            Map<String, DataSource> dataSourceMap = ((FlexDataSource) dataSource).getDataSourceMap();
             for (DataSource ds : dataSourceMap.values()) {
                 DataSourceManager.decryptDataSource(ds);
             }

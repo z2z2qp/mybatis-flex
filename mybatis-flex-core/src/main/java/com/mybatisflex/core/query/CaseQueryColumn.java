@@ -83,8 +83,8 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
         for (When when : whens) {
             values = ArrayUtil.concat(values, WrapperUtil.getValues(when.whenCondition));
         }
-        if (elseValue instanceof HasParamsColumn hpc) {
-            values = ArrayUtil.concat(values, hpc.getParamValues());
+        if (elseValue instanceof HasParamsColumn) {
+            values = ArrayUtil.concat(values, ((HasParamsColumn) elseValue).getParamValues());
         }
         return values;
     }

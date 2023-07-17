@@ -859,14 +859,14 @@ public class CommonsDialectImpl implements IDialect {
 
 
     protected boolean geZero(Number number) {
-        if (number instanceof BigDecimal bd) {
-            return bd.signum() >= 0;
-        } else if (number instanceof BigInteger bi) {
-            return bi.signum() >= 0;
-        } else if (number instanceof Float f) {
-            return f >= 0;
-        } else if (number instanceof Double d) {
-            return d >= 0;
+        if (number instanceof BigDecimal) {
+            return ((BigDecimal) number).signum() >= 0;
+        } else if (number instanceof BigInteger) {
+            return ((BigInteger) number).signum() >= 0;
+        } else if (number instanceof Float) {
+            return (Float) number >= 0;
+        } else if (number instanceof Double) {
+            return (Double) number >= 0;
         } else {
             return number.longValue() >= 0;
         }
@@ -874,14 +874,14 @@ public class CommonsDialectImpl implements IDialect {
 
 
     protected Number abs(Number number) {
-        if (number instanceof BigDecimal num) {
-            return num.abs();
-        } else if (number instanceof BigInteger num) {
-            return num.abs();
-        } else if (number instanceof Float num) {
-            return Math.abs(num);
-        } else if (number instanceof Double num) {
-            return Math.abs(num);
+        if (number instanceof BigDecimal) {
+            return ((BigDecimal) number).abs();
+        } else if (number instanceof BigInteger) {
+            return ((BigInteger) number).abs();
+        } else if (number instanceof Float) {
+            return Math.abs((Float) number);
+        } else if (number instanceof Double) {
+            return Math.abs((Double) number);
         } else {
             return Math.abs(number.longValue());
         }

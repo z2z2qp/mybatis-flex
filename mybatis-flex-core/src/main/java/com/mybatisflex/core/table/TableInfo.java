@@ -485,20 +485,20 @@ public class TableInfo {
 
 
     public Map<String, RawValue> obtainUpdateRawValueMap(Object entity) {
-        if (!(entity instanceof UpdateWrapper uw)) {
+        if (!(entity instanceof UpdateWrapper)) {
             return Collections.emptyMap();
         }
 
-        Map<String, Object> updates = uw.getUpdates();
+        Map<String, Object> updates = ((UpdateWrapper) entity).getUpdates();
         if (updates.isEmpty()) {
             return Collections.emptyMap();
         }
 
         Map<String, RawValue> map = new HashMap<>();
         updates.forEach((key, value) -> {
-            if (value instanceof RawValue rv) {
+            if (value instanceof RawValue) {
                 String column = getColumnByProperty(key);
-                map.put(column, rv);
+                map.put(column, (RawValue) value);
             }
         });
 
@@ -514,8 +514,8 @@ public class TableInfo {
     public Set<String> obtainUpdateColumns(Object entity, boolean ignoreNulls, boolean includePrimary) {
         MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
         Set<String> columns = new LinkedHashSet<>(); //需使用 LinkedHashSet 保证 columns 的顺序
-        if (entity instanceof UpdateWrapper uw) {
-            Map<String, Object> updates = uw.getUpdates();
+        if (entity instanceof UpdateWrapper) {
+            Map<String, Object> updates = ((UpdateWrapper) entity).getUpdates();
             if (updates.isEmpty()) {
                 return Collections.emptySet();
             }
@@ -586,8 +586,8 @@ public class TableInfo {
     public Object[] buildUpdateSqlArgs(Object entity, boolean ignoreNulls, boolean includePrimary) {
 
         List<Object> values = new ArrayList<>();
-        if (entity instanceof UpdateWrapper uw) {
-            Map<String, Object> updates = uw.getUpdates();
+        if (entity instanceof UpdateWrapper) {
+            Map<String, Object> updates = ((UpdateWrapper) entity).getUpdates();
             if (updates.isEmpty()) {
                 return FlexConsts.EMPTY_ARRAY;
             }
@@ -616,7 +616,7 @@ public class TableInfo {
 
                 if (value != null) {
                     ColumnInfo columnInfo = columnInfoMapping.get(column);
-                    var typeHandler = columnInfo.buildTypeHandler();
+                    TypeHandler typeHandler = columnInfo.buildTypeHandler();
                     if (typeHandler != null) {
                         value = new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
                     }
@@ -736,8 +736,8 @@ public class TableInfo {
         List<QueryColumn> selectColumns = CPI.getSelectColumns(queryWrapper);
         if (selectColumns != null && !selectColumns.isEmpty()) {
             for (QueryColumn queryColumn : selectColumns) {
-                if (queryColumn instanceof SelectQueryColumn sqc) {
-                    QueryWrapper selectColumnQueryWrapper = CPI.getQueryWrapper(sqc);
+                if (queryColumn instanceof SelectQueryColumn) {
+                    QueryWrapper selectColumnQueryWrapper = CPI.getQueryWrapper((SelectQueryColumn) queryColumn);
                     doAppendConditions(entity, selectColumnQueryWrapper);
                 }
             }
@@ -747,8 +747,8 @@ public class TableInfo {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables != null && !queryTables.isEmpty()) {
             for (QueryTable queryTable : queryTables) {
-                if (queryTable instanceof SelectQueryTable sqt) {
-                    QueryWrapper selectQueryWrapper = sqt.getQueryWrapper();
+                if (queryTable instanceof SelectQueryTable) {
+                    QueryWrapper selectQueryWrapper = ((SelectQueryTable) queryTable).getQueryWrapper();
                     doAppendConditions(entity, selectQueryWrapper);
                 }
             }
@@ -786,8 +786,8 @@ public class TableInfo {
         if (CollectionUtil.isNotEmpty(joins)) {
             for (Join join : joins) {
                 QueryTable joinQueryTable = CPI.getJoinQueryTable(join);
-                if (joinQueryTable instanceof SelectQueryTable sqt) {
-                    QueryWrapper childQuery = sqt.getQueryWrapper();
+                if (joinQueryTable instanceof SelectQueryTable) {
+                    QueryWrapper childQuery = ((SelectQueryTable) joinQueryTable).getQueryWrapper();
                     doAppendConditions(entity, childQuery);
                 } else {
 
@@ -821,8 +821,8 @@ public class TableInfo {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables != null && !queryTables.isEmpty()) {
             for (QueryTable queryTable : queryTables) {
-                if (queryTable instanceof SelectQueryTable sqt) {
-                    QueryWrapper childQuery = sqt.getQueryWrapper();
+                if (queryTable instanceof SelectQueryTable) {
+                    QueryWrapper childQuery = ((SelectQueryTable) queryTable).getQueryWrapper();
                     doAppendConditions(entity, childQuery);
                 } else {
                     String nameWithSchema = queryTable.getNameWithSchema();
