@@ -93,7 +93,7 @@ public class ConvertUtil {
             }
             return Short.parseShort(value.toString());
         } else if (targetClass.isEnum()) {
-            var enumWrapper = EnumWrapper.of(targetClass);
+            EnumWrapper enumWrapper = EnumWrapper.of(targetClass);
             if (enumWrapper.hasEnumValueAnnotation()) {
                 return enumWrapper.getEnum(value);
             } else if (value instanceof String) {

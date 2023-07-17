@@ -34,20 +34,20 @@ public class RawValue implements Serializable {
 
 
     public String toSql(IDialect dialect) {
-        if (object instanceof String str) {
-            return str;
+        if (object instanceof String) {
+            return (String) object;
         }
 
-        if (object instanceof QueryWrapper queryWrapper) {
-            return SqlConsts.BRACKET_LEFT + dialect.buildSelectSql(queryWrapper) + SqlConsts.BRACKET_RIGHT;
+        if (object instanceof QueryWrapper) {
+            return SqlConsts.BRACKET_LEFT + dialect.buildSelectSql((QueryWrapper) object) + SqlConsts.BRACKET_RIGHT;
         }
 
-        if (object instanceof QueryCondition queryCondition) {
-            return queryCondition.toSql(null, dialect);
+        if (object instanceof QueryCondition) {
+            return ((QueryCondition) object).toSql(null, dialect);
         }
 
-        if (object instanceof QueryColumn qc) {
-            return CPI.toSelectSql(qc, null, dialect);
+        if (object instanceof QueryColumn) {
+            return CPI.toSelectSql((QueryColumn) object, null, dialect);
         }
 
         return object.toString();

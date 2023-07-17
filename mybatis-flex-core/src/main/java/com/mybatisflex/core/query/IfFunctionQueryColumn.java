@@ -50,12 +50,12 @@ public class IfFunctionQueryColumn extends QueryColumn implements HasParamsColum
     public Object[] getParamValues() {
         Object[] params = WrapperUtil.getValues(condition);
         // IF 函数嵌套
-        if (trueValue instanceof HasParamsColumn hpc) {
-            Object[] paramValues = hpc.getParamValues();
+        if (trueValue instanceof HasParamsColumn) {
+            Object[] paramValues = ((HasParamsColumn) trueValue).getParamValues();
             params = ArrayUtil.concat(params, paramValues);
         }
-        if (falseValue instanceof HasParamsColumn hpc) {
-            Object[] paramValues = hpc.getParamValues();
+        if (falseValue instanceof HasParamsColumn) {
+            Object[] paramValues = ((HasParamsColumn) falseValue).getParamValues();
             params = ArrayUtil.concat(params, paramValues);
         }
         return params;

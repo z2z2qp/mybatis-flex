@@ -88,8 +88,8 @@ public class AuditManager {
     }
 
     private static void releaseScheduledMessageCollector(MessageCollector messageCollector) {
-        if (messageCollector instanceof ScheduledMessageCollector smc) {
-            smc.release();
+        if (messageCollector instanceof ScheduledMessageCollector) {
+            ((ScheduledMessageCollector) messageCollector).release();
         }
     }
 
@@ -102,8 +102,8 @@ public class AuditManager {
         auditMessage.setQueryTime(clock.getTick());
         try {
             T result = supplier.execute();
-            if (result instanceof Collection collection) {
-                auditMessage.setQueryCount(collection.size());
+            if (result instanceof Collection) {
+                auditMessage.setQueryCount(((Collection) result).size());
             } else if (result != null) {
                 auditMessage.setQueryCount(1);
             }
@@ -116,15 +116,15 @@ public class AuditManager {
             /** parameter 的组装请查看 getNamedParams 方法
              * @see ParamNameResolver#getNamedParams(Object[])
              */
-            if (parameter instanceof Map map) {
+            if (parameter instanceof Map) {
                 TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-                if (map.containsKey(FlexConsts.SQL_ARGS)) {
-                    auditMessage.addParams(statement, map.get(FlexConsts.SQL_ARGS));
-                } else if (map.containsKey("collection")) {
-                    Collection collection = (Collection) map.get("collection");
+                if (((Map<?, ?>) parameter).containsKey(FlexConsts.SQL_ARGS)) {
+                    auditMessage.addParams(statement, ((Map<?, ?>) parameter).get(FlexConsts.SQL_ARGS));
+                } else if (((Map<?, ?>) parameter).containsKey("collection")) {
+                    Collection collection = (Collection) ((Map<?, ?>) parameter).get("collection");
                     auditMessage.addParams(statement, collection.toArray());
-                } else if (map.containsKey("array")) {
-                    auditMessage.addParams(statement, map.get("array"));
+                } else if (((Map<?, ?>) parameter).containsKey("array")) {
+                    auditMessage.addParams(statement, ((Map<?, ?>) parameter).get("array"));
                 } else {
                     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
                     for (ParameterMapping parameterMapping : parameterMappings) {

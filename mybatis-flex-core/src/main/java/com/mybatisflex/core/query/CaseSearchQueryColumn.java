@@ -83,8 +83,8 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
     @Override
     public Object[] getParamValues() {
         Object[] values = FlexConsts.EMPTY_ARRAY;
-        if (elseValue instanceof HasParamsColumn hpc) {
-            values = ArrayUtil.concat(values, hpc.getParamValues());
+        if (elseValue instanceof HasParamsColumn) {
+            values = ArrayUtil.concat(values, ((HasParamsColumn) elseValue).getParamValues());
         }
         return values;
     }
