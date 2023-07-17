@@ -473,7 +473,7 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
         notNull(dataSource, "Property 'dataSource' is required");
         notNull(sqlSessionFactoryBuilder, "Property 'sqlSessionFactoryBuilder' is required");
         state((configuration == null && configLocation == null) || !(configuration != null && configLocation != null),
-                "Property 'configuration' and 'configLocation' can not specified with together");
+            "Property 'configuration' and 'configLocation' can not specified with together");
 
         this.sqlSessionFactory = buildSqlSessionFactory();
     }
@@ -506,7 +506,7 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
             targetConfiguration = xmlConfigBuilder.getConfiguration();
         } else {
             LOGGER.debug(
-                    () -> "Property 'configuration' or 'configLocation' not specified, using default Flex Configuration");
+                () -> "Property 'configuration' or 'configLocation' not specified, using default Flex Configuration");
 //            targetConfiguration = new Configuration();
             targetConfiguration = new FlexConfiguration();
             Optional.ofNullable(this.configurationProperties).ifPresent(targetConfiguration::setVariables);
@@ -518,8 +518,8 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
 
         if (hasLength(this.typeAliasesPackage)) {
             scanClasses(this.typeAliasesPackage, this.typeAliasesSuperType).stream()
-                    .filter(clazz -> !clazz.isAnonymousClass()).filter(clazz -> !clazz.isInterface())
-                    .filter(clazz -> !clazz.isMemberClass()).forEach(targetConfiguration.getTypeAliasRegistry()::registerAlias);
+                .filter(clazz -> !clazz.isAnonymousClass()).filter(clazz -> !clazz.isInterface())
+                .filter(clazz -> !clazz.isMemberClass()).forEach(targetConfiguration.getTypeAliasRegistry()::registerAlias);
         }
 
         if (!isEmpty(this.typeAliases)) {
@@ -538,8 +538,8 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
 
         if (hasLength(this.typeHandlersPackage)) {
             scanClasses(this.typeHandlersPackage, TypeHandler.class).stream().filter(clazz -> !clazz.isAnonymousClass())
-                    .filter(clazz -> !clazz.isInterface()).filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
-                    .forEach(targetConfiguration.getTypeHandlerRegistry()::register);
+                .filter(clazz -> !clazz.isInterface()).filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
+                .forEach(targetConfiguration.getTypeHandlerRegistry()::register);
         }
 
         if (!isEmpty(this.typeHandlers)) {
@@ -558,7 +558,7 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
             });
         }
         Optional.ofNullable(this.defaultScriptingLanguageDriver)
-                .ifPresent(targetConfiguration::setDefaultScriptingLanguage);
+            .ifPresent(targetConfiguration::setDefaultScriptingLanguage);
 
         if (this.databaseIdProvider != null) {// fix #64 set databaseId before parse mapper xmls
             try {
@@ -585,8 +585,8 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
         // fixed https://gitee.com/mybatis-flex/mybatis-flex/issues/I70QWU
         targetConfiguration.setEnvironment(new Environment(this.environment,
 //                this.transactionFactory == null ? new SpringManagedTransactionFactory() : this.transactionFactory,
-                this.transactionFactory == null ? new JdbcTransactionFactory() : this.transactionFactory,
-                dataSource instanceof FlexDataSource ? dataSource : new FlexDataSource(FlexConsts.NAME, dataSource)));
+            this.transactionFactory == null ? new JdbcTransactionFactory() : this.transactionFactory,
+            dataSource instanceof FlexDataSource ? dataSource : new FlexDataSource(FlexConsts.NAME, dataSource)));
 
 
         // 需先构建 sqlSessionFactory，再去初始化 mapperLocations
@@ -604,7 +604,7 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
                     }
                     try {
                         XMLMapperBuilder xmlMapperBuilder = new XMLMapperBuilder(mapperLocation.getInputStream(),
-                                targetConfiguration, mapperLocation.toString(), targetConfiguration.getSqlFragments());
+                            targetConfiguration, mapperLocation.toString(), targetConfiguration.getSqlFragments());
                         xmlMapperBuilder.parse();
                     } catch (Exception e) {
                         throw new IOException("Failed to parse mapping resource: '" + mapperLocation + "'", e);
@@ -664,10 +664,10 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
     private Set<Class<?>> scanClasses(String packagePatterns, Class<?> assignableType) throws IOException {
         Set<Class<?>> classes = new HashSet<>();
         String[] packagePatternArray = tokenizeToStringArray(packagePatterns,
-                ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+            ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
         for (String packagePattern : packagePatternArray) {
             Resource[] resources = RESOURCE_PATTERN_RESOLVER.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
-                    + ClassUtils.convertClassNameToResourcePath(packagePattern) + "/**/*.class");
+                + ClassUtils.convertClassNameToResourcePath(packagePattern) + "/**/*.class");
             for (Resource resource : resources) {
                 try {
                     ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(resource).getClassMetadata();
@@ -682,4 +682,5 @@ public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
         }
         return classes;
     }
+
 }

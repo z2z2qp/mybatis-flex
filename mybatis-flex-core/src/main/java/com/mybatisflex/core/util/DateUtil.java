@@ -30,7 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DateUtil {
 
-    private DateUtil() {}
+    private DateUtil() {
+    }
 
     public static String datePatternWithoutDividing = "yyyyMMdd";
     public static String datePattern = "yyyy-MM-dd";

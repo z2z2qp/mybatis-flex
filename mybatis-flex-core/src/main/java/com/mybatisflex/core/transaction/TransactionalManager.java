@@ -37,7 +37,7 @@ public class TransactionalManager {
 
     //<xid : <datasource : connection>>
     private static final ThreadLocal<Map<String, Map<String, Connection>>> CONNECTION_HOLDER
-            = ThreadLocal.withInitial(ConcurrentHashMap::new);
+        = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
 
     public static void hold(String xid, String ds, Connection connection) {
@@ -208,4 +208,5 @@ public class TransactionalManager {
             }
         }
     }
+
 }
