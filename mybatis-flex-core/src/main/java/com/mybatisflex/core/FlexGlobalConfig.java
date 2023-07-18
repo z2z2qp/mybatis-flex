@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FlexGlobalConfig {
 
     /**
-     * 启动是否打印 banner 和 版本好
+     * 启动是否打印 banner 和 版本号
      */
     private boolean printBanner = true;
 
@@ -73,6 +73,17 @@ public class FlexGlobalConfig {
      */
     private Object normalValueOfLogicDelete = FlexConsts.LOGIC_DELETE_NORMAL;
     private Object deletedValueOfLogicDelete = FlexConsts.LOGIC_DELETE_DELETED;
+
+    /**
+     * 分页查询时，默认每页显示的数据数量。
+     */
+    private int defaultPageSize = 10;
+
+
+    /**
+     * 默认的 Relation 注解查询深度
+     */
+    private int defaultRelationQueryDepth = 2;
 
     public boolean isPrintBanner() {
         return printBanner;
@@ -305,6 +316,22 @@ public class FlexGlobalConfig {
             throw new NullPointerException("deletedValueOfLogicDelete can not be null.");
         }
         this.deletedValueOfLogicDelete = deletedValueOfLogicDelete;
+    }
+
+    public int getDefaultPageSize() {
+        return defaultPageSize;
+    }
+
+    public void setDefaultPageSize(int defaultPageSize) {
+        this.defaultPageSize = defaultPageSize;
+    }
+
+    public int getDefaultRelationQueryDepth() {
+        return defaultRelationQueryDepth;
+    }
+
+    public void setDefaultRelationQueryDepth(int defaultRelationQueryDepth) {
+        this.defaultRelationQueryDepth = defaultRelationQueryDepth;
     }
 
     public static ConcurrentHashMap<String, FlexGlobalConfig> getGlobalConfigs() {
