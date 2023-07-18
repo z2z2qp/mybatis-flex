@@ -15,6 +15,8 @@
  */
 package com.mybatisflex.core.paginate;
 
+import com.mybatisflex.core.FlexGlobalConfig;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,50 +24,115 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * 分页对象
+ * 分页对象封装。
  *
- * @param <T> 对象类型
+ * @param <T> 数据类型
+ * @author 开源海哥
+ * @author 王帅
  */
 public class Page<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     public static final int INIT_VALUE = -1;
 
-    private List<T> records;
-    private int pageNumber;
-    private int pageSize;
-    private long totalPage;
-    private long totalRow;
+    /**
+     * 当前页数据。
+     */
+    private List<T> records = Collections.emptyList();
 
+    /**
+     * 当前页码。
+     */
+    private int pageNumber = 1;
+
+    /**
+     * 每页数据数量。
+     */
+    private int pageSize = FlexGlobalConfig.getDefaultConfig().getDefaultPageSize();
+
+    /**
+     * 总页数。
+     */
+    private long totalPage = INIT_VALUE;
+
+    /**
+     * 总数据数量。
+     */
+    private long totalRow = INIT_VALUE;
+
+    /**
+     * 是否优化分页查询 COUNT 语句。
+     */
     private boolean optimizeCountQuery = true;
 
+    /**
+     * 创建分页对象。
+     *
+     * @param pageNumber 当前页码
+     * @param pageSize   每页数据数量
+     * @param <T>        数据类型
+     * @return 分页对象
+     */
     public static <T> Page<T> of(int pageNumber, int pageSize) {
         return new Page<>(pageNumber, pageSize);
     }
 
+    /**
+     * 创建分页对象。
+     *
+     * @param pageNumber 当前页码
+     * @param pageSize   每页数据数量
+     * @param totalRow   总数据数量
+     * @param <T>        数据类型
+     * @return 分页对象
+     */
     public static <T> Page<T> of(int pageNumber, int pageSize, long totalRow) {
         return new Page<>(pageNumber, pageSize, totalRow);
     }
 
+    /**
+     * 创建分页对象。
+     */
     public Page() {
-        this(INIT_VALUE,INIT_VALUE);
+        this(1,FlexGlobalConfig.getDefaultConfig().getDefaultPageSize());
     }
 
+    /**
+     * 创建分页对象。
+     *
+     * @param pageNumber 当前页码
+     * @param pageSize   每页数据数量
+     */
     public Page(int pageNumber, int pageSize) {
         this(pageNumber,pageSize,INIT_VALUE);
     }
 
+    /**
+     * 创建分页对象。
+     *
+     * @param pageNumber 当前页码
+     * @param pageSize   每页数据数量
+     * @param totalRow   总数居数量
+     */
     public Page(int pageNumber, int pageSize, long totalRow) {
         this(new ArrayList<T>(),pageNumber,pageSize,totalRow);
     }
 
+    /**
+     * 创建分页对象。
+     *
+     * @param records    当前页数据
+     * @param pageNumber 当前页码
+     * @param pageSize   每页数据数量
+     * @param totalRow   总数居数量
+     */
     public Page(List<T> records, int pageNumber, int pageSize, long totalRow) {
         this.setRecords(records);
         this.setPageNumber(pageNumber);
         this.setPageSize(pageSize);
         this.setTotalRow(totalRow);
     }
-
 
     /**
      * 获取当前页的数据。
@@ -75,7 +142,6 @@ public class Page<T> implements Serializable {
     public List<T> getRecords() {
         return records;
     }
-
 
     /**
      * 设置当前页的数据。
@@ -98,7 +164,6 @@ public class Page<T> implements Serializable {
         return pageNumber;
     }
 
-
     /**
      * 设置当前页码。
      *
@@ -111,7 +176,6 @@ public class Page<T> implements Serializable {
         this.pageNumber = pageNumber;
     }
 
-
     /**
      * 获取当前每页数据数量。
      *
@@ -120,7 +184,6 @@ public class Page<T> implements Serializable {
     public int getPageSize() {
         return pageSize;
     }
-
 
     /**
      * 设置当前每页数据数量。
@@ -162,7 +225,6 @@ public class Page<T> implements Serializable {
         return totalRow;
     }
 
-
     /**
      * 设置数据总数。
      *
@@ -174,7 +236,7 @@ public class Page<T> implements Serializable {
     }
 
     /**
-     * 计算总页码
+     * 计算总页码。
      */
     private void calcTotalPage() {
         if (pageSize < 0 || totalRow < 0) {
@@ -183,7 +245,6 @@ public class Page<T> implements Serializable {
             totalPage = totalRow % pageSize == 0 ? (totalRow / pageSize) : (totalRow / pageSize + 1);
         }
     }
-
 
     /**
      * 当前页是否为空。
@@ -194,7 +255,6 @@ public class Page<T> implements Serializable {
         return getTotalRow() == 0 || getPageNumber() > getTotalPage();
     }
 
-
     /**
      * 是否存在下一页。
      *
@@ -203,7 +263,6 @@ public class Page<T> implements Serializable {
     public boolean hasNext() {
         return getTotalPage() != 0 && getPageNumber() < getTotalPage();
     }
-
 
     /**
      * 是否存在上一页。
@@ -214,7 +273,6 @@ public class Page<T> implements Serializable {
         return getPageNumber() > 1;
     }
 
-
     /**
      * 获取当前分页偏移量。
      *
@@ -223,7 +281,6 @@ public class Page<T> implements Serializable {
     public int offset() {
         return getPageSize() * (getPageNumber() - 1);
     }
-
 
     /**
      * 设置是否自动优化 COUNT 查询语句。
@@ -234,7 +291,6 @@ public class Page<T> implements Serializable {
         this.optimizeCountQuery = optimizeCountQuery;
     }
 
-
     /**
      * 是否自动优化 COUNT 查询语句（默认优化）。
      *
@@ -243,7 +299,6 @@ public class Page<T> implements Serializable {
     public boolean needOptimizeCountQuery() {
         return optimizeCountQuery;
     }
-
 
     public <R> Page<R> map(Function<? super T, ? extends R> mapper) {
         Page<R> newPage = new Page<>();
@@ -261,7 +316,6 @@ public class Page<T> implements Serializable {
         }
         return newPage;
     }
-
 
     @Override
     public String toString() {
