@@ -76,17 +76,19 @@ public class TableInfo {
     //大字段列
     private String[] largeColumns = new String[0];
 
-    // 所有的字段，但除了主键的列
+    private String[] allColumns = new String[0];
+
+    //所有的字段，但除了主键的列
     private String[] columns = new String[0];
 
     //主键字段
     private String[] primaryColumns = new String[0];
 
-    // 默认查询列
-    private String[] defaultColumns = new String[0];
+    // 默认查询列，排除 large 等字段
+    private String[] defaultQueryColumns = new String[0];
 
-    //在插入数据的时候，支持主动插入的主键字段
-    //通过自定义生成器生成 或者 Sequence 在 before 生成的时候，是需要主动插入数据的
+    //在插入数据的时候，支持主动插入的主键字段，自增字段不需要主动插入
+    //但通过自定义生成器生成 或者 Sequence 在 before 生成的时候，是需要主动插入数据的
     private String[] insertPrimaryKeys;
 
     private List<ColumnInfo> columnInfoList;
@@ -97,7 +99,7 @@ public class TableInfo {
     private final Map<String, QueryColumn> columnQueryMapping = new HashMap<>();
 
     //property:column
-    private final Map<String, String> propertyColumnMapping = new HashMap<>();
+    private final Map<String, String> propertyColumnMapping = new LinkedHashMap<>();
 
     private List<InsertListener> onInsertListeners;
     private List<UpdateListener> onUpdateListeners;
@@ -135,7 +137,7 @@ public class TableInfo {
     }
 
     public String getTableNameWithSchema() {
-        return StringUtil.isNotBlank(schema) ? schema + "." + tableName : tableName;
+        return StringUtil.buildSchemaWithTable(schema, tableName);
     }
 
     public String getWrapSchemaAndTableName(IDialect dialect) {
@@ -226,12 +228,12 @@ public class TableInfo {
         this.largeColumns = largeColumns;
     }
 
-    public String[] getDefaultColumns() {
-        return defaultColumns;
+    public String[] getDefaultQueryColumns() {
+        return defaultQueryColumns;
     }
 
-    public void setDefaultColumns(String[] defaultColumns) {
-        this.defaultColumns = defaultColumns;
+    public void setDefaultQueryColumns(String[] defaultQueryColumns) {
+        this.defaultQueryColumns = defaultQueryColumns;
     }
 
     public String[] getInsertPrimaryKeys() {
@@ -252,6 +254,14 @@ public class TableInfo {
 
     public void setReflector(Reflector reflector) {
         this.reflector = reflector;
+    }
+
+    public String[] getAllColumns() {
+        return allColumns;
+    }
+
+    public void setAllColumns(String[] allColumns) {
+        this.allColumns = allColumns;
     }
 
     public String[] getColumns() {
@@ -347,6 +357,7 @@ public class TableInfo {
             String[] alias = columnInfo.getAlias();
             columnQueryMapping.put(columnInfo.column, new QueryColumn(schema, tableName, columnInfo.column, alias != null && alias.length > 0 ? alias[0] : null));
         }
+        this.allColumns = ArrayUtil.concat(allColumns, columns);
     }
 
 
@@ -373,6 +384,7 @@ public class TableInfo {
             String[] alias = idInfo.getAlias();
             columnQueryMapping.put(idInfo.column, new QueryColumn(schema, tableName, idInfo.column, alias != null && alias.length > 0 ? alias[0] : null));
         }
+        this.allColumns = ArrayUtil.concat(allColumns, primaryColumns);
         this.insertPrimaryKeys = insertIdFields.toArray(new String[0]);
     }
 
@@ -457,7 +469,7 @@ public class TableInfo {
      */
     public String[] obtainInsertColumnsWithPk(Object entity, boolean ignoreNulls) {
         if (!ignoreNulls) {
-            return ArrayUtil.concat(primaryColumns, columns);
+            return allColumns;
         } else {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
             List<String> retColumns = new ArrayList<>();
@@ -838,6 +850,36 @@ public class TableInfo {
     }
 
 
+    public QueryWrapper buildQueryWrapper(Object entity) {
+        QueryColumn[] queryColumns = new QueryColumn[defaultQueryColumns.length];
+        for (int i = 0; i < defaultQueryColumns.length; i++) {
+            queryColumns[i] = columnQueryMapping.get(defaultQueryColumns[i]);
+        }
+
+        QueryWrapper queryWrapper = QueryWrapper.create();
+
+        String tableNameWithSchema = getTableNameWithSchema();
+        queryWrapper.select(queryColumns).from(tableNameWithSchema);
+
+        MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
+        propertyColumnMapping.forEach((property, column) -> {
+            if (column.equals(logicDeleteColumn)) {
+                return;
+            }
+            Object value = metaObject.getValue(property);
+            if (value != null && !"".equals(value)) {
+                QueryColumn queryColumn = TableDefs.getQueryColumn(entityClass, tableNameWithSchema, column);
+                if (queryColumn != null) {
+                    queryWrapper.and(queryColumn.eq(value));
+                } else {
+                    queryWrapper.and(QueryMethods.column(tableNameWithSchema, column).eq(value));
+                }
+            }
+        });
+        return queryWrapper;
+    }
+
+
     public String getKeyProperties() {
         StringJoiner joiner = new StringJoiner(",");
         for (IdInfo value : primaryKeyList) {
@@ -856,7 +898,7 @@ public class TableInfo {
     }
 
     public List<QueryColumn> getDefaultQueryColumn() {
-        return Arrays.stream(defaultColumns)
+        return Arrays.stream(defaultQueryColumns)
             .map(name -> columnQueryMapping.get(name))
             .collect(Collectors.toList());
     }
@@ -989,20 +1031,6 @@ public class TableInfo {
         }
     }
 
-
-//    private Object buildColumnSqlArg(Object value, String column) {
-//        ColumnInfo columnInfo = columnInfoMapping.get(column);
-////        Object value = getPropertyValue(metaObject, columnInfo.property);
-//
-//        if (value != null) {
-//            TypeHandler typeHandler = columnInfo.buildTypeHandler();
-//            if (typeHandler != null) {
-//                return new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
-//            }
-//        }
-//
-//        return value;
-//    }
 
     private Object buildColumnSqlArg(MetaObject metaObject, String column) {
         ColumnInfo columnInfo = columnInfoMapping.get(column);
