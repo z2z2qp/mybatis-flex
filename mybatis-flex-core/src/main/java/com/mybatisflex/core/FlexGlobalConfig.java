@@ -24,6 +24,7 @@ import com.mybatisflex.core.dialect.DbType;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -108,6 +109,10 @@ public class FlexGlobalConfig {
 
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
+        DataSource dataSource = configuration.getEnvironment().getDataSource();
+        if (dataSource instanceof FlexDataSource) {
+            this.dbType = ((FlexDataSource) dataSource).getDefaultDbType();
+        }
     }
 
     public SqlSessionFactory getSqlSessionFactory() {
@@ -335,7 +340,7 @@ public class FlexGlobalConfig {
         this.defaultRelationQueryDepth = defaultRelationQueryDepth;
     }
 
-    public FlexDataSource getDataSource(){
+    public FlexDataSource getDataSource() {
         return (FlexDataSource) getConfiguration().getEnvironment().getDataSource();
     }
 
@@ -407,34 +412,21 @@ public class FlexGlobalConfig {
         return globalConfigs.get(environmentId);
     }
 
-    public static synchronized void setConfig(String id, FlexGlobalConfig config) {
-        setConfig(id, config, true);
-    }
 
     /**
      * 设置全局配置
      *
-     * @param id            环境id
-     * @param config        全局配置
-     * @param copyToDefault 自动指定默认全局配置（在多源时，方便由注解指定默认源）
+     * @param id        环境id
+     * @param config    全局配置
+     * @param isDefault 自动指定默认全局配置（在多源时，方便由注解指定默认源）
      */
-    public static synchronized void setConfig(String id, FlexGlobalConfig config, boolean copyToDefault) {
-        //first setConfig，copy the config to default
-        if (copyToDefault && globalConfigs.isEmpty()) {
-
+    public static synchronized void setConfig(String id, FlexGlobalConfig config, boolean isDefault) {
+        if (isDefault) {
             defaultConfig.setSqlSessionFactory(config.sqlSessionFactory);
-            defaultConfig.setDbType(config.dbType);
             defaultConfig.setConfiguration(config.configuration);
-
-            if (defaultConfig.getKeyConfig() == null
-                && config.keyConfig != null) {
-                defaultConfig.setKeyConfig(config.keyConfig);
-            }
-
-            config = defaultConfig;
         }
 
-        globalConfigs.put(id, config);
+        globalConfigs.put(id, isDefault ? defaultConfig : config);
     }
 
 }

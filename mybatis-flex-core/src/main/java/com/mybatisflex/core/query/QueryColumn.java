@@ -224,6 +224,20 @@ public class QueryColumn implements CloneSupport<QueryColumn> {
         return QueryCondition.create(this, SqlConsts.LIKE, "%" + value).when(fn);
     }
 
+    public QueryCondition likeRaw(Object value) {
+        if (value == null) {
+            return QueryCondition.createEmpty();
+        }
+        return QueryCondition.create(this, SqlConsts.LIKE, value);
+    }
+
+    public <T> QueryCondition likeRaw(Object value, Predicate<T> fn) {
+        if (value == null) {
+            return QueryCondition.createEmpty();
+        }
+        return QueryCondition.create(this, SqlConsts.LIKE, value).when(fn);
+    }
+
     /**
      * 大于 greater than
      *
@@ -541,30 +555,35 @@ public class QueryColumn implements CloneSupport<QueryColumn> {
     }
 
 
-    QueryTable getSelectTable(List<QueryTable> queryTables, QueryTable columnTable) {
+    QueryTable getSelectTable(List<QueryTable> queryTables, QueryTable selfTable) {
+        //未查询任何表
         if (queryTables == null || queryTables.isEmpty()) {
             return null;
         }
 
-        if (queryTables.size() == 1 && queryTables.get(0).isSameTable(columnTable)) {
+        if (selfTable != null && StringUtil.isNotBlank(selfTable.alias)){
+            return selfTable;
+        }
+
+        if (queryTables.size() == 1 && queryTables.get(0).isSameTable(selfTable)) {
             //ignore table
             return null;
         }
 
         if (CollectionUtil.isEmpty(queryTables)) {
-            return columnTable;
+            return selfTable;
         }
 
-        if (columnTable == null && queryTables.size() == 1) {
+        if (selfTable == null && queryTables.size() == 1) {
             return queryTables.get(0);
         }
 
         for (QueryTable table : queryTables) {
-            if (table.isSameTable(columnTable)) {
+            if (table.isSameTable(selfTable)) {
                 return table;
             }
         }
-        return columnTable;
+        return selfTable;
     }
 
 

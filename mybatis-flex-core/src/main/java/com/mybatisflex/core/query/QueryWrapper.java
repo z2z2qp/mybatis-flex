@@ -28,9 +28,20 @@ import java.util.function.Consumer;
 
 public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
 
-
     public static QueryWrapper create() {
         return new QueryWrapper();
+    }
+
+
+    /**
+     * 根据实体类对象，构建查询条件
+     *
+     * @param entity 实体类对象
+     * @return 查询对象
+     */
+    public static QueryWrapper create(Object entity) {
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(ClassUtil.getUsefulClass(entity.getClass()));
+        return tableInfo.buildQueryWrapper(entity);
     }
 
 
@@ -62,11 +73,9 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return new WithBuilder(this, with, name, Arrays.asList(params));
     }
 
-
     public QueryWrapper select() {
         return this;
     }
-
 
     public QueryWrapper select(String... columns) {
         for (String column : columns) {
@@ -75,7 +84,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
-
     public <T> QueryWrapper select(LambdaGetter<T>... lambdaGetters) {
         for (LambdaGetter<T> lambdaGetter : lambdaGetters) {
             QueryColumn queryColumn = LambdaUtil.getQueryColumn(lambdaGetter);
@@ -83,7 +91,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         }
         return this;
     }
-
 
     public QueryWrapper select(QueryColumn... queryColumns) {
         for (QueryColumn column : queryColumns) {
@@ -107,14 +114,12 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
-
     public QueryWrapper from(TableDef... tableDefs) {
         for (TableDef tableDef : tableDefs) {
             from(new QueryTable(tableDef));
         }
         return this;
     }
-
 
     public QueryWrapper from(Class<?>... entityClasses) {
         for (Class<?> entityClass : entityClasses) {
@@ -124,24 +129,15 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
-
     public QueryWrapper from(String... tables) {
         for (String table : tables) {
             if (StringUtil.isBlank(table)) {
                 throw new IllegalArgumentException("table must not be null or blank.");
             }
-            int indexOf = table.indexOf(".");
-            if (indexOf > 0) {
-                String schema = table.substring(0, indexOf);
-                table = table.substring(indexOf + 1);
-                from(new QueryTable(schema, table));
-            } else {
-                from(new QueryTable(table));
-            }
+            from(new QueryTable(table));
         }
         return this;
     }
-
 
     public QueryWrapper from(QueryTable... tables) {
         if (CollectionUtil.isEmpty(queryTables)) {
@@ -163,11 +159,9 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
-
     public QueryWrapper from(QueryWrapper queryWrapper) {
         return from(new SelectQueryTable(queryWrapper));
     }
-
 
     public QueryWrapper as(String alias) {
         if (CollectionUtil.isEmpty(queryTables)) {
@@ -177,7 +171,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         queryTables.get(queryTables.size() - 1).alias = alias;
         return this;
     }
-
 
     public QueryWrapper where(QueryCondition queryCondition) {
         this.setWhereQueryCondition(queryCondition);
@@ -189,12 +182,10 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
-
     public QueryWrapper where(String sql, Object... params) {
         this.setWhereQueryCondition(new RawFragment(sql, params));
         return this;
     }
-
 
     public QueryWrapper where(Map<String, Object> whereConditions) {
         if (whereConditions != null) {
@@ -224,7 +215,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     public <T> QueryConditionBuilder and(LambdaGetter<T> fn) {
         return new QueryConditionBuilder(this, LambdaUtil.getQueryColumn(fn), SqlConnector.AND);
     }
-
 
     public QueryWrapper and(Consumer<QueryWrapper> consumer) {
         QueryWrapper newWrapper = new QueryWrapper();
@@ -268,7 +258,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return joining(SqlConsts.LEFT_JOIN, new QueryTable(table), true);
     }
 
-
     public Joiner<QueryWrapper> leftJoin(String table, boolean when) {
         return joining(SqlConsts.LEFT_JOIN, new QueryTable(table), when);
     }
@@ -296,7 +285,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     public Joiner<QueryWrapper> leftJoin(QueryWrapper table, boolean when) {
         return joining(SqlConsts.LEFT_JOIN, table, when);
     }
-
 
     public Joiner<QueryWrapper> rightJoin(String table) {
         return joining(SqlConsts.RIGHT_JOIN, new QueryTable(table), true);
@@ -330,7 +318,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return joining(SqlConsts.RIGHT_JOIN, table, when);
     }
 
-
     public Joiner<QueryWrapper> innerJoin(String table) {
         return joining(SqlConsts.INNER_JOIN, new QueryTable(table), true);
     }
@@ -362,7 +349,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     public Joiner<QueryWrapper> innerJoin(QueryWrapper table, boolean when) {
         return joining(SqlConsts.INNER_JOIN, table, when);
     }
-
 
     public Joiner<QueryWrapper> fullJoin(String table) {
         return joining(SqlConsts.FULL_JOIN, new QueryTable(table), true);
@@ -396,7 +382,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return joining(SqlConsts.FULL_JOIN, table, when);
     }
 
-
     public Joiner<QueryWrapper> crossJoin(String table) {
         return joining(SqlConsts.CROSS_JOIN, new QueryTable(table), true);
     }
@@ -428,7 +413,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     public Joiner<QueryWrapper> crossJoin(QueryWrapper table, boolean when) {
         return joining(SqlConsts.CROSS_JOIN, table, when);
     }
-
 
     public Joiner<QueryWrapper> join(String table) {
         return joining(SqlConsts.JOIN, new QueryTable(table), true);
@@ -462,7 +446,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return joining(SqlConsts.JOIN, table, when);
     }
 
-
     public QueryWrapper union(QueryWrapper unionQuery) {
         if (unions == null) {
             unions = new ArrayList<>();
@@ -489,12 +472,10 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
-
-//    public QueryWrapper end(String sqlPart){
-//        addEndFragment(sqlPart);
-//        return this;
-//    }
-
+    //    public QueryWrapper end(String sqlPart){
+    //        addEndFragment(sqlPart);
+    //        return this;
+    //    }
 
     protected Joiner<QueryWrapper> joining(String type, QueryTable table, boolean when) {
         Join join = new Join(type, table, when);
@@ -513,7 +494,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         addJoinTable(join.getQueryTable());
         return new Joiner<>(addJoin(join), join);
     }
-
 
     public QueryWrapper groupBy(String name) {
         addGroupByColumns(new QueryColumn(name));
@@ -539,7 +519,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
-
     public QueryWrapper having(QueryCondition queryCondition) {
         addHavingQueryCondition(queryCondition, SqlConnector.AND);
         return this;
@@ -564,7 +543,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         }
         return this;
     }
-
 
     public QueryWrapper limit(Integer rows) {
         setLimitRows(rows);
@@ -687,7 +665,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return returnValues;
     }
 
-
     List<QueryWrapper> getChildSelect() {
 
         List<QueryWrapper> tableChildQuery = null;
@@ -703,7 +680,6 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
             }
         }
 
-
         List<QueryWrapper> whereChildQuery = WrapperUtil.getChildQueryWrapper(whereQueryCondition);
         List<QueryWrapper> havingChildQuery = WrapperUtil.getChildQueryWrapper(havingQueryCondition);
 
@@ -711,21 +687,18 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
             return Collections.emptyList();
         }
 
-
-        List<QueryWrapper> childQueryWrappers = tableChildQuery == null
-            ? new ArrayList<>() : new ArrayList<>(tableChildQuery);
+        List<QueryWrapper> childQueryWrappers = tableChildQuery == null ? new ArrayList<>()
+            : new ArrayList<>(tableChildQuery);
         childQueryWrappers.addAll(whereChildQuery);
         childQueryWrappers.addAll(havingChildQuery);
 
         return childQueryWrappers;
     }
 
-
     public String toSQL() {
         String sql = DialectFactory.getDialect().forSelectByQuery(this);
         return SqlUtil.replaceSqlParams(sql, getValueArray());
     }
-
 
     @Override
     public QueryWrapper clone() {
