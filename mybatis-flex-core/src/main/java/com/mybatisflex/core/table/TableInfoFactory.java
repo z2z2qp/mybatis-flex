@@ -218,8 +218,10 @@ public class TableInfoFactory {
                 if (Collection.class.isAssignableFrom(fieldType)) {
                     Type genericType = TypeParameterResolver.resolveFieldType(field, entityClass);
                     if (genericType instanceof ParameterizedType pt) {
-                        Class<?> actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
-                        tableInfo.addCollectionType(field, actualTypeArgument);
+                        Type actualTypeArgument = pt.getActualTypeArguments()[0];
+                        if (actualTypeArgument instanceof Class){
+                            tableInfo.addCollectionType(field, (Class<?>) actualTypeArgument);
+                        }
                     }
                 }
                 // 实体类嵌套

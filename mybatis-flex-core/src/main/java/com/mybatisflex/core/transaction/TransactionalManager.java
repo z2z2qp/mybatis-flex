@@ -35,7 +35,7 @@ public class TransactionalManager {
 
     private static final Log log = LogFactory.getLog(TransactionalManager.class);
 
-    //<xid : <datasource : connection>>
+    //<xid : <dataSourceKey : connection>>
     private static final ThreadLocal<Map<String, Map<String, Connection>>> CONNECTION_HOLDER
         = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
@@ -200,11 +200,12 @@ public class TransactionalManager {
             }
         } finally {
             holdMap.remove(xid);
+
             if (holdMap.isEmpty()) {
                 CONNECTION_HOLDER.remove();
             }
             if (exception != null) {
-                log.error("TransactionalManager.release() is error. cause: " + exception.getMessage(), exception);
+                log.error("TransactionalManager.release() is error. Cause: " + exception.getMessage(), exception);
             }
         }
     }

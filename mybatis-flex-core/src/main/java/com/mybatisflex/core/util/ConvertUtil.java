@@ -32,6 +32,7 @@ public class ConvertUtil {
         return (T) convert(value, targetClass, false);
     }
 
+    @SuppressWarnings("unchecked")
     public static Object convert(Object value, Class targetClass, boolean ignoreConvertError) {
         if (value == null && targetClass.isPrimitive()) {
             return getPrimitiveDefaultValue(targetClass);
@@ -101,7 +102,6 @@ public class ConvertUtil {
                 return Enum.valueOf(targetClass, value.toString());
             }
         }
-
         if (ignoreConvertError) {
             return null;
         } else {
@@ -240,16 +240,6 @@ public class ConvertUtil {
         }
 
         return (Boolean) b;
-    }
-
-    public static Number toNumber(Object o) {
-        if (o instanceof Number number) {
-            return number;
-        } else if (o == null) {
-            return null;
-        }
-        String s = o.toString();
-        return s.indexOf('.') != -1 ? Double.parseDouble(s) : Long.parseLong(s);
     }
 
 
