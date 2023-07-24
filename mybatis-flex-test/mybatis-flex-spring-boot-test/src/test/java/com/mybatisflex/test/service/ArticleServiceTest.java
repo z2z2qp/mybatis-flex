@@ -13,22 +13,33 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.spring.boot;
 
-import com.mybatisflex.core.mybatis.FlexConfiguration;
+package com.mybatisflex.test.service;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static com.mybatisflex.test.model.table.ArticleTableDef.ARTICLE;
 
 /**
- * 为 {@link FlexConfiguration} 做自定义的配置支持。
- * @author michael
+ * @author 王帅
+ * @since 2023-07-22
  */
-@FunctionalInterface
-public interface ConfigurationCustomizer {
+@SpringBootTest
+class ArticleServiceTest {
 
-    /**
-     * 自定义配置 {@link FlexConfiguration}。
-     *
-     * @param configuration MyBatis Flex Configuration
-     */
-    void customize(FlexConfiguration configuration);
+    @Autowired
+    ArticleService articleService;
+
+    @Test
+    void testChain() {
+        articleService.queryChain()
+            .select(ARTICLE.DEFAULT_COLUMNS)
+            .from(ARTICLE)
+            .where(ARTICLE.ID.ge(100))
+            .objList()
+            .forEach(System.out::println);
+    }
 
 }

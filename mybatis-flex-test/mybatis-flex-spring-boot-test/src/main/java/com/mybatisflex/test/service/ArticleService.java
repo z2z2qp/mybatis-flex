@@ -13,22 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.spring.boot;
 
-import com.mybatisflex.core.mybatis.FlexConfiguration;
+package com.mybatisflex.test.service;
+
+import com.mybatisflex.core.service.IService;
+import com.mybatisflex.test.model.Article;
 
 /**
- * 为 {@link FlexConfiguration} 做自定义的配置支持。
- * @author michael
+ * @author 王帅
+ * @since 2023-07-22
  */
-@FunctionalInterface
-public interface ConfigurationCustomizer {
-
-    /**
-     * 自定义配置 {@link FlexConfiguration}。
-     *
-     * @param configuration MyBatis Flex Configuration
-     */
-    void customize(FlexConfiguration configuration);
+public interface ArticleService extends IService<Article> {
 
 }

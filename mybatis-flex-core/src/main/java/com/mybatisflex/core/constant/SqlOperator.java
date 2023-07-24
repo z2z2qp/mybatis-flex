@@ -13,42 +13,61 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.core.query;
+package com.mybatisflex.core.constant;
 
 /**
  * @author michael
  */
+public enum SqlOperator {
 
-public enum SqlConnector {
+    // >
+    GT(SqlConsts.GT),
 
+    // >=
+    GE(SqlConsts.GE),
 
-    /**
-     * And
-     */
-    AND(" AND "),
-    //    AND_NOT(" AND NOT "),
-//    AND_EXISTS(" AND EXISTS "),
-//    AND_NOT_EXISTS(" AND NOT EXISTS "),
+    // <
+    LT(SqlConsts.LT),
 
-    /**
-     * OR
-     */
-    OR(" OR "),
-//    OR_NOT(" OR NOT "),
-//    OR_EXISTS(" OR EXISTS "),
-//    OR_NOT_EXISTS(" OR NOT EXISTS "),
-//    NOT(" NOT "),
+    // <=
+    LE(SqlConsts.LE),
+
+    // like
+    LIKE(SqlConsts.LIKE),
+
+    // not like
+    NOT_LIKE(SqlConsts.NOT_LIKE),
+
+    // =
+    EQUALS(SqlConsts.EQUALS),
+
+    // is null
+    IS_NULL(SqlConsts.IS_NULL),
+
+    // is not null
+    IS_NOT_NULL(SqlConsts.IS_NOT_NULL),
+
+    // in
+    IN(SqlConsts.IN),
+
+    // not in
+    NOT_IN(SqlConsts.NOT_IN),
+
+    // between
+    BETWEEN(SqlConsts.BETWEEN),
+
+    // not between
+    NOT_BETWEEN(SqlConsts.NOT_BETWEEN),
     ;
-
 
     private final String value;
 
-    SqlConnector(String value) {
+
+    SqlOperator(String value) {
         this.value = value;
     }
 
-    @Override
-    public String toString() {
+    public String getValue() {
         return value;
     }
 }

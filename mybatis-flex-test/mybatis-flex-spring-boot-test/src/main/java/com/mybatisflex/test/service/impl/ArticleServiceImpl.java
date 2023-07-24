@@ -13,22 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.spring.boot;
 
-import com.mybatisflex.core.mybatis.FlexConfiguration;
+package com.mybatisflex.test.service.impl;
+
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.mybatisflex.test.mapper.ArticleMapper;
+import com.mybatisflex.test.model.Article;
+import com.mybatisflex.test.service.ArticleService;
+import org.springframework.stereotype.Service;
 
 /**
- * 为 {@link FlexConfiguration} 做自定义的配置支持。
- * @author michael
+ * @author 王帅
+ * @since 2023-07-22
  */
-@FunctionalInterface
-public interface ConfigurationCustomizer {
-
-    /**
-     * 自定义配置 {@link FlexConfiguration}。
-     *
-     * @param configuration MyBatis Flex Configuration
-     */
-    void customize(FlexConfiguration configuration);
+@Service
+public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
 }

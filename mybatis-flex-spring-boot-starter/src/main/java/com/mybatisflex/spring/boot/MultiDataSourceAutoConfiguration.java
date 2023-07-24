@@ -18,7 +18,6 @@ package com.mybatisflex.spring.boot;
 import com.mybatisflex.core.datasource.DataSourceBuilder;
 import com.mybatisflex.core.datasource.FlexDataSource;
 import com.mybatisflex.spring.datasource.DataSourceAdvice;
-import com.mybatisflex.spring.datasource.DataSourceInterceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.aop.Advisor;
@@ -38,6 +37,7 @@ import java.util.Map;
 
 /**
  * MyBatis-Flex 多数据源的配置支持。
+ * @author michael
  */
 @ConditionalOnMybatisFlexDatasource()
 @Configuration(proxyBeanMethods = false)
@@ -73,6 +73,7 @@ public class MultiDataSourceAutoConfiguration {
         return flexDataSource;
     }
 
+
     /**
      * {@link com.mybatisflex.annotation.UseDataSource} 注解切换数据源切面。
      */
@@ -80,7 +81,7 @@ public class MultiDataSourceAutoConfiguration {
     @ConditionalOnMissingBean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public Advisor dataSourceAdvice() {
-        return new DataSourceAdvice(new DataSourceInterceptor());
+        return new DataSourceAdvice();
     }
 
 }
