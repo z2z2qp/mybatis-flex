@@ -15,6 +15,8 @@
  */
 package com.mybatisflex.test.controller;
 
+import com.mybatisflex.annotation.UseDataSource;
+import com.mybatisflex.core.datasource.DataSourceKey;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
@@ -31,6 +33,7 @@ import jakarta.annotation.Resource;
 import java.util.List;
 
 @RestController
+@UseDataSource("ds3333")
 public class AccountController {
 
     @Resource
@@ -79,17 +82,13 @@ public class AccountController {
         Row row2 = Db.selectOneById(null, "tb_account", "id", 2);
         System.out.println(">>>>>>> row2: " + row2);
 
-//        Account account1 = accountMapper.selectOneById(1L);
-//        Account account2 = accountMapper.selectOneById(2L);
-//
-//        accountService.update2();
-//
-//        if (true) {
-//            throw new IllegalStateException("aaa");
-//        }
-//
-//        System.out.println("selectOne >>>>  " + account1);
-//        System.out.println("selectOne >>>>  " + account2);
+        Account account = new Account();
+        account.setId(2L);
+        account.setUserName("haha1111");
+        accountMapper.update(account);
+
+        //嵌套事务
+        accountService.update2();
 
         return accountMapper.selectOneById(id);
     }
@@ -104,6 +103,14 @@ public class AccountController {
     @GetMapping("/paginate")
     Page<Account> paginate(@RequestParam(defaultValue = "1") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
         return accountMapper.paginate(pageNumber, pageSize, QueryWrapper.create());
+    }
+
+
+
+    @GetMapping("/ds")
+    @UseDataSource("ds2222")
+    public String ds() {
+        return ">>>>>ds: " + DataSourceKey.get();
     }
 
 }

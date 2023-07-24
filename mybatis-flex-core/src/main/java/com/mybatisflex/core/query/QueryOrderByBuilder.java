@@ -15,40 +15,30 @@
  */
 package com.mybatisflex.core.query;
 
+
+import com.mybatisflex.core.util.LambdaGetter;
+import com.mybatisflex.core.util.LambdaUtil;
+
 /**
+ * 排序字段构建器
  * @author michael
  */
+@SuppressWarnings("unchecked")
+public class QueryOrderByBuilder<Wrapper extends QueryWrapper> {
 
-public enum SqlConnector {
+    private Wrapper queryWrapper;
+    private QueryColumn orderByColumn;
 
-
-    /**
-     * And
-     */
-    AND(" AND "),
-    //    AND_NOT(" AND NOT "),
-//    AND_EXISTS(" AND EXISTS "),
-//    AND_NOT_EXISTS(" AND NOT EXISTS "),
-
-    /**
-     * OR
-     */
-    OR(" OR "),
-//    OR_NOT(" OR NOT "),
-//    OR_EXISTS(" OR EXISTS "),
-//    OR_NOT_EXISTS(" OR NOT EXISTS "),
-//    NOT(" NOT "),
-    ;
-
-
-    private final String value;
-
-    SqlConnector(String value) {
-        this.value = value;
+    public <T> QueryOrderByBuilder(Wrapper queryWrapper, LambdaGetter<T> getter) {
+        this.queryWrapper = queryWrapper;
+        this.orderByColumn = LambdaUtil.getQueryColumn(getter);
     }
 
-    @Override
-    public String toString() {
-        return value;
+    public Wrapper asc(){
+        return (Wrapper) queryWrapper.orderBy(orderByColumn.asc());
+    }
+
+    public Wrapper desc(){
+        return (Wrapper) queryWrapper.orderBy(orderByColumn.desc());
     }
 }
