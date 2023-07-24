@@ -29,8 +29,6 @@ import java.util.function.Consumer;
 
 public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
 
-    private QueryWrapper(){}
-
 
     public static QueryWrapper create() {
         return new QueryWrapper();

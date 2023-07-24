@@ -61,7 +61,7 @@ public class QueryWrapperChain<T> extends QueryWrapperAdapter<QueryWrapperChain<
         return SqlUtil.toBool(count());
     }
 
-    public T one() {
+    public Optional<T> one() {
         return baseMapper.selectOneByQuery(this);
     }
 
@@ -77,8 +77,14 @@ public class QueryWrapperChain<T> extends QueryWrapperAdapter<QueryWrapperChain<
         return baseMapper.selectOneWithRelationsByQueryAs(this, asType);
     }
 
+    /**
+     * 
+     * @return
+     * @see #one()
+     */
+    @Deprecated
     public Optional<T> oneOpt() {
-        return Optional.ofNullable(baseMapper.selectOneByQuery(this));
+        return one();
     }
 
     public <R> Optional<R> oneAsOpt(Class<R> asType) {
