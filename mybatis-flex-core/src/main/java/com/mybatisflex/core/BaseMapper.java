@@ -55,6 +55,12 @@ public interface BaseMapper<T> {
      */
     int DEFAULT_BATCH_SIZE = 1000;
 
+
+    default QueryWrapperChain<T> queryChain() {
+        return new QueryWrapperChain<>(this);
+    }
+
+
     // === 增（insert） ===
 
     /**
@@ -488,6 +494,16 @@ public interface BaseMapper<T> {
      */
     default T selectOneWithRelationsByQuery(QueryWrapper queryWrapper) {
         return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+    }
+
+    /**
+     * 根据主表主键来查询 1 条数据。
+     *
+     * @param id 主表主键
+     * @return 实体类数据
+     */
+    default T selectOneWithRelationsById(Serializable id) {
+        return MapperUtil.queryRelations(this, selectOneById(id));
     }
 
     /**
