@@ -47,6 +47,7 @@ import com.mybatisflex.core.query.FunctionQueryColumn;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.QueryWrapperChain;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
@@ -76,11 +77,9 @@ public interface BaseMapper<T> {
      */
     int DEFAULT_BATCH_SIZE = 1000;
 
-
     default QueryWrapperChain<T> queryChain() {
         return new QueryWrapperChain<>(this);
     }
-
 
     // === 增（insert） ===
 
@@ -563,7 +562,7 @@ public interface BaseMapper<T> {
      * @param id 主表主键
      * @return 实体类数据
      */
-    default T selectOneWithRelationsById(Serializable id) {
+    default Optional<T> selectOneWithRelationsById(Serializable id) {
         return MapperUtil.queryRelations(this, selectOneById(id));
     }
 

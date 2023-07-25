@@ -15,6 +15,18 @@
  */
 package com.mybatisflex.test;
 
+import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
+
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.apache.ibatis.logging.stdout.StdOutImpl;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+
 import com.mybatisflex.core.MybatisFlexBootstrap;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
@@ -25,17 +37,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.DbChain;
 import com.mybatisflex.core.update.UpdateWrapper;
 import com.mybatisflex.core.util.UpdateEntity;
-import org.apache.ibatis.logging.stdout.StdOutImpl;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-
-import javax.sql.DataSource;
-import java.util.List;
-
-import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
-
 
 public class AccountTester {
 
@@ -44,24 +45,23 @@ public class AccountTester {
     @BeforeClass
     public static void init() {
         DataSource dataSource = new EmbeddedDatabaseBuilder()
-            .setType(EmbeddedDatabaseType.H2)
-            .addScript("schema.sql")
-            .addScript("data.sql")
-            .build();
+                .setType(EmbeddedDatabaseType.H2)
+                .addScript("schema.sql")
+                .addScript("data.sql")
+                .build();
 
         MybatisFlexBootstrap bootstrap = MybatisFlexBootstrap.getInstance()
-            .setDataSource(dataSource)
-            .setLogImpl(StdOutImpl.class)
-            .addMapper(AccountMapper.class)
-            .start();
+                .setDataSource(dataSource)
+                .setLogImpl(StdOutImpl.class)
+                .addMapper(AccountMapper.class)
+                .start();
 
-        //开启审计功能
+        // 开启审计功能
         AuditManager.setAuditEnable(true);
 
-        //设置 SQL 审计收集器
+        // 设置 SQL 审计收集器
         MessageCollector collector = new ConsoleMessageCollector();
         AuditManager.setMessageCollector(collector);
-
 
         accountMapper = bootstrap.getMapper(AccountMapper.class);
     }
@@ -69,27 +69,27 @@ public class AccountTester {
     @Test
     public void testExecutor() {
         DbChain.create()
-            .select(ACCOUNT.ALL_COLUMNS)
-            .from(ACCOUNT)
-            .where(ACCOUNT.ID.ge(1))
-            .listAs(Account.class)
-            .forEach(System.out::println);
+                .select(ACCOUNT.ALL_COLUMNS)
+                .from(ACCOUNT)
+                .where(ACCOUNT.ID.ge(1))
+                .listAs(Account.class)
+                .forEach(System.out::println);
 
         AccountMapper accountBaseMapper = (AccountMapper) Mappers.ofEntityClass(Account.class);
 
         AccountMapper accountMapper = Mappers.ofMapperClass(AccountMapper.class);
         System.out.println(">>>>> : " + (accountBaseMapper == accountMapper));
 
-        Account account = accountBaseMapper.selectOneById(1);
-        System.out.println(">>>> account: "  + account);
+        var account = accountBaseMapper.selectOneById(1);
+        System.out.println(">>>> account: " + account);
     }
 
     @Test
     public void testLambda() {
         QueryWrapper queryWrapper = QueryWrapper.create();
         queryWrapper.where(Account::getId).ge(100)
-            .and(Account::getUserName).like("michael")
-            .or(Account::getUserName).like(null, If::notNull);
+                .and(Account::getUserName).like("michael")
+                .or(Account::getUserName).like(null, If::notNull);
         System.out.println(queryWrapper.toSQL());
     }
 
@@ -101,27 +101,23 @@ public class AccountTester {
         System.out.println(accounts);
     }
 
-
     @Test
     public void testSelectAsToDTO() {
         List<AccountDTO> accountDTOS = accountMapper.selectListByQueryAs(QueryWrapper.create(), AccountDTO.class);
         System.out.println(accountDTOS);
     }
 
-
     @Test
     public void testUpdate() {
         List<Account> accounts = accountMapper.selectAll();
         System.out.println(accounts);
 
-
         Account account = UpdateEntity.of(Account.class, 1);
         account.setUserName("lisi");
 
         UpdateWrapper.of(account)
-            .setRaw("age", "age + 1");
+                .setRaw("age", "age + 1");
         accountMapper.update(account);
-
 
         accounts = accountMapper.selectAll();
         System.out.println(accounts);
@@ -136,7 +132,6 @@ public class AccountTester {
         List<Account> accounts = accountMapper.selectAll();
         System.out.println(accounts);
 
-
         Account account = new Account();
         account.setId(4L);
         account.setUserName("test04");
@@ -147,6 +142,5 @@ public class AccountTester {
         System.out.println(accounts);
 
     }
-
 
 }
