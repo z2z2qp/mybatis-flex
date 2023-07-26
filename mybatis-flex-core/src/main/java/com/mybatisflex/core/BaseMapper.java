@@ -55,12 +55,6 @@ public interface BaseMapper<T> {
      */
     int DEFAULT_BATCH_SIZE = 1000;
 
-
-    default QueryWrapperChain<T> queryChain() {
-        return new QueryWrapperChain<>(this);
-    }
-
-
     // === 增（insert） ===
 
     /**
@@ -506,6 +500,20 @@ public interface BaseMapper<T> {
         return MapperUtil.queryRelations(this, selectOneById(id));
     }
 
+    /**
+     * 根据主表主键来查询 1 条数据。
+     * @param id 表主键
+     * @param asType 接收数据类型
+     * @return 实体类数据
+     */
+    default <R> R selectOneWithRelationsByIdAs(Serializable id, Class<R> asType) {
+        try {
+            MappedStatementTypes.setCurrentType(asType);
+            return (R) selectOneWithRelationsById(id);
+        } finally {
+            MappedStatementTypes.clear();
+        }
+    }
     /**
      * 根据查询条件来查询 1 条数据。
      *
