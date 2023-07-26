@@ -47,7 +47,6 @@ import com.mybatisflex.core.query.FunctionQueryColumn;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.QueryWrapperChain;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
@@ -76,10 +75,6 @@ public interface BaseMapper<T> {
      * 默认批量处理切片数量。
      */
     int DEFAULT_BATCH_SIZE = 1000;
-
-    default QueryWrapperChain<T> queryChain() {
-        return new QueryWrapperChain<>(this);
-    }
 
     // === 增（insert） ===
 
@@ -564,6 +559,22 @@ public interface BaseMapper<T> {
      */
     default Optional<T> selectOneWithRelationsById(Serializable id) {
         return MapperUtil.queryRelations(this, selectOneById(id));
+    }
+
+    /**
+     * 根据主表主键来查询 1 条数据。
+     * 
+     * @param id     表主键
+     * @param asType 接收数据类型
+     * @return 实体类数据
+     */
+    default <R> R selectOneWithRelationsByIdAs(Serializable id, Class<R> asType) {
+        try {
+            MappedStatementTypes.setCurrentType(asType);
+            return (R) selectOneWithRelationsById(id);
+        } finally {
+            MappedStatementTypes.clear();
+        }
     }
 
     /**

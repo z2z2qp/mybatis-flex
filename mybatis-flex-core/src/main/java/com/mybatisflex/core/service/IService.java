@@ -21,7 +21,7 @@ import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.QueryWrapperChain;
+import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.CollectionUtil;
@@ -530,8 +530,8 @@ public interface IService<T> {
         return QueryWrapper.create();
     }
 
-    default QueryWrapperChain<T> queryChain() {
-        return getMapper().queryChain();
+    default QueryChain<T> queryChain() {
+        return new QueryChain<>(getMapper());
     }
 
 }

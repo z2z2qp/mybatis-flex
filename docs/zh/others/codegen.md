@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.mybatis-flex</groupId>
     <artifactId>mybatis-flex-codegen</artifactId>
-    <version>1.5.2</version>
+    <version>1.5.3</version>
 </dependency>
 ```
 
@@ -449,8 +449,21 @@ public class ColumnConfig implements Serializable {
 
     // 是否是租户列
     private Boolean tenantId;
+
+    /**
+     * 属性的类型。
+     * 原始类型直接写类型名称，例：int/long/float/double/boolean
+     * 对象类型请写对应类的全限定名，例：java.lang.String/com.abc.def.enums.Gender
+     */
+    private String propertyType;
+
+    /**
+     * 属性的默认值, 例：long类型默认值：0L，枚举类型默认值：Gender.MALE
+     */
+    private String propertyDefaultValue;
 }
 ```
+
 
 ## 自定义属性类型
 
@@ -474,40 +487,30 @@ public class EnjoyTemplate implements ITemplate {
     private Engine engine;
 
     public EnjoyTemplate() {
-        engine = Engine.create("mybatis-flex", engine -> {
-            engine.setToClassPathSourceFactory();
-            engine.addSharedMethod(StringUtil.class);
-        });
+        Engine engine = Engine.use(engineName);
+        if (engine == null) {
+            engine = Engine.create(engineName, e -> {
+                e.addSharedStaticMethod(StringUtil.class);
+                e.setSourceFactory(new FileAndClassPathSourceFactory());
+            });
+        }
+        this.engine = engine;
+
+        // 以下配置将支持 user.girl 表达式去调用 user 对象的 boolean isGirl() 方法
         Engine.addFieldGetterToFirst(new FieldGetters.IsMethodFieldGetter());
     }
 
-    /**
-     * 生成 entity 的方法实现
-     */
     @Override
-    public void generateEntity(GlobalConfig globalConfig, Table table, File entityJavaFile) throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("globalConfig", globalConfig);
-        params.put("table", table);
-
-
-        FileOutputStream fileOutputStream = new FileOutputStream(entityJavaFile);
-        engine.getTemplate("/templates/enjoy/entity.tpl").render(params, fileOutputStream);
-    }
-
-
-    /**
-     * 生成 mapper 的方法实现
-     */
-    @Override
-    public void generateMapper(GlobalConfig globalConfig, Table table, File mapperJavaFile) throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("globalConfig", globalConfig);
-        params.put("table", table);
-
-
-        FileOutputStream fileOutputStream = new FileOutputStream(mapperJavaFile);
-        engine.getTemplate("/templates/enjoy/mapper.tpl").render(params, fileOutputStream);
+    public void generate(Map<String, Object> params, String templateFilePath, File generateFile) {
+        if (!generateFile.getParentFile().exists() && !generateFile.getParentFile().mkdirs()) {
+            throw new IllegalStateException("Can not mkdirs by dir: " + generateFile.getParentFile());
+        }
+        // 开始生成文件
+        try (FileOutputStream fileOutputStream = new FileOutputStream(generateFile)) {
+            engine.getTemplate(templateFilePath).render(params, fileOutputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 ```
