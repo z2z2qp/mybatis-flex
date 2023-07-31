@@ -18,8 +18,9 @@ MyBatis-Flex 使用了 APT（Annotation Processing Tool）技术，在项目编�
 | processor.enable                        | 全局启用apt开关            | true/false                                               | true                                 |
 | processor.stopBubbling                  | 是否停止向上级合并配           | true/false                                               | false                                |
 | processor.genPath                       | APT 代码生成路径           | 合法的绝对或相对路径                                               | target/generated-sources/annotations |
+| processor.charset                       | APT 代码生成文件字符集        | UTF-8                                                    | target/generated-sources/annotations |
 | processor.allInTables.enable            | 是否所有的类都生成在 Tables 类里 | true/false                                               | false                                |
-| processor.allInTables.package           | Tables 类名            | 合法的包名                                                    | ${entityPackage}.table               |
+| processor.allInTables.package           | Tables 包名            | 合法的包名                                                    | ${entityPackage}.table               |
 | processor.allInTables.className         | Tables 类名            | 合法的类名                                                    | Tables                               |
 | processor.mapper.generateEnable         | 开启 Mapper 自动生成       | true/false                                               | false                                |
 | processor.mapper.annotation             | 开启 @Mapper 注解        | true/false                                               | false                                |
@@ -219,7 +220,7 @@ pom.xml 添加 `annotationProcessorPaths` 配置，
 ```
 dependencies {
     ...
-    annotationProcessor 'com.mybatis-flex:mybatis-flex-processor:<version>1.5.3</version>'
+    annotationProcessor 'com.mybatis-flex:mybatis-flex-processor:<version>1.5.4</version>'
 }
 ```
 

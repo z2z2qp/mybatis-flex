@@ -118,6 +118,20 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return this;
     }
 
+    public QueryWrapper select(QueryColumn[] queryColumns, QueryColumn... queryColumns2) {
+        for (QueryColumn column : queryColumns) {
+            if (column != null) {
+                addSelectColumn(column);
+            }
+        }
+        for (QueryColumn column : queryColumns2) {
+            if (column != null) {
+                addSelectColumn(column);
+            }
+        }
+        return this;
+    }
+
     public QueryWrapper from(TableDef... tableDefs) {
         for (TableDef tableDef : tableDefs) {
             from(new QueryTable(tableDef));
@@ -202,6 +216,10 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return new QueryConditionBuilder<>(this, LambdaUtil.getQueryColumn(fn), SqlConnector.AND);
     }
 
+    public QueryWrapper where(Consumer<QueryWrapper> consumer) {
+        return and(consumer);
+    }
+
     public QueryWrapper and(QueryCondition queryCondition) {
         return addWhereQueryCondition(queryCondition, SqlConnector.AND);
     }
@@ -221,6 +239,13 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     }
 
     public QueryWrapper and(Consumer<QueryWrapper> consumer) {
+        return and(consumer, true);
+    }
+
+    public QueryWrapper and(Consumer<QueryWrapper> consumer, boolean condition) {
+        if (!condition) {
+            return this;
+        }
         QueryWrapper newWrapper = new QueryWrapper();
         consumer.accept(newWrapper);
         QueryCondition whereQueryCondition = newWrapper.whereQueryCondition;
@@ -263,6 +288,13 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     }
 
     public QueryWrapper or(Consumer<QueryWrapper> consumer) {
+        return or(consumer, true);
+    }
+
+    public QueryWrapper or(Consumer<QueryWrapper> consumer, boolean condition) {
+        if (condition) {
+            return this;
+        }
         QueryWrapper newWrapper = new QueryWrapper();
         consumer.accept(newWrapper);
         QueryCondition whereQueryCondition = newWrapper.whereQueryCondition;

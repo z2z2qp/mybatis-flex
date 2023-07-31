@@ -23,12 +23,26 @@ import java.util.function.Predicate;
 
 /**
  * 类实例创建者创建者
- * Created by michael on 17/3/21.
+ *
+ * @author michael
+ * @date 17/3/21
  */
 public class ClassUtil {
 
     private ClassUtil() {
     }
+
+    private static final String[] OBJECT_METHODS = new String[]{
+        "toString",
+        "getClass",
+        "equals",
+        "hashCode",
+        "wait",
+        "notify",
+        "notifyAll",
+        "clone",
+        "finalize"
+    };
 
     //proxy frameworks
     private static final List<String> PROXY_CLASS_NAMES = Arrays.asList("net.sf.cglib.proxy.Factory"
@@ -113,9 +127,9 @@ public class ClassUtil {
             Constructor<?> defaultConstructor = null;
             Constructor<?> otherConstructor = null;
 
-            var declaredConstructors = clazz.getDeclaredConstructors();
-            for (var constructor : declaredConstructors) {
-                if (constructor.getParameterCount() == 0) {
+            Constructor<?>[] declaredConstructors = clazz.getDeclaredConstructors();
+            for (Constructor<?> constructor : declaredConstructors) {
+                if (constructor.getParameterCount() == 0 && Modifier.isPublic(constructor.getModifiers())) {
                     defaultConstructor = constructor;
                 } else if (Modifier.isPublic(constructor.getModifiers())) {
                     otherConstructor = constructor;
@@ -134,6 +148,16 @@ public class ClassUtil {
                     }
                 }
                 return (T) otherConstructor.newInstance(parameters);
+            }
+            // 没有任何构造函数的情况下，去查找 static 工厂方法，满足 lombok 注解的需求
+            else {
+                Method factoryMethod = ClassUtil.getFirstMethod(clazz, m -> m.getParameterCount() == 0
+                    && clazz == m.getReturnType()
+                    && Modifier.isPublic(m.getModifiers())
+                    && Modifier.isStatic(m.getModifiers()));
+                if (factoryMethod != null) {
+                    return (T) factoryMethod.invoke(null);
+                }
             }
             throw new IllegalArgumentException("the class \"" + clazz.getName() + "\" has no constructor.");
         } catch (Exception e) {
@@ -276,6 +300,10 @@ public class ClassUtil {
         } else {
             return false;
         }
+    }
+
+    public static boolean isObjectMethod(String methodName) {
+        return ArrayUtil.contains(OBJECT_METHODS, methodName);
     }
 
 }

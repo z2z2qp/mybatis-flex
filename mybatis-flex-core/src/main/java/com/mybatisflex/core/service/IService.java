@@ -19,10 +19,11 @@ import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.exception.MybatisFlexException;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.core.row.Db;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.SqlUtil;
@@ -96,14 +97,8 @@ public interface IService<T> {
      * @return {@code true} 保存成功，{@code false} 保存失败。
      */
     default boolean saveBatch(Collection<T> entities, int batchSize) {
-        List<T> entityList = CollectionUtil.toList(entities);
         Class<BaseMapper<T>> usefulClass = (Class<BaseMapper<T>>) ClassUtil.getUsefulClass(getMapper().getClass());
-        return SqlUtil.toBool(
-            Db.executeBatch(entities.size()
-                , batchSize
-                , usefulClass
-                , (mapper, integer) -> mapper.insert(entityList.get(integer)))
-        );
+        return SqlUtil.toBool(Db.executeBatch(entities, batchSize, usefulClass, BaseMapper::insert));
     }
 
     /**
@@ -124,14 +119,8 @@ public interface IService<T> {
      * @return {@code true} 保存成功，{@code false} 保存失败。
      */
     default boolean saveBatchSelective(Collection<T> entities, int batchSize) {
-        List<T> entityList = CollectionUtil.toList(entities);
         Class<BaseMapper<T>> usefulClass = (Class<BaseMapper<T>>) ClassUtil.getUsefulClass(getMapper().getClass());
-        return SqlUtil.toBool(
-            Db.executeBatch(entities.size()
-                , batchSize
-                , usefulClass
-                , (mapper, integer) -> mapper.insertSelective(entityList.get(integer)))
-        );
+        return SqlUtil.toBool(Db.executeBatch(entities, batchSize, usefulClass, BaseMapper::insertSelective));
     }
 
     // ===== 删除（删）操作 =====
@@ -268,16 +257,8 @@ public interface IService<T> {
      * @return {@code true} 更新成功，{@code false} 更新失败。
      */
     default boolean updateBatch(Collection<T> entities, int batchSize) {
-        List<T> entityList = CollectionUtil.toList(entities);
-        // BaseMapper 是经过 Mybatis 动态代理处理过的对象，需要获取原始 BaseMapper 类型
         Class<BaseMapper<T>> usefulClass = (Class<BaseMapper<T>>) ClassUtil.getUsefulClass(getMapper().getClass());
-        return SqlUtil.toBool(
-            Db.executeBatch(
-                entityList.size()
-                , batchSize
-                , usefulClass
-                , (mapper, index) -> mapper.update(entityList.get(index)))
-        );
+        return SqlUtil.toBool(Db.executeBatch(entities, batchSize, usefulClass, BaseMapper::update));
     }
 
 
@@ -526,12 +507,33 @@ public interface IService<T> {
         return getMapper().paginateAs(page, query, asType);
     }
 
+    // ===== 查询包装器操作 =====
+
+    /**
+     * 默认 {@link QueryWrapper} 构建。
+     *
+     * @return {@link QueryWrapper} 对象
+     */
     default QueryWrapper query() {
         return QueryWrapper.create();
     }
 
+    /**
+     * 链式查询。
+     *
+     * @return {@link QueryChain} 对象
+     */
     default QueryChain<T> queryChain() {
-        return new QueryChain<>(getMapper());
+        return QueryChain.of(getMapper());
+    }
+
+    /**
+     * 链式更新。
+     *
+     * @return {@link UpdateChain} 对象
+     */
+    default UpdateChain<T> updateChain() {
+        return UpdateChain.create(getMapper());
     }
 
 }

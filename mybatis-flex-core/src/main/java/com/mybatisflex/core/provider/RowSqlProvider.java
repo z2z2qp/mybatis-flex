@@ -18,7 +18,6 @@ package com.mybatisflex.core.provider;
 import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.dialect.DialectFactory;
 import com.mybatisflex.core.exception.FlexAssert;
-import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
@@ -80,7 +79,7 @@ public class RowSqlProvider {
     public static String insertBatchWithFirstRowColumns(Map params) {
         List<Row> rows = ProviderUtil.getRows(params);
 
-        FlexAssert.notEmpty(rows, "rows can not be null or empty.");
+        FlexAssert.notEmpty(rows, "rows");
 
         String tableName = ProviderUtil.getTableName(params);
         String schema = ProviderUtil.getSchemaName(params);
@@ -110,7 +109,7 @@ public class RowSqlProvider {
     public static String deleteById(Map params) {
         Object[] primaryValues = ProviderUtil.getPrimaryValues(params);
 
-        FlexAssert.notEmpty(primaryValues, "primaryValue can not be null or empty.");
+        FlexAssert.notEmpty(primaryValues, "primaryValues");
 
         String schema = ProviderUtil.getSchemaName(params);
         String tableName = ProviderUtil.getTableName(params);
@@ -212,7 +211,7 @@ public class RowSqlProvider {
     public static String updateBatchById(Map params) {
         List<Row> rows = ProviderUtil.getRows(params);
 
-        FlexAssert.notEmpty(rows, "rows can not be null or empty.");
+        FlexAssert.notEmpty(rows, "rows");
 
         String schema = ProviderUtil.getSchemaName(params);
         String tableName = ProviderUtil.getTableName(params);
@@ -247,7 +246,7 @@ public class RowSqlProvider {
         Object[] primaryValues = tableInfo.buildPkSqlArgs(entity);
         Object[] tenantIdArgs = tableInfo.buildTenantIdArgs();
 
-        FlexExceptions.assertAreNotNull(primaryValues, "The value of primary key must not be null, entity[%s]", entity);
+        FlexAssert.assertAreNotNull(primaryValues, "The value of primary key must not be null, entity[%s]", entity);
 
         ProviderUtil.setSqlArgs(params, ArrayUtil.concat(updateValues, primaryValues, tenantIdArgs));
 

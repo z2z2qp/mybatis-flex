@@ -20,6 +20,7 @@ import com.mybatisflex.core.activerecord.query.QueryModel;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.util.SqlUtil;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,8 +33,8 @@ import java.util.Optional;
  */
 @SuppressWarnings({ "unused", "unchecked" })
 public abstract class Model<T extends Model<T>>
-        extends QueryModel<T>
-        implements MapperModel<T> {
+    extends QueryModel<T>
+    implements MapperModel<T>, Serializable {
 
     /**
      * 根据实体类构建的条件删除数据。
@@ -41,7 +42,7 @@ public abstract class Model<T extends Model<T>>
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
     public boolean remove() {
-        return SqlUtil.toBool(baseMapper().deleteByQuery(getQueryWrapper()));
+        return SqlUtil.toBool(baseMapper().deleteByQuery(queryWrapper()));
     }
 
     /**
@@ -60,7 +61,7 @@ public abstract class Model<T extends Model<T>>
      * @return {@code true} 更新成功，{@code false} 更新失败
      */
     public boolean update(boolean ignoreNulls) {
-        return SqlUtil.toBool(baseMapper().updateByQuery((T) this, ignoreNulls, getQueryWrapper()));
+        return SqlUtil.toBool(baseMapper().updateByQuery((T) this, ignoreNulls, queryWrapper()));
     }
 
     /**
@@ -69,7 +70,7 @@ public abstract class Model<T extends Model<T>>
      * @return 数据数量
      */
     public long count() {
-        return baseMapper().selectCountByQuery(getQueryWrapper());
+        return baseMapper().selectCountByQuery(queryWrapper());
     }
 
     /**
@@ -87,7 +88,16 @@ public abstract class Model<T extends Model<T>>
      * @return 数据
      */
     public Optional<T> one() {
-        return baseMapper().selectOneByQuery(getQueryWrapper().limit(1));
+        return baseMapper().selectOneByQuery(queryWrapper());
+    }
+
+    /**
+     * 根据实体类构建的条件获取一条数据，并查询 {@code @Relation} 注解关联的内容。
+     *
+     * @return 数据
+     */
+    public T oneWithRelations() {
+        return baseMapper().selectOneWithRelationsByQuery(queryWrapper().limit(1));
     }
 
     /**
@@ -102,12 +112,30 @@ public abstract class Model<T extends Model<T>>
     }
 
     /**
+     * 根据实体类构建的条件获取一条数据，并查询 {@code @Relation} 注解关联的内容，封装为 {@link Optional} 返回。
+     *
+     * @return 数据
+     */
+    public Optional<T> oneWithRelationsOpt() {
+        return Optional.ofNullable(oneWithRelations());
+    }
+
+    /**
      * 根据实体类构建的条件获取多条数据。
      *
      * @return 数据列表
      */
     public List<T> list() {
-        return baseMapper().selectListByQuery(getQueryWrapper());
+        return baseMapper().selectListByQuery(queryWrapper());
+    }
+
+    /**
+     * 根据实体类构建的条件获取多条数据，并查询 {@code @Relation} 注解关联的内容。
+     *
+     * @return 数据列表
+     */
+    public List<T> listWithRelations() {
+        return baseMapper().selectListWithRelationsByQuery(queryWrapper());
     }
 
     /**
@@ -117,7 +145,17 @@ public abstract class Model<T extends Model<T>>
      * @return 分页数据
      */
     public Page<T> page(Page<T> page) {
-        return baseMapper().paginate(page, getQueryWrapper());
+        return baseMapper().paginate(page, queryWrapper());
+    }
+
+    /**
+     * 根据实体类构建的条件获取分页数据，并查询 {@code @Relation} 注解关联的内容。
+     *
+     * @param page 分页对象
+     * @return 分页数据
+     */
+    public Page<T> pageWithRelations(Page<T> page) {
+        return baseMapper().paginateWithRelations(page, queryWrapper());
     }
 
 }

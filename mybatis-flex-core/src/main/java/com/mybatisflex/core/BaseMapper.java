@@ -267,7 +267,7 @@ public interface BaseMapper<T> {
      * @return 受影响的行数
      */
     default int deleteByMap(Map<String, Object> whereConditions) {
-        FlexAssert.notEmpty(whereConditions, "deleteByMap is not allow empty map.");
+        FlexAssert.notEmpty(whereConditions, "whereConditions");
         return deleteByQuery(QueryWrapper.create().where(whereConditions));
     }
 
@@ -278,7 +278,7 @@ public interface BaseMapper<T> {
      * @return 受影响的行数
      */
     default int deleteByCondition(QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return deleteByQuery(QueryWrapper.create().where(whereConditions));
     }
 
@@ -325,7 +325,7 @@ public interface BaseMapper<T> {
      * @return 受影响的行数
      */
     default int updateByMap(T entity, Map<String, Object> whereConditions) {
-        FlexAssert.notEmpty(whereConditions, "updateByMap is not allow empty map.");
+        FlexAssert.notEmpty(whereConditions, "whereConditions");
         return updateByQuery(entity, QueryWrapper.create().where(whereConditions));
     }
 
@@ -338,7 +338,7 @@ public interface BaseMapper<T> {
      * @return 受影响的行数
      */
     default int updateByMap(T entity, boolean ignoreNulls, Map<String, Object> whereConditions) {
-        FlexAssert.notEmpty(whereConditions, "updateByMap is not allow empty map.");
+        FlexAssert.notEmpty(whereConditions, "whereConditions");
         return updateByQuery(entity, ignoreNulls, QueryWrapper.create().where(whereConditions));
     }
 
@@ -350,7 +350,7 @@ public interface BaseMapper<T> {
      * @return 受影响的行数
      */
     default int updateByCondition(T entity, QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return updateByQuery(entity, QueryWrapper.create().where(whereConditions));
     }
 
@@ -363,7 +363,7 @@ public interface BaseMapper<T> {
      * @return 受影响的行数
      */
     default int updateByCondition(T entity, boolean ignoreNulls, QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return updateByQuery(entity, ignoreNulls, QueryWrapper.create().where(whereConditions));
     }
 
@@ -394,42 +394,45 @@ public interface BaseMapper<T> {
 
     /**
      * 执行类似 {@code update table set field = field + 1 where ... } 的场景。
-     *
+     * TODO: 2023/7/27  该方法将在 v1.6.0 被删除
      * @param fieldName    字段名
      * @param value        值（大于等于 0 加，小于 0 减）
      * @param queryWrapper 条件
      * @return 受影响的行数
      * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
      */
+    @Deprecated
     @UpdateProvider(type = EntitySqlProvider.class, method = "updateNumberAddByQuery")
     int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value,
             @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
     /**
      * 执行类似 {@code update table set field = field + 1 where ... } 的场景。
-     *
+     * TODO: 该方法将在 v1.6.0 被删除
      * @param column       字段名
      * @param value        值（大于等于 0 加，小于 0 减）
      * @param queryWrapper 条件
      * @return 受影响的行数
      * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
      */
+    @Deprecated
     default int updateNumberAddByQuery(QueryColumn column, Number value, QueryWrapper queryWrapper) {
-        FlexAssert.notNull(value, "add value can not be null.");
+        FlexAssert.notNull(value, "value");
         return updateNumberAddByQuery(column.getName(), value, queryWrapper);
     }
 
     /**
      * 执行类似 {@code update table set field = field + 1 where ... } 的场景。
-     *
+     * TODO: 该方法将在 v1.6.0 被删除
      * @param fn           字段名
      * @param value        值（大于等于 0 加，小于 0 减）
      * @param queryWrapper 条件
      * @return 受影响的行数
      * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
      */
+    @Deprecated
     default int updateNumberAddByQuery(LambdaGetter<T> fn, Number value, QueryWrapper queryWrapper) {
-        FlexAssert.notNull(value, "add value can not be null.");
+        FlexAssert.notNull(value, "value");
         TableInfo tableInfo = TableInfoFactory.ofMapperClass(ClassUtil.getUsefulClass(getClass()));
         String column = tableInfo.getColumnByProperty(LambdaUtil.getFieldName(fn));
         return updateNumberAddByQuery(column, value, queryWrapper);
@@ -469,7 +472,7 @@ public interface BaseMapper<T> {
      * @return entity 数据
      */
     default Optional<T> selectOneByMap(Map<String, Object> whereConditions) {
-        FlexAssert.notEmpty(whereConditions, "whereConditions map can not be null or empty.");
+        FlexAssert.notEmpty(whereConditions, "whereConditions");
         return selectOneByQuery(QueryWrapper.create().where(whereConditions).limit(1));
     }
 
@@ -484,8 +487,7 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default Optional<T> selectOneByCondition(QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
-
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return selectOneByQuery(QueryWrapper.create().where(whereConditions).limit(1));
     }
 
@@ -526,7 +528,7 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default T selectOneWithRelationsByMap(Map<String, Object> whereConditions) {
-        FlexAssert.notEmpty(whereConditions, "whereConditions map can not be null or empty.");
+        FlexAssert.notEmpty(whereConditions, "whereConditions");
         return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions).limit(1));
     }
 
@@ -537,7 +539,7 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default T selectOneWithRelationsByCondition(QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions).limit(1));
     }
 
@@ -620,7 +622,7 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default List<T> selectListByMap(Map<String, Object> whereConditions) {
-        FlexAssert.notEmpty(whereConditions, "whereConditions map can not be null or empty.");
+        FlexAssert.notEmpty(whereConditions, "whereConditions");
         return selectListByQuery(QueryWrapper.create().where(whereConditions));
     }
 
@@ -636,7 +638,7 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default List<T> selectListByMap(Map<String, Object> whereConditions, int count) {
-        FlexAssert.notEmpty(whereConditions, "whereConditions map can not be null or empty.");
+        FlexAssert.notEmpty(whereConditions, "whereConditions");
         return selectListByQuery(QueryWrapper.create().where(whereConditions).limit(count));
     }
 
@@ -651,7 +653,7 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default List<T> selectListByCondition(QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return selectListByQuery(QueryWrapper.create().where(whereConditions));
     }
 
@@ -667,7 +669,7 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default List<T> selectListByCondition(QueryCondition whereConditions, int count) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return selectListByQuery(QueryWrapper.create().where(whereConditions).limit(count));
     }
 
@@ -950,7 +952,7 @@ public interface BaseMapper<T> {
      * @return 数据量
      */
     default long selectCountByCondition(QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         return selectCountByQuery(QueryWrapper.create().where(whereConditions));
     }
 
@@ -1060,7 +1062,7 @@ public interface BaseMapper<T> {
      * @return 分页数据
      */
     default Page<T> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, QueryWrapper.create().where(whereConditions));
     }
@@ -1081,7 +1083,7 @@ public interface BaseMapper<T> {
      * @return 分页数据
      */
     default Page<T> paginateWithRelations(int pageNumber, int pageSize, int totalRow, QueryCondition whereConditions) {
-        FlexAssert.notNull(whereConditions, "whereConditions can not be null.");
+        FlexAssert.notNull(whereConditions, "whereConditions");
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginateWithRelations(page, QueryWrapper.create().where(whereConditions));
     }

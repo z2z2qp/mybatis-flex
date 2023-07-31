@@ -628,9 +628,11 @@ public class TableInfo {
 
                 if (value != null) {
                     ColumnInfo columnInfo = columnInfoMapping.get(column);
-                    var typeHandler = columnInfo.buildTypeHandler();
-                    if (typeHandler != null) {
-                        value = new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
+                    if (columnInfo != null) {
+                        var typeHandler = columnInfo.buildTypeHandler();
+                        if (typeHandler != null) {
+                            value = new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
+                        }
                     }
                 }
 
@@ -1043,7 +1045,7 @@ public class TableInfo {
         Object value = getPropertyValue(metaObject, columnInfo.property);
 
         if (value != null) {
-            TypeHandler typeHandler = columnInfo.buildTypeHandler();
+            var typeHandler = columnInfo.buildTypeHandler();
             if (typeHandler != null) {
                 return new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
             }
@@ -1073,7 +1075,7 @@ public class TableInfo {
      * @return entity
      */
     public <T> T newInstanceByRow(Row row, int index) {
-        Object instance = ClassUtil.newInstance(entityClass);
+        var instance = ClassUtil.newInstance(entityClass);
         MetaObject metaObject = EntityMetaObject.forObject(instance, reflectorFactory);
         Set<String> rowKeys = row.keySet();
         columnInfoMapping.forEach((column, columnInfo) -> {

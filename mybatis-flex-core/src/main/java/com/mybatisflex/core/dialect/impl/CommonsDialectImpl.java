@@ -19,6 +19,7 @@ import com.mybatisflex.core.dialect.IDialect;
 import com.mybatisflex.core.dialect.KeywordWrap;
 import com.mybatisflex.core.dialect.LimitOffsetProcessor;
 import com.mybatisflex.core.exception.FlexExceptions;
+import com.mybatisflex.core.exception.locale.LocalizedFormats;
 import com.mybatisflex.core.logicdelete.LogicDeleteManager;
 import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.row.Row;
@@ -248,7 +249,7 @@ public class CommonsDialectImpl implements IDialect {
 
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables == null || queryTables.size() != 1) {
-            throw FlexExceptions.wrap("update sql must need 1 table.");
+            throw FlexExceptions.wrap(LocalizedFormats.UPDATE_ONLY_SUPPORT_1_TABLE);
         }
 
         //fix: support schema
@@ -765,7 +766,7 @@ public class CommonsDialectImpl implements IDialect {
         if (StringUtil.isNotBlank(versionColumn)) {
             Object versionValue = tableInfo.buildColumnSqlArg(entity, versionColumn);
             if (versionValue == null) {
-                throw FlexExceptions.wrap("The version value of entity[%s] must not be null.", entity);
+                throw FlexExceptions.wrap(LocalizedFormats.ENTITY_VERSION_NULL, entity);
             }
             sql.append(AND).append(wrap(versionColumn)).append(EQUALS).append(versionValue);
         }
@@ -781,8 +782,8 @@ public class CommonsDialectImpl implements IDialect {
         Set<String> updateColumns = tableInfo.obtainUpdateColumns(entity, ignoreNulls, true);
         Map<String, RawValue> rawValueMap = tableInfo.obtainUpdateRawValueMap(entity);
 
-        sql.append(UPDATE).append(forHint(CPI.getHint(queryWrapper)))
-            .append(tableInfo.getWrapSchemaAndTableName(this)).append(SET);
+        sql.append(UPDATE).append(forHint(CPI.getHint(queryWrapper)));
+        sql.append(tableInfo.getWrapSchemaAndTableName(this)).append(SET);
 
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
 
@@ -813,7 +814,7 @@ public class CommonsDialectImpl implements IDialect {
 
         //不允许全量更新
         if (StringUtil.isBlank(whereConditionSql)) {
-            throw new IllegalArgumentException("Not allowed UPDATE a table without where condition.");
+            throw FlexExceptions.wrap(LocalizedFormats.UPDATE_OR_DELETE_NOT_ALLOW);
         }
 
         sql.append(WHERE).append(whereConditionSql);
@@ -843,7 +844,7 @@ public class CommonsDialectImpl implements IDialect {
 
         //不允许全量更新
         if (StringUtil.isBlank(whereConditionSql)) {
-            throw new IllegalArgumentException("Not allowed UPDATE a table without where condition.");
+            throw FlexExceptions.wrap(LocalizedFormats.UPDATE_OR_DELETE_NOT_ALLOW);
         }
 
         sql.append(WHERE).append(whereConditionSql);
@@ -992,12 +993,12 @@ public class CommonsDialectImpl implements IDialect {
             if (StringUtil.isNotBlank(whereSql)) {
                 sqlBuilder.append(WHERE).append(whereSql);
             } else if (!allowNoCondition) {
-                throw new IllegalArgumentException("Not allowed DELETE or UPDATE a table without where condition.");
+                throw FlexExceptions.wrap(LocalizedFormats.UPDATE_OR_DELETE_NOT_ALLOW);
             }
         } else {
             // whereQueryCondition == null
             if (!allowNoCondition) {
-                throw new IllegalArgumentException("Not allowed DELETE or UPDATE a table without where condition.");
+                throw FlexExceptions.wrap(LocalizedFormats.UPDATE_OR_DELETE_NOT_ALLOW);
             }
         }
     }
