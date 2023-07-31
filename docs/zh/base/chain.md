@@ -4,6 +4,7 @@
 
 - **QueryChain**：链式查询
 - **UpdateChain**：链式更新
+- **DbChain**：链式调用 [Db + Row](./db-row.md)
 
 
 ## QueryChain 示例
@@ -29,7 +30,7 @@ class ArticleServiceTest {
 }
 ```
 
-若不是在 Service 中，我们也可以通过 `QueryChain.create` 方法，自己创建一个 `QueryChain` 实例，代码如下：
+若不是在 Service 中，我们也可以通过 `QueryChain.of(mapper)` 方法，自己创建一个 `QueryChain` 实例，代码如下：
 
 ```java
 List<Article> articles = QueryChain.of(mapper)
@@ -75,6 +76,8 @@ public void testUpdateChain2() {
 
     //查询所有数据并打印
     QueryChain.of(accountMapper)
+        .where(Account::getId).ge(100)
+        .and(Account::getAge).eq(18)
         .list()
         .forEach(System.out::println);
 }
@@ -114,14 +117,14 @@ WHERE  `id` >= 100 AND `age` = 18
 ### `list()` 系列方法
 
 - list()：查询数据列表
-- listWithRelations()：查询数据列表极其关联数据
+- listWithRelations()：查询数据列表及其关联数据
 - listAs()：查询数据列表，并直接转换为 vo、dto 等
 - listWithRelationsAs()：查询数据列表，及其关联数据，并直接转换为 vo、dto 等
 
 ### `page()` 系列方法
 
 - page(page)：分页查询数据列表
-- pageWithRelations(page)：分页查询数据列表极其关联数据
+- pageWithRelations(page)：分页查询数据列表及其关联数据
 - pageAs(page)：分页查询数据列表，并直接转换为 vo、dto 等
 - pageWithRelationsAs(page)：分页查询数据列表，及其关联数据，并直接转换为 vo、dto 等
 
@@ -184,7 +187,7 @@ public class ArticleVo {
 ArticleVo articleVo = articleService.queryChain()
     .select(
         ARTICLE.ALL_COLUMNS,
-        max(ARTICLE.comments).as(ArticleVo::maxCommments)
+        max(ARTICLE.comments).as(ArticleVo::maxComments)
     ).from(ARTICLE)
     .where(ARTICLE.ID.ge(100))
     .limit(1)
@@ -228,3 +231,24 @@ ArticleVo articleVo = articleService.queryChain()
 > 通过 `oneWithRelationsAs` 方法查询 `ArticleVo` 及其关联数据（多对多的文章分类）。
 > 更多关于关联查询的内容请参考章节：[《关联查询》](/zh/base/relations-query.html)。
 
+
+## DbChain 示例
+
+使用 `DbChain` 之后无需将 `QueryWrapper` 与 `Row` 的构建分离，直接即可进行操作。
+
+```java
+// 新增 Row 构建
+DbChain.table("tb_account")
+    .set(RowKey.AUTO)
+    .set("user_name","王帅")
+    .set("age",18)
+    .set("birthday",new Date())
+    .save();
+
+// 查询 QueryWrapper 构建
+DbChain.table("tb_account")
+    .select("id","user_name","age","birthday")
+    .where("age > ?",18)
+    .list()
+    .forEach(System.out::println);
+```
