@@ -7,12 +7,13 @@
 | hh-vue       | 这是基于ruoyi-vue改造的项目，对flex完整封装可以参考此项项目                                                                                                      | https://gitee.com/min290/hh-vue         |
 | youcan-solon | 基于 solon 框架做的一个类似 Ruoyi 的项目，使用flex自带的 mybatis-flex-solon-plugin 插件做集成，集成方式非常简单，属于即拿即用                                                           | https://gitee.com/gollyhu/youcan-solon  |
 | Ruoyi-Flex   | Ruoyi-Flex是基于RuoYi-Vue v3.8.6进行的扩展，集成MyBatis-Flex、JDK17、lombok、Sa-Token、PowerJob、Hutool、OSS、ureport-keep、Flowable、vue3、TypeScript等优秀开源软件。 | https://gitee.com/dataprince/ruoyi-flex |
+| 小鸣助手   |「小鸣助手」是一个生活服务类小程序，主要为用户的日常生活提供一些便捷工具，例如天气查询、时间规划、生活记录等。目前该小程序已稳定运行近4年，为近10万用户提供了生活帮助。主要技术栈：Spring Boot + Spring Security + JWT + MyBatis-Flex + MySQL + Redis + Docker | https://github.com/inlym/life-helper-server |
 
 ## 开发插件
 
-**Mybatis-Flex IDEA**
+**Mybatis-Flex-Helper**
 
-这是一款高度自定义的 Mybatis-Flex IDEA 代码生成插件：
+这是一款高度自定义的 Mybatis-Flex IDEA 插件（idea 开发工具可以直接搜索安装）：
 
 - 开源地址：https://gitee.com/djxchi/mybatis-flex-code-gen.git
 - 视频简介：https://www.bilibili.com/video/BV1yV411g7Yd
@@ -20,7 +21,7 @@
 ## 视频教程
 
 **课程1：《MyBatis-Flex 视频教程》** -- 全网首发（免费）。
-> 课程简介：该课程由 [王帅](https://gitee.com/Suomm) 老师录制主讲， [王帅](https://gitee.com/Suomm) 老师 也是除了作者以外，对 MyBatis-Flex 代码贡献最大的 committer。
+> 课程简介：该课程由 [王帅](https://gitee.com/Suomm) 老师录制主讲， [王帅](https://gitee.com/Suomm) 老师也是除了作者以外，对 MyBatis-Flex 代码贡献最大的 committer。
 > 其无论对 MyBatis 还是 MyBatis-Flex，都有非常深入的理解。
 
 课程目录：
@@ -49,3 +50,6 @@
 - [MyBatis-Flex 视频教程 - 22 @Id 的简单使用](https://www.bilibili.com/video/BV1Hp4y1571K)
 - [MyBatis-Flex 视频教程 - 23 自定义主键生成器](https://www.bilibili.com/video/BV1eM4y1p72z)
 - [MyBatis-Flex 视频教程 - 24 @Column 注解的简单使用](https://www.bilibili.com/video/BV14c411w7Fr)
+- [MyBatis-Flex 视频教程 - 25 isLogicDelete 逻辑删除的简单使用](https://www.bilibili.com/video/BV1K94y1e7X7)
+- [MyBatis-Flex 视频教程 - 26 自定义逻辑删除处理器](https://www.bilibili.com/video/BV1oP411z7uu)
+- [MyBatis-Flex 视频教程 - 27 version 乐观锁的简单使用](https://www.bilibili.com/video/BV1Rc411F7wp)
