@@ -154,7 +154,7 @@ public interface MapperModel<T> {
      *
      * @return 数据
      */
-    default Optional<T> oneWithRelationsById() {
+    default T oneWithRelationsById() {
         return baseMapper().selectOneWithRelationsById(pkValues());
     }
 
@@ -162,11 +162,9 @@ public interface MapperModel<T> {
      * 根据实体类主键获取一条数据，并查询 {@code @Relation} 注解关联的内容，封装为 {@link Optional} 返回。
      *
      * @return 数据
-     * @see #oneWithRelationsById()
      */
-    @Deprecated
     default Optional<T> oneWithRelationsByIdOpt() {
-        return oneWithRelationsById();
+        return Optional.ofNullable(oneWithRelationsById());
     }
 
 }
