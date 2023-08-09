@@ -43,7 +43,7 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-spring-boot-starter</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.0-native-rc2</version>
         </dependency>
 
 
