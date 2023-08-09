@@ -42,7 +42,7 @@ public interface ChainQuery<T> {
      *
      * @return 一条数据
      */
-    T one();
+    Optional<T> one();
 
     /**
      * 获取一条数据，返回的数据为 asType 类型。
@@ -57,9 +57,11 @@ public interface ChainQuery<T> {
      * 获取一条数据，并封装为 {@link Optional} 返回。
      *
      * @return 一条数据
+     * @see #one()
      */
+    @Deprecated
     default Optional<T> oneOpt() {
-        return Optional.ofNullable(one());
+        return one();
     }
 
     /**

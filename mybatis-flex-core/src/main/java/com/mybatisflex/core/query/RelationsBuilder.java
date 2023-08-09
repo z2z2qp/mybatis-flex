@@ -21,6 +21,7 @@ import com.mybatisflex.core.relation.RelationManager;
 import com.mybatisflex.core.util.LambdaGetter;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 使用 {@code Relations Query} 的方式进行关联查询。
@@ -83,8 +84,8 @@ public class RelationsBuilder<T> extends AbstractQueryBuilder<T> {
      * {@inheritDoc}
      */
     @Override
-    public T one() {
-        return baseMapper().selectOneWithRelationsByQuery(queryWrapper());
+    public Optional<T> one() {
+        return Optional.ofNullable(baseMapper().selectOneWithRelationsByQuery(queryWrapper()));
     }
 
     /**

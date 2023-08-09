@@ -74,7 +74,7 @@ public interface MapperQueryChain<T> extends ChainQuery<T> {
     /**
      * {@inheritDoc}
      */
-    default T one() {
+    default Optional<T> one() {
         return baseMapper().selectOneByQuery(toQueryWrapper());
     }
 

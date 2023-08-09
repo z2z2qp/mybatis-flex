@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 使用 {@code Fields Query} 的方式进行关联查询。
@@ -82,10 +83,10 @@ public class FieldsBuilder<T> extends AbstractQueryBuilder<T> {
      * {@inheritDoc}
      */
     @Override
-    public T one() {
-        List<T> entities = Collections.singletonList(baseMapper().selectOneByQuery(queryWrapper()));
+    public Optional<T> one() {
+        List<T> entities = Collections.singletonList(baseMapper().selectOneByQuery(queryWrapper()).get());
         FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
-        return entities.get(0);
+        return Optional.of(entities.get(0));
     }
 
     /**
