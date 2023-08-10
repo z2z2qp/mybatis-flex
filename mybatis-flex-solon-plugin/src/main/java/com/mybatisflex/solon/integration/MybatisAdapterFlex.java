@@ -81,7 +81,7 @@ public class MybatisAdapterFlex extends MybatisAdapterDefault {
         config = new FlexConfiguration(environment);
 
         Props cfgProps = dsProps.getProp("configuration");
-        if (cfgProps.size() > 0) {
+        if (!cfgProps.isEmpty()) {
             Utils.injectProperties(config, cfgProps);
         }
 
@@ -91,7 +91,7 @@ public class MybatisAdapterFlex extends MybatisAdapterDefault {
         globalConfig.setKeyConfig(new FlexGlobalConfig.KeyConfig());
 
         Props globalProps = dsProps.getProp("globalConfig");
-        if (globalProps.size() > 0) {
+        if (!globalProps.isEmpty()) {
             //尝试配置注入
             Utils.injectProperties(globalConfig, globalProps);
         }

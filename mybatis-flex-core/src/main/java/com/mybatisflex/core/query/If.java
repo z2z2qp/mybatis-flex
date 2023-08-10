@@ -51,7 +51,7 @@ public class If {
             return false;
         }
 
-        if (object instanceof Collection collection) {
+        if (object instanceof Collection<?> collection) {
             return !collection.isEmpty();
         }
 
@@ -59,7 +59,7 @@ public class If {
             return Array.getLength(object) > 0;
         }
 
-        if (object instanceof Map map) {
+        if (object instanceof Map<?, ?> map) {
             return !map.isEmpty();
         }
 

@@ -171,7 +171,7 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper 
             return defaultValue;
         }
         String r = s.toString();
-        return r.trim().length() == 0 ? defaultValue : r;
+        return r.trim().isEmpty() ? defaultValue : r;
     }
 
     public Integer getInt(String key) {

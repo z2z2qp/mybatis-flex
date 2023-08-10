@@ -25,6 +25,7 @@ import com.mybatisflex.core.util.LambdaGetter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 使用 {@code Fields Query} 的方式进行关联查询。
@@ -60,10 +61,13 @@ public class FieldsQuery<T extends Model<T>> extends FieldsBuilder<T> {
      *
      * @return 一条数据
      */
-    public T oneById() {
-        List<T> entities = Collections.singletonList(baseMapper().selectOneById(pkValues()).get());
-        FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
-        return entities.get(0);
+    public Optional<T> oneById() {
+        var optional = baseMapper().selectOneById(pkValues());
+        optional.ifPresent(it -> {
+            var list = Collections.singletonList(it);
+            FieldQueryManager.queryFields(baseMapper(), list, fieldQueryMap);
+        });
+        return optional;
     }
 
     /**

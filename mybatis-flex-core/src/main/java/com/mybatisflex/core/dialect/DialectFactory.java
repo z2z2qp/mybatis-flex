@@ -96,58 +96,25 @@ public class DialectFactory {
 
 
     private static IDialect createDialect(DbType dbType) {
-        switch (dbType) {
-            case MYSQL:
-            case H2:
-            case MARIADB:
-            case GBASE:
-            case OSCAR:
-            case XUGU:
-            case CLICK_HOUSE:
-            case OCEAN_BASE:
-            case CUBRID:
-            case GOLDILOCKS:
-            case CSIIDB:
-                return new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
-            case DM:
-                return new DmDialect();
-            case ORACLE:
-                return new OracleDialect();
-            case GAUSS:
-                return new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
-            case POSTGRE_SQL:
-            case SQLITE:
-            case HSQL:
-            case KINGBASE_ES:
-            case PHOENIX:
-            case SAP_HANA:
-            case IMPALA:
-            case HIGH_GO:
-            case VERTICA:
-            case REDSHIFT:
-            case OPENGAUSS:
-            case UXDB:
-                return new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
-            case TDENGINE:
-                return new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
-            case ORACLE_12C:
-                return new OracleDialect(LimitOffsetProcessor.DERBY);
-            case FIREBIRD:
-            case DB2:
-                return new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.DERBY);
-            case SQLSERVER:
-                return new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER);
-            case SQLSERVER_2005:
-                return new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
-            case INFORMIX:
-                return new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.INFORMIX);
-            case SINODB:
-                return new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
-            case SYBASE:
-                return new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
-            default:
-                return new CommonsDialectImpl();
-        }
+        return switch (dbType) {
+            case MYSQL, H2, MARIADB, GBASE, OSCAR, XUGU, CLICK_HOUSE, OCEAN_BASE, CUBRID, GOLDILOCKS, CSIIDB ->
+                new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
+            case DM -> new DmDialect();
+            case ORACLE -> new OracleDialect();
+            case GAUSS -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
+            case POSTGRE_SQL, SQLITE, HSQL, KINGBASE_ES, PHOENIX, SAP_HANA, IMPALA, HIGH_GO, VERTICA, REDSHIFT, OPENGAUSS, UXDB ->
+                new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
+            case TDENGINE -> new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
+            case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
+            case FIREBIRD, DB2 -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.DERBY);
+            case SQLSERVER -> new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER);
+            case SQLSERVER_2005 ->
+                new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
+            case INFORMIX -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.INFORMIX);
+            case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
+            case SYBASE -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
+            default -> new CommonsDialectImpl();
+        };
     }
 
 }

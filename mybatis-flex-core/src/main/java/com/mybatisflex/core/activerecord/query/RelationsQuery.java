@@ -20,6 +20,8 @@ import com.mybatisflex.core.activerecord.Model;
 import com.mybatisflex.core.query.RelationsBuilder;
 import com.mybatisflex.core.util.LambdaGetter;
 
+import java.util.Optional;
+
 /**
  * 使用 {@code Relations Query} 的方式进行关联查询。
  *
@@ -66,7 +68,7 @@ public class RelationsQuery<T extends Model<T>> extends RelationsBuilder<T> {
      *
      * @return 一条数据
      */
-    public T oneById() {
+    public Optional<T> oneById() {
         return baseMapper().selectOneWithRelationsById(pkValues());
     }
 

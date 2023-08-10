@@ -30,7 +30,7 @@ import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.session.Configuration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MybatisKeyGeneratorUtil {
@@ -117,7 +117,7 @@ public class MybatisKeyGeneratorUtil {
                                                       String statementId, Class<?> resultType, List<ResultMapping> resultMappings) {
         ResultMap resultMap = new ResultMap.Builder(configuration, statementId, resultType, resultMappings, null)
             .build();
-        return Arrays.asList(resultMap);
+        return Collections.singletonList(resultMap);
     }
 
 

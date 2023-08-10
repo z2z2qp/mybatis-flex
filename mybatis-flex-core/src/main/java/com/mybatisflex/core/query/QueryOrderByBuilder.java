@@ -26,8 +26,8 @@ import com.mybatisflex.core.util.LambdaUtil;
 @SuppressWarnings("unchecked")
 public class QueryOrderByBuilder<Wrapper extends QueryWrapper> {
 
-    private Wrapper queryWrapper;
-    private QueryColumn orderByColumn;
+    private final Wrapper queryWrapper;
+    private final QueryColumn orderByColumn;
 
     public <T> QueryOrderByBuilder(Wrapper queryWrapper, LambdaGetter<T> getter) {
         this.queryWrapper = queryWrapper;

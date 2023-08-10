@@ -50,18 +50,14 @@ public class FlexStatementHandler implements StatementHandler {
     public FlexStatementHandler(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         configuration = ms.getConfiguration();
         switch (ms.getStatementType()) {
-            case STATEMENT:
+            case STATEMENT ->
                 delegate = new SimpleStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
-                break;
-            case PREPARED:
+            case PREPARED ->
                 // use FlexPreparedStatementHandler to replace PreparedStatementHandler
                 delegate = new FlexPreparedStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
-                break;
-            case CALLABLE:
+            case CALLABLE ->
                 delegate = new CallableStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);
-                break;
-            default:
-                throw new ExecutorException("Unknown statement type: " + ms.getStatementType());
+            default -> throw new ExecutorException("Unknown statement type: " + ms.getStatementType());
         }
 
         this.boundSql = delegate.getBoundSql();

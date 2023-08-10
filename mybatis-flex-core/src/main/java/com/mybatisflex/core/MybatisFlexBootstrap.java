@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * MybatisFlex 的启动类
- *
  * <code>
  * MybatisFlexBootstrap.getInstance()
  * .setDatasource(...)

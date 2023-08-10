@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * spring 事务支持，解决 issues https://gitee.com/mybatis-flex/mybatis-flex/issues/I7HJ4J
+ * spring 事务支持，解决 issues <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7HJ4J">https://gitee.com/mybatis-flex/mybatis-flex/issues/I7HJ4J</a>
  *
  * @author life
  */

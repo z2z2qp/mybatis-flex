@@ -80,7 +80,7 @@ public class CollectionUtil {
 
 
     public static <T> List<T> toList(Collection<T> collection) {
-        if (collection instanceof List list) {
+        if (collection instanceof List<T> list) {
             return list;
         } else {
             return new ArrayList<>(collection);

@@ -62,38 +62,14 @@ public class SqliteDialect implements IDialect {
             type = type.substring(0, indexOf);
         }
         type = type.toLowerCase();
-        switch (type) {
-            case "integer":
-            case "int":
-            case "int2":
-            case "int8":
-            case "tinyint":
-            case "smallint":
-            case "mediumint":
-                return Integer.class.getName();
-            case "bigint":
-            case "unsigned bigint":
-                return BigInteger.class.getName();
-            case "character":
-            case "varchar":
-            case "nchar":
-            case "nvarchar":
-            case "varying character":
-            case "native character":
-            case "text":
-            case "clob":
-                return String.class.getName();
-            case "double":
-            case "numeric":
-            case "real":
-                return Double.class.getName();
-            case "float":
-                return Float.class.getName();
-            case "decimal":
-                return BigDecimal.class.getName();
-            default:
-                return String.class.getName();
-        }
+        return switch (type) {
+            case "integer", "int", "int2", "int8", "tinyint", "smallint", "mediumint" -> Integer.class.getName();
+            case "bigint", "unsigned bigint" -> BigInteger.class.getName();
+            case "double", "numeric", "real" -> Double.class.getName();
+            case "float" -> Float.class.getName();
+            case "decimal" -> BigDecimal.class.getName();
+            default -> String.class.getName();
+        };
     }
 
 }

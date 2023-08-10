@@ -121,7 +121,7 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
 
     public static class Builder {
 
-        private CaseSearchQueryColumn caseQueryColumn = new CaseSearchQueryColumn();
+        private final CaseSearchQueryColumn caseQueryColumn = new CaseSearchQueryColumn();
         private When lastWhen;
 
         public Builder(QueryColumn queryColumn) {
@@ -144,7 +144,7 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
 
         public static class Then {
 
-            private Builder builder;
+            private final Builder builder;
 
             public Then(Builder builder) {
                 this.builder = builder;

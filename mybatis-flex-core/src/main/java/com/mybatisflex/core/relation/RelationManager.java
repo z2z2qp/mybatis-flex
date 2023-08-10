@@ -43,7 +43,7 @@ public class RelationManager {
     private RelationManager() {
     }
 
-    private static Map<Class<?>, List<AbstractRelation>> classRelations = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, List<AbstractRelation>> classRelations = new ConcurrentHashMap<>();
 
     /**
      * 默认查询深度
@@ -53,24 +53,24 @@ public class RelationManager {
     /**
      * 递归查询深度，默认为 2，在一些特殊场景下可以修改这个值
      */
-    private static ThreadLocal<Integer> depthThreadLocal = ThreadLocal.withInitial(() -> defaultQueryDepth);
+    private static final ThreadLocal<Integer> depthThreadLocal = ThreadLocal.withInitial(() -> defaultQueryDepth);
 
     /**
      * 附加条件的查询参数
      */
-    private static ThreadLocal<Map<String, Object>> extraConditionParams = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, Object>> extraConditionParams = new ThreadLocal<>();
 
 
     /**
      * 查询时，可忽略某些已经添加 Relation 注解的属性
      */
-    private static ThreadLocal<Set<String>> ignoreRelations = new ThreadLocal<>();
+    private static final ThreadLocal<Set<String>> ignoreRelations = new ThreadLocal<>();
 
 
     /**
      * 每次查询是否自动清除 depth  extraConditionParams ignoreRelations 的配置
      */
-    private static ThreadLocal<Boolean> autoClearConfig = ThreadLocal.withInitial(() -> true);
+    private static final ThreadLocal<Boolean> autoClearConfig = ThreadLocal.withInitial(() -> true);
 
     public static int getDefaultQueryDepth() {
         return defaultQueryDepth;

@@ -402,15 +402,15 @@ public class CommonsDialectImpl implements IDialect {
     public String buildNoSelectSql(QueryWrapper queryWrapper) {
         StringBuilder sqlBuilder = new StringBuilder();
 
-        buildJoinSql(sqlBuilder, queryWrapper, Collections.EMPTY_LIST);
-        buildWhereSql(sqlBuilder, queryWrapper, Collections.EMPTY_LIST, true);
-        buildGroupBySql(sqlBuilder, queryWrapper, Collections.EMPTY_LIST);
-        buildHavingSql(sqlBuilder, queryWrapper, Collections.EMPTY_LIST);
-        buildOrderBySql(sqlBuilder, queryWrapper, Collections.EMPTY_LIST);
+        buildJoinSql(sqlBuilder, queryWrapper, Collections.emptyList());
+        buildWhereSql(sqlBuilder, queryWrapper, Collections.emptyList(), true);
+        buildGroupBySql(sqlBuilder, queryWrapper, Collections.emptyList());
+        buildHavingSql(sqlBuilder, queryWrapper, Collections.emptyList());
+        buildOrderBySql(sqlBuilder, queryWrapper, Collections.emptyList());
 
         List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
         if (CollectionUtil.isNotEmpty(unions)) {
-            if (sqlBuilder.length() > 0) {
+            if (!sqlBuilder.isEmpty()) {
                 sqlBuilder.insert(0, BRACKET_LEFT).append(BRACKET_RIGHT);
             }
             for (UnionWrapper unionWrapper : unions) {

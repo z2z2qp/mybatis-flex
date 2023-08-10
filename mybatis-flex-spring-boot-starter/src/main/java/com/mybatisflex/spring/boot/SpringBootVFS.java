@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 /**
  * MyBatis 的 VFS 支持。
- *  参考：https://github.com/mybatis/spring-boot-starter/blob/master/mybatis-spring-boot-autoconfigure/src/main/java/org/mybatis/spring/boot/autoconfigure/SpringBootVFS.java
+ * <a href="https://github.com/mybatis/spring-boot-starter/blob/master/mybatis-spring-boot-autoconfigure/src/main/java/org/mybatis/spring/boot/autoconfigure/SpringBootVFS.java">参考</a>
  * @author Hans Westerbeek
  * @author Eddú Meléndez
  * @author Kazuki Shimizu

@@ -643,7 +643,7 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
 
 
     public QueryWrapper orderBy(String... orderBys) {
-        if (orderBys == null || orderBys.length == 0) {
+        if (orderBys == null) {
             //ignore
             return this;
         }

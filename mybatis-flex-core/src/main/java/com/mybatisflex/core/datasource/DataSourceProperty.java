@@ -24,8 +24,8 @@ public enum DataSourceProperty {
     PASSWORD("password", new String[]{"password"}),
     ;
 
-    String property;
-    String[] methodFlags;
+    final String property;
+    final String[] methodFlags;
 
     DataSourceProperty(String property, String[] methodFlags) {
         this.property = property;

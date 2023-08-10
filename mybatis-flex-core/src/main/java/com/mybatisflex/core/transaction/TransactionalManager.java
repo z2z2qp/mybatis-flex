@@ -86,9 +86,7 @@ public class TransactionalManager {
 
 
                     //始终以新事务的方式运行，若存在当前事务，则暂停（挂起）当前事务。
-                case REQUIRES_NEW -> {
-                    yield execNewTransactional(supplier, withResult);
-                }
+                case REQUIRES_NEW -> execNewTransactional(supplier, withResult);
 
 
                 //以非事务的方式运行，若存在当前事务，则暂停（挂起）当前事务。
@@ -182,7 +180,7 @@ public class TransactionalManager {
             }
             Map<String, Connection> connections = holdMap.get(xid);
             for (Connection conn : connections.values()) {
-                try {
+                try (conn) {
                     if (commit) {
                         conn.commit();
                     } else {
@@ -190,12 +188,6 @@ public class TransactionalManager {
                     }
                 } catch (SQLException e) {
                     exception = e;
-                } finally {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        //ignore
-                    }
                 }
             }
         } finally {

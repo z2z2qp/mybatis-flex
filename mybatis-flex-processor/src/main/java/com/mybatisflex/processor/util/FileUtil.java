@@ -32,7 +32,7 @@ public class FileUtil {
     private FileUtil() {
     }
 
-    private static Set<String> flagFileNames = new HashSet<>(Arrays.asList("pom.xml", "build.gradle", "build.gradle.kts"));
+    private final static Set<String> flagFileNames = new HashSet<>(Arrays.asList("pom.xml", "build.gradle", "build.gradle.kts"));
 
 
     public static boolean existsBuildFile(File dir) {

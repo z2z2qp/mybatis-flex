@@ -57,7 +57,7 @@ public class RowUtil {
                     }
                 } else {
                     for (int i = index; i >= 0; i--) {
-                        String newProperty = i <= 0 ? property : property + INDEX_SEPARATOR + i;
+                        String newProperty = i == 0 ? property : property + INDEX_SEPARATOR + i;
                         boolean fillValue = false;
                         for (String rowKey : rowKeys) {
                             if (newProperty.equalsIgnoreCase(rowKey)) {

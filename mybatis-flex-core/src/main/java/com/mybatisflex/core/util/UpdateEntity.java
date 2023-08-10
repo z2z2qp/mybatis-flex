@@ -15,15 +15,10 @@
  */
 package com.mybatisflex.core.util;
 
-import com.mybatisflex.core.table.IdInfo;
-import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.update.ModifyAttrsRecordProxyFactory;
-import org.apache.ibatis.reflection.Reflector;
-import org.apache.ibatis.reflection.invoker.Invoker;
 
 import java.lang.reflect.Array;
-import java.util.List;
 
 public class UpdateEntity {
 

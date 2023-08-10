@@ -40,7 +40,7 @@ class ToOneRelation<SelfEntity> extends AbstractRelation<SelfEntity> {
             Object selfValue = selfFieldWrapper.get(selfEntity);
             if (selfValue != null) {
                 selfValue = selfValue.toString();
-                String targetMappingValue = null;
+                String targetMappingValue;
                 if (mappingRows != null) {
                     targetMappingValue = getTargetMappingValue(mappingRows, selfValue);
                     if (targetMappingValue == null) {

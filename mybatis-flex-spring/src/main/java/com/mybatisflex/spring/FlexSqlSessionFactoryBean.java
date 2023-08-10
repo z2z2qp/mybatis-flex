@@ -19,8 +19,6 @@ import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.datasource.FlexDataSource;
 import com.mybatisflex.core.mybatis.FlexConfiguration;
 import com.mybatisflex.core.mybatis.FlexSqlSessionFactoryBuilder;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.cache.Cache;
@@ -37,7 +35,6 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
-import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.mybatis.logging.Logger;
 import org.mybatis.logging.LoggerFactory;
@@ -45,7 +42,6 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -75,11 +71,11 @@ import static org.springframework.util.StringUtils.hasLength;
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
 /**
- * 参考：https://github.com/mybatis/spring/blob/master/src/main/java/org/mybatis/spring/SqlSessionFactoryBean.java
+ * 参考：<a href="https://github.com/mybatis/spring/blob/master/src/main/java/org/mybatis/spring/SqlSessionFactoryBean.java">https://github.com/mybatis/spring/blob/master/src/main/java/org/mybatis/spring/SqlSessionFactoryBean.java</a>
  *
  * <p>在 MyBatis 官方的 SqlSessionFactoryBean 基础上,替换le  FlexSqlSessionFactoryBean。
  *
- * <p>源于 {@link SqlSessionFactoryBean}，主要是用于构建 {@link com.mybatisflex.core.mybatis.FlexConfiguration }，而不是使用原生的 {@link Configuration}。
+ * <p>源于 {@link SqlSessionFactoryBean}，主要是用于构建 {@link FlexConfiguration }，而不是使用原生的 {@link Configuration}。
  *
  * <p>此代码主要是用于修改 {@link FlexSqlSessionFactoryBean#buildSqlSessionFactory()} 部分。
  *
@@ -94,7 +90,7 @@ import static org.springframework.util.StringUtils.tokenizeToStringArray;
  * @author life
  */
 public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
-        implements FactoryBean<SqlSessionFactory>, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
+    implements FactoryBean<SqlSessionFactory>, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBean.class);
 

@@ -24,11 +24,7 @@ import com.mybatisflex.core.util.FieldWrapper;
 import com.mybatisflex.core.util.LambdaGetter;
 import com.mybatisflex.core.util.LambdaUtil;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 使用 {@code Fields Query} 的方式进行关联查询。
@@ -84,9 +80,12 @@ public class FieldsBuilder<T> extends AbstractQueryBuilder<T> {
      */
     @Override
     public Optional<T> one() {
-        List<T> entities = Collections.singletonList(baseMapper().selectOneByQuery(queryWrapper()).get());
-        FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
-        return Optional.of(entities.get(0));
+        var optional = baseMapper().selectOneByQuery(queryWrapper());
+        optional.ifPresent(it -> {
+            List<T> entities = Collections.singletonList(it);
+            FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
+        });
+        return optional;
     }
 
     /**

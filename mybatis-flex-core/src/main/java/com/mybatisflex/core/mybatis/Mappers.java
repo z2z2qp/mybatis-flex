@@ -78,7 +78,7 @@ public class Mappers {
 
     static class MapperHandler implements InvocationHandler {
 
-        private Class<?> mapperClass;
+        private final Class<?> mapperClass;
         private final SqlSessionFactory sqlSessionFactory = FlexGlobalConfig.getDefaultConfig().getSqlSessionFactory();
         private final ExecutorType executorType = FlexGlobalConfig.getDefaultConfig().getConfiguration().getDefaultExecutorType();
 

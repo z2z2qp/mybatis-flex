@@ -18,8 +18,7 @@ package com.mybatisflex.spring.boot;
 import org.mybatis.spring.SqlSessionFactoryBean;
 
 /**
- * 参考：https://github.com/mybatis/spring-boot-starter/blob/master/mybatis-spring-boot-autoconfigure/src/main/java/org/mybatis/spring/boot/autoconfigure/SqlSessionFactoryBeanCustomizer.java
- *
+ * <a href="https://github.com/mybatis/spring-boot-starter/blob/master/mybatis-spring-boot-autoconfigure/src/main/java/org/mybatis/spring/boot/autoconfigure/SqlSessionFactoryBeanCustomizer.java">参考</a>
  * 为 FlexSqlSessionFactoryBean 做自定义的配置支持。
  *
  * @see com.mybatisflex.spring.FlexSqlSessionFactoryBean

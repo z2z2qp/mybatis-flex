@@ -20,7 +20,6 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
@@ -113,7 +112,7 @@ public class AuditManager {
             auditMessage.setQuery(boundSql.getSql());
             Object parameter = boundSql.getParameterObject();
 
-            /** parameter 的组装请查看 getNamedParams 方法
+            /* parameter 的组装请查看 getNamedParams 方法
              * @see ParamNameResolver#getNamedParams(Object[])
              */
             if (parameter instanceof Map map) {

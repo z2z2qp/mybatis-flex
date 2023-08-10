@@ -117,8 +117,8 @@ public class ArithmeticQueryColumn extends QueryColumn {
 
     static class ArithmeticInfo implements CloneSupport<ArithmeticInfo> {
 
-        private String symbol;
-        private Object value;
+        private final String symbol;
+        private final Object value;
 
         public ArithmeticInfo(Object value) {
             this(null, value);

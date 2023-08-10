@@ -120,7 +120,7 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
 
     public static class Builder {
 
-        private CaseQueryColumn caseQueryColumn = new CaseQueryColumn();
+        private final CaseQueryColumn caseQueryColumn = new CaseQueryColumn();
         private When lastWhen;
 
         public Then when(QueryCondition condition) {
@@ -139,7 +139,7 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
 
         public static class Then {
 
-            private Builder builder;
+            private final Builder builder;
 
             public Then(Builder builder) {
                 this.builder = builder;

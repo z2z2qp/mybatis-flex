@@ -66,7 +66,7 @@ public class DataSourceBuilder {
 
         try {
             Class<?> dataSourceClass = Class.forName(dataSourceClassName);
-            Object dataSourceObject = dataSourceClass.newInstance();
+            Object dataSourceObject = dataSourceClass.getConstructor().newInstance();
             setDataSourceProperties(dataSourceObject);
             return (DataSource) dataSourceObject;
         } catch (Exception e) {

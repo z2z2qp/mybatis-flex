@@ -141,7 +141,7 @@ abstract class AbstractRelation<SelfEntity> {
                 sqlBuilder.append(current);
             }
         }
-        if (keyStart && currentKey != null && currentKey.length() > 0) {
+        if (keyStart && currentKey != null && !currentKey.isEmpty()) {
             if (sqlParamKeys == null) {
                 sqlParamKeys = new ArrayList<>();
             }

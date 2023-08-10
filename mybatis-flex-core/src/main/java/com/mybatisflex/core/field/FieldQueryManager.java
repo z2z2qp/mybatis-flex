@@ -38,10 +38,10 @@ public class FieldQueryManager {
     }
 
     public static void queryFields(BaseMapper<?> mapper, Collection<?> entities, Map<String, FieldQuery> fieldQueryMap) {
-        for (Object entity : entities) {
+        entities.parallelStream().forEach(entity -> {
 
             if (entity == null) {
-                continue;
+                return;
             }
 
             String className = ClassUtil.getUsefulClass(entity.getClass()).getName();
@@ -99,7 +99,7 @@ public class FieldQueryManager {
                     fieldQuery.getFieldWrapper().set(value, entity);
                 }
             });
-        }
+        });
     }
 
 

@@ -15,14 +15,15 @@
  */
 package com.mybatisflex.core.update;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.mybatisflex.core.util.ClassUtil;
 import org.apache.ibatis.javassist.util.proxy.ProxyFactory;
 import org.apache.ibatis.javassist.util.proxy.ProxyObject;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.util.MapUtil;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author michael
@@ -53,7 +54,7 @@ public class ModifyAttrsRecordProxyFactory {
 
         T proxyObject = null;
         try {
-            proxyObject = (T) proxyClass.getDeclaredConstructor().newInstance(proxyClass);
+            proxyObject = (T) ClassUtil.newInstance(proxyClass);
             ((ProxyObject) proxyObject).setHandler(new ModifyAttrsRecordHandler());
         } catch (Exception e) {
             LogFactory.getLog(ModifyAttrsRecordProxyFactory.class).error(e.toString(), e);

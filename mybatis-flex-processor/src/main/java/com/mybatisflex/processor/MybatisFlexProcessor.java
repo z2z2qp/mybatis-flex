@@ -346,7 +346,7 @@ public class MybatisFlexProcessor extends AbstractProcessor {
         Writer writer = null;
         try {
             JavaFileObject sourceFile = filer.createSourceFile(genPackageName + "." + className);
-            if (genBasePath == null || genBasePath.trim().length() == 0) {
+            if (genBasePath == null || genBasePath.trim().isEmpty()) {
                 writer = sourceFile.openWriter();
                 writer.write(genContent);
                 writer.flush();

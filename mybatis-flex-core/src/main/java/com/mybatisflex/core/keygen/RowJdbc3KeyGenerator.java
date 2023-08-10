@@ -209,16 +209,16 @@ public class RowJdbc3KeyGenerator implements KeyGenerator {
     }
 
     private static Collection<?> collectionize(Object param) {
-        if (param instanceof Collection collection) {
+        if (param instanceof Collection<?> collection) {
             return collection;
         } else if (param instanceof Object[] objects) {
             return Arrays.asList(objects);
         } else {
-            return Arrays.asList(param);
+            return Collections.singletonList(param);
         }
     }
 
-    private class KeyAssigner {
+    private static class KeyAssigner {
 
         private final Configuration configuration;
         private final ResultSetMetaData rsmd;
