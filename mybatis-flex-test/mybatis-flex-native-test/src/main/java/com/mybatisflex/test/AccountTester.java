@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
+import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.MybatisFlexBootstrap;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
@@ -36,6 +37,7 @@ import com.mybatisflex.core.mybatis.Mappers;
 import com.mybatisflex.core.query.If;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.DbChain;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.update.UpdateWrapper;
 import com.mybatisflex.core.util.UpdateEntity;
 import com.mybatisflex.mapper.ArticleMapper;
@@ -53,6 +55,9 @@ public class AccountTester {
                 .addScript("data.sql")
                 .build();
 
+        FlexGlobalConfig.getDefaultConfig()
+            .setLogicDeleteColumn("is_delete");
+
         MybatisFlexBootstrap bootstrap = MybatisFlexBootstrap.getInstance()
                 .setDataSource(dataSource)
                 .setLogImpl(StdOutImpl.class)
@@ -69,6 +74,11 @@ public class AccountTester {
 
         accountMapper = bootstrap.getMapper(AccountMapper.class);
         articleMapper = bootstrap.getMapper(ArticleMapper.class);
+    }
+
+    @Test
+    public void testLogicDelete() {
+        accountMapper.selectAll().forEach(System.out::println);
     }
 
     @Test
@@ -138,7 +148,7 @@ public class AccountTester {
     }
 
     @Test
-    public void testUpdate() {
+    public void testUpdate1() {
         List<Account> accounts = accountMapper.selectAll();
         System.out.println(accounts);
 
@@ -151,7 +161,25 @@ public class AccountTester {
 
         accounts = accountMapper.selectAll();
         System.out.println(accounts);
+    }
 
+
+    @Test
+    public void testUpdate2() {
+        List<Account> accounts = accountMapper.selectAll();
+        System.out.println(accounts);
+
+
+        UpdateChain.of(Account.class)
+            .set(Account::getUserName,"zhangsan123")
+//            .leftJoin(ARTICLE).on(ARTICLE.ACCOUNT_ID.eq(ACCOUNT.ID))
+            .where(Account::getId).eq(1)
+//            .and(ARTICLE.ID.ge(0))
+            .limit(1)
+            .remove();
+
+        accounts = accountMapper.selectAll();
+        System.out.println(accounts);
     }
 
     /**
