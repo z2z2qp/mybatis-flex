@@ -12,8 +12,8 @@
 	<artifactId>mybatis-flex-kotlin</artifactId>
 
 	<properties>
-		<maven.compiler.source>8</maven.compiler.source>
-		<maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<kotlin.version>1.9.0</kotlin.version>
 	</properties>
@@ -63,47 +63,47 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
                 <configuration>
-                    <jvmTarget>1.8</jvmTarget>
+                    <jvmTarget>17</jvmTarget>
                     <args>
                         <arg>-Xjvm-default=all</arg>
                     </args>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>kapt</id>
-                        <goals>
-                            <goal>kapt</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>src/main/kotlin</sourceDir>
-                                <sourceDir>src/main/java</sourceDir>
-                            </sourceDirs>
-                            <annotationProcessorPaths>
-                                <!-- 在此处指定你的注解处理器。 -->
-                                <annotationProcessorPath>
-                                    <groupId>com.google.dagger</groupId>
-                                    <artifactId>dagger-compiler</artifactId>
-                                    <version>2.9</version>
-                                </annotationProcessorPath>
-                            </annotationProcessorPaths>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>compile</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <!--                <executions>-->
+                <!--                    <execution>-->
+                <!--                        <id>kapt</id>-->
+                <!--                        <goals>-->
+                <!--                            <goal>kapt</goal>-->
+                <!--                        </goals>-->
+                <!--                        <configuration>-->
+                <!--                            <sourceDirs>-->
+                <!--                                <sourceDir>src/main/kotlin</sourceDir>-->
+                <!--                                <sourceDir>src/main/java</sourceDir>-->
+                <!--                            </sourceDirs>-->
+                <!--                            <annotationProcessorPaths>-->
+                <!--                                &lt;!&ndash; 在此处指定你的注解处理器。 &ndash;&gt;-->
+                <!--                                <annotationProcessorPath>-->
+                <!--                                    <groupId>com.google.dagger</groupId>-->
+                <!--                                    <artifactId>dagger-compiler</artifactId>-->
+                <!--                                    <version>2.9</version>-->
+                <!--                                </annotationProcessorPath>-->
+                <!--                            </annotationProcessorPaths>-->
+                <!--                        </configuration>-->
+                <!--                    </execution>-->
+                <!--                    <execution>-->
+                <!--                        <id>compile</id>-->
+                <!--                        <phase>process-sources</phase>-->
+                <!--                        <goals>-->
+                <!--                            <goal>compile</goal>-->
+                <!--                        </goals>-->
+                <!--                    </execution>-->
+                <!--                    <execution>-->
+                <!--                        <id>test-compile</id>-->
+                <!--                        <phase>test-compile</phase>-->
+                <!--                        <goals>-->
+                <!--                            <goal>test-compile</goal>-->
+                <!--                        </goals>-->
+                <!--                    </execution>-->
+                <!--                </executions>-->
             </plugin>
         </plugins>
     </build>
