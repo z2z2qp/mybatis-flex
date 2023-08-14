@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>mybatis-flex-test</artifactId>
 		<groupId>com.mybatis-flex</groupId>
-		<version>1.5.6</version>
+		<version>1.5.7</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -12,8 +12,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
 	<dependencies>

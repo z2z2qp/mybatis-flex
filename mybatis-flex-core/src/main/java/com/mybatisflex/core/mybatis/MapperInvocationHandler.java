@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 
 /**
  * @author michael
+ * @author norkts
  */
 public class MapperInvocationHandler implements InvocationHandler {
 
@@ -41,7 +42,11 @@ public class MapperInvocationHandler implements InvocationHandler {
 
     public MapperInvocationHandler(Object mapper, DataSource dataSource) {
         this.mapper = mapper;
-        this.dataSource = (FlexDataSource) dataSource;
+        if (dataSource instanceof FlexDataSource) {
+            this.dataSource = (FlexDataSource) dataSource;
+        } else {
+            this.dataSource = null;
+        }
     }
 
 
@@ -65,7 +70,7 @@ public class MapperInvocationHandler implements InvocationHandler {
             //优先获取用户自己配置的 dbType
             DbType dbType = DialectFactory.getHintDbType();
             if (dbType == null) {
-                if (dataSourceKey != null) {
+                if (dataSourceKey != null && dataSource != null) {
                     dbType = dataSource.getDbType(dataSourceKey);
                 }
                 if (dbType == null) {
