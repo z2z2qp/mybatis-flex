@@ -111,7 +111,7 @@ public class DialectFactory {
             case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
             case SYBASE->new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
             default -> new CommonsDialectImpl();
-        }
+        };
     }
 
 }
