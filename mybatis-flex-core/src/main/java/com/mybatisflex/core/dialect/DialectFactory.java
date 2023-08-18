@@ -15,16 +15,16 @@
  */
 package com.mybatisflex.core.dialect;
 
+import java.util.EnumMap;
+import java.util.Map;
+
+import org.apache.ibatis.util.MapUtil;
 
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
 import com.mybatisflex.core.dialect.impl.DmDialect;
 import com.mybatisflex.core.dialect.impl.OracleDialect;
 import com.mybatisflex.core.util.ObjectUtil;
-import org.apache.ibatis.util.MapUtil;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
  * 方言工厂类，用于创建方言
@@ -46,14 +46,14 @@ public class DialectFactory {
      */
     private static final ThreadLocal<DbType> dbTypeThreadLocal = new ThreadLocal<>();
 
-
     /**
      * 获取方言
      *
      * @return IDialect
      */
     public static IDialect getDialect() {
-        DbType dbType = ObjectUtil.requireNonNullElse(dbTypeThreadLocal.get(), FlexGlobalConfig.getDefaultConfig().getDbType());
+        DbType dbType = ObjectUtil.requireNonNullElse(dbTypeThreadLocal.get(),
+                FlexGlobalConfig.getDefaultConfig().getDbType());
         return MapUtil.computeIfAbsent(dialectMap, dbType, DialectFactory::createDialect);
     }
 
@@ -75,14 +75,12 @@ public class DialectFactory {
         return dbTypeThreadLocal.get();
     }
 
-
     /**
      * 清除当前线程的 dbType
      */
     public static void clearHintDbType() {
         dbTypeThreadLocal.remove();
     }
-
 
     /**
      * 可以为某个 dbType 注册（新增或覆盖）自己的方言
@@ -94,27 +92,26 @@ public class DialectFactory {
         dialectMap.put(dbType, dialect);
     }
 
-
     private static IDialect createDialect(DbType dbType) {
         return switch (dbType) {
-            case MYSQL, H2, MARIADB, GBASE, OSCAR, XUGU, CLICK_HOUSE, OCEAN_BASE, CUBRID, GOLDILOCKS, CSIIDB ->
-                new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
+            case MYSQL,H2,MARIADB,GBASE,OSCAR,XUGU,OCEAN_BASE,CUBRID,GOLDILOCKS,CSIIDB ->
+                 new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
+            case CLICK_HOUSE -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
             case DM -> new DmDialect();
             case ORACLE -> new OracleDialect();
-            case GAUSS -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
-            case POSTGRE_SQL, SQLITE, HSQL, KINGBASE_ES, PHOENIX, SAP_HANA, IMPALA, HIGH_GO, VERTICA, REDSHIFT, OPENGAUSS, UXDB ->
+            case GAUSS ->  new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
+            case POSTGRE_SQL,SQLITE,HSQL,KINGBASE_ES,PHOENIX,SAP_HANA,IMPALA,HIGH_GO,VERTICA,REDSHIFT,OPENGAUSS,UXDB,LEALONE ->
                 new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
             case TDENGINE -> new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
             case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
-            case FIREBIRD, DB2 -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.DERBY);
+            case FIREBIRD,DB2 -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.DERBY);
             case SQLSERVER -> new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER);
-            case SQLSERVER_2005 ->
-                new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
-            case INFORMIX -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.INFORMIX);
+            case SQLSERVER_2005 -> new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
+            case INFORMIX -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.INFORMIX);
             case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
-            case SYBASE -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
+            case SYBASE->new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
             default -> new CommonsDialectImpl();
-        };
+        }
     }
 
 }
