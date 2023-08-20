@@ -73,19 +73,26 @@ public class CommonsDialectImpl implements IDialect {
     @Override
     public String forInsertRow(String schema, String tableName, Row row) {
         StringBuilder fields = new StringBuilder();
-        StringBuilder questions = new StringBuilder();
+        StringBuilder paramsOrPlaceholder = new StringBuilder();
 
         Set<String> modifyAttrs = RowCPI.getModifyAttrs(row);
         int index = 0;
         for (String attr : modifyAttrs) {
             fields.append(wrap(attr));
-            questions.append(PLACEHOLDER);
+
+            Object value = row.get(attr);
+            if (value instanceof RawValue) {
+                paramsOrPlaceholder.append(((RawValue) value).toSql(this));
+            } else {
+                paramsOrPlaceholder.append(PLACEHOLDER);
+            }
             if (index != modifyAttrs.size() - 1) {
                 fields.append(DELIMITER);
-                questions.append(DELIMITER);
+                paramsOrPlaceholder.append(DELIMITER);
             }
             index++;
         }
+
         StringBuilder sql = new StringBuilder();
         sql.append(INSERT_INTO);
         if (StringUtil.isNotBlank(schema)) {
@@ -93,7 +100,7 @@ public class CommonsDialectImpl implements IDialect {
         }
         sql.append(wrap(getRealTable(tableName)));
         sql.append(BRACKET_LEFT).append(fields).append(BRACKET_RIGHT);
-        sql.append(VALUES).append(BRACKET_LEFT).append(questions).append(BRACKET_RIGHT);
+        sql.append(VALUES).append(BRACKET_LEFT).append(paramsOrPlaceholder).append(BRACKET_RIGHT);
         return sql.toString();
     }
 
@@ -516,12 +523,16 @@ public class CommonsDialectImpl implements IDialect {
         String[] insertColumns = tableInfo.obtainInsertColumns(entity, ignoreNulls);
         Map<String, String> onInsertColumns = tableInfo.getOnInsertColumns();
 
+        Map<String, RawValue> rawValueMap = tableInfo.obtainUpdateRawValueMap(entity);
+
         StringJoiner sqlFields = new StringJoiner(DELIMITER);
         StringJoiner sqlValues = new StringJoiner(DELIMITER);
 
         for (String insertColumn : insertColumns) {
             sqlFields.add(wrap(insertColumn));
-            if (onInsertColumns != null && onInsertColumns.containsKey(insertColumn)) {
+            if (rawValueMap.containsKey(insertColumn)) {
+                sqlValues.add(rawValueMap.get(insertColumn).toSql(this));
+            } else if (onInsertColumns != null && onInsertColumns.containsKey(insertColumn)) {
                 sqlValues.add(onInsertColumns.get(insertColumn));
             } else {
                 sqlValues.add(PLACEHOLDER);
