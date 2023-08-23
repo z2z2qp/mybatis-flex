@@ -22,6 +22,7 @@ import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.util.SqlUtil;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -56,9 +57,9 @@ public interface MapperModel<T> {
      *
      * @return 主键数据数组
      */
-    default Object[] pkValues() {
+    default Object pkValue() {
         TableInfo tableInfo = TableInfoFactory.ofEntityClass(getClass());
-        return tableInfo.buildPkSqlArgs(this);
+        return tableInfo.getPkValue(this);
     }
 
     /**
@@ -71,6 +72,17 @@ public interface MapperModel<T> {
     }
 
     /**
+     * 保存数据（自动忽略 {@code null} 值），结果使用 {@link Optional}
+     * 返回源对象回调，保存成功返回 {@code Optional.of(this)}，保存失败返回
+     * {@code Optional.empty()}。
+     *
+     * @return {@link Optional} 链式调用
+     */
+    default Optional<T> saveOpt() {
+        return saveOpt(true);
+    }
+
+    /**
      * 保存数据，并设置是否忽略 {@code null} 值。
      *
      * @param ignoreNulls 是否忽略 {@code null} 值
@@ -78,6 +90,18 @@ public interface MapperModel<T> {
      */
     default boolean save(boolean ignoreNulls) {
         return SqlUtil.toBool(baseMapper().insert((T) this, ignoreNulls));
+    }
+
+    /**
+     * 保存数据，并设置是否忽略 {@code null} 值，结果使用 {@link Optional}
+     * 返回源对象回调，保存成功返回 {@code Optional.of(this)}，保存失败返回
+     * {@code Optional.empty()}。
+     *
+     * @param ignoreNulls 是否忽略 {@code null} 值
+     * @return {@link Optional} 链式调用
+     */
+    default Optional<T> saveOpt(boolean ignoreNulls) {
+        return save(ignoreNulls) ? Optional.of((T) this) : Optional.empty();
     }
 
     /**
@@ -92,6 +116,18 @@ public interface MapperModel<T> {
 
     /**
      * 保存或者更新数据，如果实体类主键没有值，则 <b>保存</b> 数据；如果实体类主键有值，则
+     * <b>更新</b> 数据（全部自动忽略 {@code null} 值），结果使用 {@link Optional}
+     * 返回源对象回调，保存或更新成功返回 {@code Optional.of(this)}，保存或更新失败返回
+     * {@code Optional.empty()}。
+     *
+     * @return {@link Optional} 链式调用
+     */
+    default Optional<T> saveOrUpdateOpt() {
+        return saveOrUpdateOpt(true);
+    }
+
+    /**
+     * 保存或者更新数据，如果实体类主键没有值，则 <b>保存</b> 数据；如果实体类主键有值，则
      * <b>更新</b> 数据，并设置是否忽略 {@code null} 值。
      *
      * @param ignoreNulls 是否忽略 {@code null} 值
@@ -102,12 +138,35 @@ public interface MapperModel<T> {
     }
 
     /**
+     * 保存或者更新数据，如果实体类主键没有值，则 <b>保存</b> 数据；如果实体类主键有值，则
+     * <b>更新</b> 数据，并设置是否忽略 {@code null} 值，结果使用 {@link Optional}
+     * 返回源对象回调，保存或更新成功返回 {@code Optional.of(this)}，保存或更新失败返回
+     * {@code Optional.empty()}。
+     *
+     * @param ignoreNulls 是否忽略 {@code null} 值
+     * @return {@link Optional} 链式调用
+     */
+    default Optional<T> saveOrUpdateOpt(boolean ignoreNulls) {
+        return saveOrUpdate(ignoreNulls) ? Optional.of((T) this) : Optional.empty();
+    }
+
+    /**
      * 根据实体类主键删除数据。
      *
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
     default boolean removeById() {
-        return SqlUtil.toBool(baseMapper().deleteById(pkValues()));
+        return SqlUtil.toBool(baseMapper().deleteById((Serializable) pkValue()));
+    }
+
+    /**
+     * 根据实体类主键删除数据，结果使用 {@link Optional} 返回源对象回调，删除成功返回
+     * {@code Optional.of(this)}，删除失败返回 {@code Optional.empty()}。
+     *
+     * @return {@link Optional} 链式调用
+     */
+    default Optional<T> removeByIdOpt() {
+        return removeById() ? Optional.of((T) this) : Optional.empty();
     }
 
     /**
@@ -117,6 +176,17 @@ public interface MapperModel<T> {
      */
     default boolean updateById() {
         return updateById(true);
+    }
+
+    /**
+     * 根据实体类主键更新数据（自动忽略 {@code null} 值），结果使用 {@link Optional}
+     * 返回源对象回调，更新成功返回 {@code Optional.of(this)}，更新失败返回
+     * {@code Optional.empty()}。
+     *
+     * @return {@link Optional} 链式调用
+     */
+    default Optional<T> updateByIdOpt() {
+        return updateByIdOpt(true);
     }
 
     /**
@@ -130,12 +200,24 @@ public interface MapperModel<T> {
     }
 
     /**
+     * 根据实体类主键更新数据，并设置是否忽略 {@code null} 值，结果使用 {@link Optional}
+     * 返回源对象回调，更新成功返回 {@code Optional.of(this)}，更新失败返回
+     * {@code Optional.empty()}。
+     *
+     * @param ignoreNulls 是否忽略 {@code null} 值
+     * @return {@link Optional} 链式调用
+     */
+    default Optional<T> updateByIdOpt(boolean ignoreNulls) {
+        return updateById(ignoreNulls) ? Optional.of((T) this) : Optional.empty();
+    }
+
+    /**
      * 根据实体类主键获取一条数据。
      *
      * @return 数据
      */
     default T oneById() {
-        return baseMapper().selectOneById(pkValues());
+        return baseMapper().selectOneById((Serializable) pkValue());
     }
 
     /**
