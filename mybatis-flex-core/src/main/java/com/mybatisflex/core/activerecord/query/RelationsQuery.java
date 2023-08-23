@@ -21,6 +21,7 @@ import com.mybatisflex.core.query.RelationsBuilder;
 import com.mybatisflex.core.util.LambdaGetter;
 
 import java.util.Optional;
+import java.io.Serializable;
 
 /**
  * 使用 {@code Relations Query} 的方式进行关联查询。
@@ -58,9 +59,9 @@ public class RelationsQuery<T extends Model<T>> extends RelationsBuilder<T> {
         return this;
     }
 
-    protected Object[] pkValues() {
+    protected Object pkValue() {
         // 懒加载，实际用到的时候才会生成 主键值
-        return ((Model<T>) delegate).pkValues();
+        return ((Model<T>) delegate).pkValue();
     }
 
     /**
@@ -69,7 +70,7 @@ public class RelationsQuery<T extends Model<T>> extends RelationsBuilder<T> {
      * @return 一条数据
      */
     public Optional<T> oneById() {
-        return baseMapper().selectOneWithRelationsById(pkValues());
+        return baseMapper().selectOneWithRelationsById((Serializable) pkValue());
     }
 
     /**
@@ -80,7 +81,7 @@ public class RelationsQuery<T extends Model<T>> extends RelationsBuilder<T> {
      * @return 一条数据
      */
     public <R> R oneByIdAs(Class<R> asType) {
-        return baseMapper().selectOneWithRelationsByIdAs(pkValues(), asType);
+        return baseMapper().selectOneWithRelationsByIdAs((Serializable) pkValue(), asType);
     }
 
 }

@@ -16,16 +16,17 @@
 
 package com.mybatisflex.core.activerecord.query;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import com.mybatisflex.core.activerecord.Model;
 import com.mybatisflex.core.field.FieldQueryManager;
 import com.mybatisflex.core.field.QueryBuilder;
 import com.mybatisflex.core.mybatis.MappedStatementTypes;
 import com.mybatisflex.core.query.FieldsBuilder;
 import com.mybatisflex.core.util.LambdaGetter;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * 使用 {@code Fields Query} 的方式进行关联查询。
@@ -51,9 +52,9 @@ public class FieldsQuery<T extends Model<T>> extends FieldsBuilder<T> {
         return this;
     }
 
-    protected Object[] pkValues() {
+    protected Object pkValue() {
         // 懒加载，实际用到的时候才会生成 主键值
-        return ((Model<T>) delegate).pkValues();
+        return ((Model<T>) delegate).pkValue();
     }
 
     /**
@@ -62,7 +63,7 @@ public class FieldsQuery<T extends Model<T>> extends FieldsBuilder<T> {
      * @return 一条数据
      */
     public Optional<T> oneById() {
-        var optional = baseMapper().selectOneById(pkValues());
+        var optional = baseMapper().selectOneById((Serializable) pkValue());
         optional.ifPresent(it -> {
             var list = Collections.singletonList(it);
             FieldQueryManager.queryFields(baseMapper(), list, fieldQueryMap);
@@ -81,7 +82,7 @@ public class FieldsQuery<T extends Model<T>> extends FieldsBuilder<T> {
     public <R> R oneByIdAs(Class<R> asType) {
         try {
             MappedStatementTypes.setCurrentType(asType);
-            List<R> entities = Collections.singletonList((R) baseMapper().selectOneById(pkValues()));
+            List<R> entities = Collections.singletonList((R) baseMapper().selectOneById((Serializable) pkValue()));
             FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
             return entities.get(0);
         } finally {
