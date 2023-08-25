@@ -358,16 +358,22 @@ public class TableInfo {
 
     void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
-        this.columns = new String[columnInfoList.size()];
+        List<String> columnNames = new ArrayList<>();
         for (int i = 0; i < columnInfoList.size(); i++) {
             ColumnInfo columnInfo = columnInfoList.get(i);
-            columns[i] = columnInfo.getColumn();
-            columnInfoMapping.put(columnInfo.column, columnInfo);
-            propertyColumnMapping.put(columnInfo.property, columnInfo.column);
+            //真正的字段（没有做忽略标识）
+            if (!columnInfo.isIgnore()) {
+                columnNames.add(columnInfo.column);
 
-            String[] alias = columnInfo.getAlias();
-            columnQueryMapping.put(columnInfo.column, new QueryColumn(schema, tableName, columnInfo.column, alias != null && alias.length > 0 ? alias[0] : null));
+                columnInfoMapping.put(columnInfo.column, columnInfo);
+                propertyColumnMapping.put(columnInfo.property, columnInfo.column);
+
+                String[] alias = columnInfo.getAlias();
+                columnQueryMapping.put(columnInfo.column, new QueryColumn(schema, tableName, columnInfo.column, alias != null && alias.length > 0 ? alias[0] : null));
+            }
         }
+
+        this.columns = columnNames.toArray(new String[]{});
         this.allColumns = ArrayUtil.concat(allColumns, columns);
     }
 
@@ -515,6 +521,7 @@ public class TableInfo {
     }
 
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Map<String, RawValue> obtainUpdateRawValueMap(Object entity) {
         if (!(entity instanceof UpdateWrapper)) {
             return Collections.emptyMap();
@@ -551,7 +558,13 @@ public class TableInfo {
                 return Collections.emptySet();
             }
             for (String property : updates.keySet()) {
-                String column = getColumnByProperty(property);
+//                String column = getColumnByProperty(property);
+                String column = propertyColumnMapping.get(property);
+                if (column == null) {
+                    continue;
+                }
+
+
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
                     continue;
                 }
@@ -622,12 +635,14 @@ public class TableInfo {
             if (updates.isEmpty()) {
                 return FlexConsts.EMPTY_ARRAY;
             }
-//            Set<String> properties = (Set<String>) updates;
-//            if (properties.isEmpty()) {
-//                return values.toArray();
-//            }
             for (String property : updates.keySet()) {
-                String column = getColumnByProperty(property);
+
+                String column = propertyColumnMapping.get(property);
+                if (column == null) {
+                    continue;
+                }
+
+
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
                     continue;
                 }
@@ -712,6 +727,7 @@ public class TableInfo {
 
     /**
      * 获取主键值
+     *
      * @param entity
      * @return 主键值，有多个主键时返回数组
      */
@@ -988,16 +1004,16 @@ public class TableInfo {
         List<ResultMapping> resultMappings = new ArrayList<>();
 
 
+        // <resultMap> 标签下的 <id> 标签映射
+        for (IdInfo idInfo : primaryKeyList) {
+            doBuildColumnResultMapping(configuration, existMappingColumns, resultMappings, idInfo, CollectionUtil.newArrayList(ResultFlag.ID), isNested);
+        }
+
         // <resultMap> 标签下的 <result> 标签映射
         for (ColumnInfo columnInfo : columnInfoList) {
             doBuildColumnResultMapping(configuration, existMappingColumns, resultMappings, columnInfo, Collections.emptyList(), isNested);
         }
 
-
-        // <resultMap> 标签下的 <id> 标签映射
-        for (IdInfo idInfo : primaryKeyList) {
-            doBuildColumnResultMapping(configuration, existMappingColumns, resultMappings, idInfo, CollectionUtil.newArrayList(ResultFlag.ID), isNested);
-        }
 
         // <resultMap> 标签下的 <association> 标签映射
         if (associationType != null) {

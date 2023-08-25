@@ -16,6 +16,8 @@
 package com.mybatisflex.spring;
 
 import com.mybatisflex.core.datasource.FlexDataSource;
+import com.mybatisflex.core.transaction.TransactionContext;
+import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.transaction.Transaction;
 
 import java.sql.Connection;
@@ -30,6 +32,9 @@ import java.sql.SQLException;
 public class FlexSpringTransaction implements Transaction {
 
     private final FlexDataSource dataSource;
+    private Boolean isConnectionTransactional;
+    private Boolean autoCommit;
+    private Connection connection;
 
     public FlexSpringTransaction(FlexDataSource dataSource) {
         this.dataSource = dataSource;
@@ -37,22 +42,42 @@ public class FlexSpringTransaction implements Transaction {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        if (isConnectionTransactional == null) {
+            connection = dataSource.getConnection();
+            isConnectionTransactional = StringUtil.isNotBlank(TransactionContext.getXID());
+            autoCommit = connection.getAutoCommit();
+            return connection;
+        }
+        // 在事务中，通过 FlexDataSource 去获取
+        // FlexDataSource 内部会进行 connection 缓存以及多数据源下的 key 判断
+        else if (isConnectionTransactional) {
+            return dataSource.getConnection();
+        }
+        // 非事务，返回当前链接
+        else {
+            return connection;
+        }
     }
 
     @Override
     public void commit() throws SQLException {
-        getConnection().commit();
+        if (this.connection != null && !this.isConnectionTransactional && !this.autoCommit) {
+            this.connection.commit();
+        }
     }
 
     @Override
     public void rollback() throws SQLException {
-        getConnection().rollback();
+        if (this.connection != null && !this.isConnectionTransactional && !this.autoCommit) {
+            this.connection.rollback();
+        }
     }
 
     @Override
     public void close() throws SQLException {
-        getConnection().close();
+        if (this.connection != null && !this.isConnectionTransactional) {
+            connection.close();
+        }
     }
 
     @Override

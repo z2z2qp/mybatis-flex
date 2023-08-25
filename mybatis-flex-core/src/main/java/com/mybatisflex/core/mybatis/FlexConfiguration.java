@@ -24,7 +24,6 @@ import com.mybatisflex.core.mybatis.executor.FlexBatchExecutor;
 import com.mybatisflex.core.mybatis.executor.FlexReuseExecutor;
 import com.mybatisflex.core.mybatis.executor.FlexSimpleExecutor;
 import com.mybatisflex.core.row.RowMapper;
-import com.mybatisflex.core.table.EntityWrapperFactory;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.util.StringUtil;
@@ -51,20 +50,22 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author michael
+ */
 public class FlexConfiguration extends Configuration {
 
     private static final Map<String, MappedStatement> dynamicMappedStatementCache = new ConcurrentHashMap<>();
 
-    public FlexConfiguration(Environment environment) {
-        super(environment);
-        setMapUnderscoreToCamelCase(true);
-        setObjectWrapperFactory(new EntityWrapperFactory());
+    public FlexConfiguration() {
+        setObjectWrapperFactory(new FlexWrapperFactory());
         initDefaultMappers();
     }
 
-    public FlexConfiguration() {
-        setMapUnderscoreToCamelCase(true);
-        setObjectWrapperFactory(new EntityWrapperFactory());
+
+    public FlexConfiguration(Environment environment) {
+        super(environment);
+        setObjectWrapperFactory(new FlexWrapperFactory());
         initDefaultMappers();
     }
 
@@ -240,7 +241,8 @@ public class FlexConfiguration extends Configuration {
             .fetchSize(ms.getFetchSize())
             .timeout(ms.getTimeout())
             .statementType(ms.getStatementType())
-            .keyGenerator(keyGenerator) // 替换主键生成器
+            // 替换主键生成器
+            .keyGenerator(keyGenerator)
             .keyProperty(ms.getKeyProperties() == null ? null : String.join(",", ms.getKeyProperties()))
             .keyColumn(ms.getKeyColumns() == null ? null : String.join(",", ms.getKeyColumns()))
             .databaseId(databaseId)
@@ -283,7 +285,8 @@ public class FlexConfiguration extends Configuration {
             .fetchSize(ms.getFetchSize())
             .timeout(ms.getTimeout())
             .statementType(ms.getStatementType())
-            .keyGenerator(keyGenerator) // 替换主键生成器
+            // 替换主键生成器
+            .keyGenerator(keyGenerator)
             .keyProperty(tableInfo.getKeyProperties())
             .keyColumn(tableInfo.getKeyColumns())
             .databaseId(databaseId)

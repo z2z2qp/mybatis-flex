@@ -19,6 +19,10 @@ import com.mybatisflex.annotation.*;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.exception.FlexExceptions;
+import com.mybatisflex.core.query.QueryChain;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.Reflectors;
@@ -59,6 +63,10 @@ public class TableInfoFactory {
         byte[].class, Byte[].class, Byte.class,
         BigInteger.class, BigDecimal.class,
         char.class, String.class, Character.class
+    );
+
+    static final Set<Class<?>> ignoreColumnTypes = CollectionUtil.newHashSet(
+        QueryWrapper.class, QueryColumn.class, QueryCondition.class, QueryChain.class
     );
 
 
@@ -175,7 +183,6 @@ public class TableInfoFactory {
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         List<IdInfo> idInfos = new ArrayList<>();
 
-//        Field idField = null;
 
         String logicDeleteColumn = null;
         String versionColumn = null;
@@ -193,25 +200,38 @@ public class TableInfoFactory {
         // 默认查询列
         Set<String> defaultQueryColumns = new LinkedHashSet<>();
 
-
         List<Field> entityFields = getColumnFields(entityClass);
 
         FlexGlobalConfig config = FlexGlobalConfig.getDefaultConfig();
 
         for (Field field : entityFields) {
 
-            Column column = field.getAnnotation(Column.class);
-            if (column != null && column.ignore()) {
-                continue; // ignore
-            }
-
             Class<?> fieldType = reflector.getGetterType(field.getName());
 
+            //移除默认的忽略字段
+            boolean isIgnoreField = false;
+            for (Class<?> ignoreColumnType : ignoreColumnTypes) {
+                if (ignoreColumnType.isAssignableFrom(fieldType)) {
+                    isIgnoreField = true;
+                    break;
+                }
+            }
+
+            if (isIgnoreField) {
+                continue;
+            }
+
+            Column columnAnnotation = field.getAnnotation(Column.class);
+
             //满足以下 3 种情况，不支持该类型
-            if ((column == null || column.typeHandler() == UnknownTypeHandler.class) // 未配置 typeHandler
+            if ((columnAnnotation == null || columnAnnotation.typeHandler() == UnknownTypeHandler.class) // 未配置 typeHandler
                 && !fieldType.isEnum()   // 类型不是枚举
                 && !defaultSupportColumnTypes.contains(fieldType) //默认的自动类型不包含该类型
             ) {
+                // 忽略 集合 实体类 解析
+                if (columnAnnotation != null && columnAnnotation.ignore()) {
+                    continue;
+                }
                 // 集合嵌套
                 if (Collection.class.isAssignableFrom(fieldType)) {
                     Type genericType = TypeParameterResolver.resolveFieldType(field, entityClass);
@@ -232,10 +252,10 @@ public class TableInfoFactory {
             }
 
             //列名
-            String columnName = getColumnName(tableInfo.isCamelToUnderline(), field, column);
+            String columnName = getColumnName(tableInfo.isCamelToUnderline(), field, columnAnnotation);
 
             //逻辑删除字段
-            if ((column != null && column.isLogicDelete())
+            if ((columnAnnotation != null && columnAnnotation.isLogicDelete())
                 || columnName.equals(config.getLogicDeleteColumn())) {
                 if (logicDeleteColumn == null) {
                     logicDeleteColumn = columnName;
@@ -245,7 +265,7 @@ public class TableInfoFactory {
             }
 
             //乐观锁版本字段
-            if ((column != null && column.version())
+            if ((columnAnnotation != null && columnAnnotation.version())
                 || columnName.equals(config.getVersionColumn())) {
                 if (versionColumn == null) {
                     versionColumn = columnName;
@@ -255,7 +275,7 @@ public class TableInfoFactory {
             }
 
             //租户ID 字段
-            if ((column != null && column.tenantId())
+            if ((columnAnnotation != null && columnAnnotation.tenantId())
                 || columnName.equals(config.getTenantColumn())) {
                 if (tenantIdColumn == null) {
                     tenantIdColumn = columnName;
@@ -264,24 +284,22 @@ public class TableInfoFactory {
                 }
             }
 
-            if (column != null && StringUtil.isNotBlank(column.onInsertValue())) {
-                onInsertColumns.put(columnName, column.onInsertValue().trim());
+
+            if (columnAnnotation != null && StringUtil.isNotBlank(columnAnnotation.onInsertValue())) {
+                onInsertColumns.put(columnName, columnAnnotation.onInsertValue().trim());
             }
 
 
-            if (column != null && StringUtil.isNotBlank(column.onUpdateValue())) {
-                onUpdateColumns.put(columnName, column.onUpdateValue().trim());
+            if (columnAnnotation != null && StringUtil.isNotBlank(columnAnnotation.onUpdateValue())) {
+                onUpdateColumns.put(columnName, columnAnnotation.onUpdateValue().trim());
             }
 
 
-            if (column != null && column.isLarge()) {
+            if (columnAnnotation != null && columnAnnotation.isLarge()) {
                 largeColumns.add(columnName);
             }
 
-            if (column == null || !column.isLarge()) {
-                defaultQueryColumns.add(columnName);
-            }
-
+            //主键配置
             Id id = field.getAnnotation(Id.class);
             ColumnInfo columnInfo;
             if (id != null) {
@@ -293,6 +311,7 @@ public class TableInfoFactory {
             }
 
             ColumnAlias columnAlias = null;
+
             // 属性上没有别名，查找 getter 方法上有没有别名
             Method getterMethod = ClassUtil.getFirstMethod(entityClass, m -> ClassUtil.isGetterMethod(m, field.getName()));
             if (getterMethod != null) {
@@ -310,19 +329,28 @@ public class TableInfoFactory {
             columnInfo.setColumn(columnName);
             columnInfo.setProperty(field.getName());
             columnInfo.setPropertyType(fieldType);
+            columnInfo.setIgnore(columnAnnotation != null && columnAnnotation.ignore());
 
-            if (column != null && column.typeHandler() != UnknownTypeHandler.class) {
+
+            // 默认查询列 没有忽略且不是大字段
+            if (columnAnnotation == null || (!columnAnnotation.isLarge() && !columnAnnotation.ignore())) {
+                defaultQueryColumns.add(columnName);
+            }
+
+
+            //typeHandler 配置
+            if (columnAnnotation != null && columnAnnotation.typeHandler() != UnknownTypeHandler.class) {
                 TypeHandler<?> typeHandler;
 
-                // 集合类型，传入泛型
-                // fixed https://gitee.com/mybatis-flex/mybatis-flex/issues/I7S2YE
+                //集合类型，支持泛型
+                //fixed https://gitee.com/mybatis-flex/mybatis-flex/issues/I7S2YE
                 if (Collection.class.isAssignableFrom(fieldType)) {
-                    typeHandler = createCollectionTypeHandler(entityClass, field, column.typeHandler(), fieldType);
+                    typeHandler = createCollectionTypeHandler(entityClass, field, columnAnnotation.typeHandler(), fieldType);
                 }
 
                 //非集合类型
                 else {
-                    Class<?> typeHandlerClass = column.typeHandler();
+                    Class<?> typeHandlerClass = columnAnnotation.typeHandler();
                     Configuration configuration = FlexGlobalConfig.getDefaultConfig().getConfiguration();
                     TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
                     typeHandler = typeHandlerRegistry.getInstance(columnInfo.getPropertyType(), typeHandlerClass);
@@ -331,6 +359,7 @@ public class TableInfoFactory {
                 columnInfo.setTypeHandler(typeHandler);
             }
 
+            // 数据脱敏配置
             ColumnMask columnMask = field.getAnnotation(ColumnMask.class);
             if (columnMask != null && StringUtil.isNotBlank(columnMask.value())) {
                 if (String.class != fieldType) {
@@ -339,8 +368,9 @@ public class TableInfoFactory {
                 columnInfo.setMaskType(columnMask.value().trim());
             }
 
-            if (column != null && column.jdbcType() != JdbcType.UNDEFINED) {
-                columnInfo.setJdbcType(column.jdbcType());
+            // jdbcType 配置
+            if (columnAnnotation != null && columnAnnotation.jdbcType() != JdbcType.UNDEFINED) {
+                columnInfo.setJdbcType(columnAnnotation.jdbcType());
             }
 
         }
