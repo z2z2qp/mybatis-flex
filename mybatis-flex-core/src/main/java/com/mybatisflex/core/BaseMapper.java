@@ -375,54 +375,7 @@ public interface BaseMapper<T> {
     int updateByQuery(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls,
                       @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
-    /**
-     * 执行类似 {@code update table set field = field + 1 where ... } 的场景。
-     * TODO: 2023/7/27  该方法将在 v1.6.0 被删除
-     *
-     * @param fieldName    字段名
-     * @param value        值（大于等于 0 加，小于 0 减）
-     * @param queryWrapper 条件
-     * @return 受影响的行数
-     * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
-     */
-    @Deprecated
-    @UpdateProvider(type = EntitySqlProvider.class, method = "updateNumberAddByQuery")
-    int updateNumberAddByQuery(@Param(FlexConsts.FIELD_NAME) String fieldName, @Param(FlexConsts.VALUE) Number value,
-                               @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
-    /**
-     * 执行类似 {@code update table set field = field + 1 where ... } 的场景。
-     * TODO: 该方法将在 v1.6.0 被删除
-     *
-     * @param column       字段名
-     * @param value        值（大于等于 0 加，小于 0 减）
-     * @param queryWrapper 条件
-     * @return 受影响的行数
-     * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
-     */
-    @Deprecated
-    default int updateNumberAddByQuery(QueryColumn column, Number value, QueryWrapper queryWrapper) {
-        FlexAssert.notNull(value, "value");
-        return updateNumberAddByQuery(column.getName(), value, queryWrapper);
-    }
-
-    /**
-     * 执行类似 {@code update table set field = field + 1 where ... } 的场景。
-     * TODO: 该方法将在 v1.6.0 被删除
-     *
-     * @param fn           字段名
-     * @param value        值（大于等于 0 加，小于 0 减）
-     * @param queryWrapper 条件
-     * @return 受影响的行数
-     * @see EntitySqlProvider#updateNumberAddByQuery(Map, ProviderContext)
-     */
-    @Deprecated
-    default int updateNumberAddByQuery(LambdaGetter<T> fn, Number value, QueryWrapper queryWrapper) {
-        FlexAssert.notNull(value, "value");
-        TableInfo tableInfo = TableInfoFactory.ofMapperClass(ClassUtil.getUsefulClass(getClass()));
-        String column = tableInfo.getColumnByProperty(LambdaUtil.getFieldName(fn));
-        return updateNumberAddByQuery(column, value, queryWrapper);
-    }
 
     // === 查（select） ===
 
@@ -1232,51 +1185,6 @@ public interface BaseMapper<T> {
         return MapperUtil.doPaginate(this, page, queryWrapper, asType, true, consumers);
     }
 
-    default <R> Page<R> doPaginate(Page<R> page, QueryWrapper queryWrapper, Class<R> asType, boolean withRelations,
-                                   Consumer<FieldQueryBuilder<R>>... consumers) {
-        try {
-            // 只有 totalRow 小于 0 的时候才会去查询总量
-            // 这样方便用户做总数缓存，而非每次都要去查询总量
-            // 一般的分页场景中，只有第一页的时候有必要去查询总量，第二页以后是不需要的
-            if (page.getTotalRow() < 0) {
-                QueryWrapper countQueryWrapper;
-                if (page.needOptimizeCountQuery()) {
-                    countQueryWrapper = MapperUtil.optimizeCountQueryWrapper(queryWrapper);
-                } else {
-                    countQueryWrapper = MapperUtil.rawCountQueryWrapper(queryWrapper);
-                }
-                page.setTotalRow(selectCountByQuery(countQueryWrapper));
-            }
-
-            if (page.isEmpty()) {
-                return page;
-            }
-
-            queryWrapper.limit(page.offset(), page.getPageSize());
-
-            List<R> records;
-            if (asType != null) {
-                records = selectListByQueryAs(queryWrapper, asType);
-            } else {
-                records = (List<R>) selectListByQuery(queryWrapper);
-            }
-
-            if (withRelations) {
-                MapperUtil.queryRelations(this, records);
-            }
-
-            MapperUtil.queryFields(this, records, consumers);
-            page.setRecords(records);
-
-            return page;
-
-        } finally {
-            // 将之前设置的 limit 清除掉
-            // 保险起见把重置代码放到 finally 代码块中
-            CPI.setLimitRows(queryWrapper, null);
-            CPI.setLimitOffset(queryWrapper, null);
-        }
-    }
 
     default <R> Page<R> paginate(Page<T> page, QueryWrapper queryWrapper, Function<T, R> cast) {
         var r = paginate(page, queryWrapper);
@@ -1312,10 +1220,10 @@ public interface BaseMapper<T> {
                     countSelectId = mapperClassName + "." + countSelectId;
                 }
                 Number number = sqlSession.selectOne(countSelectId, preparedParams);
-                page.setTotalRow(number);
+                page.setTotalRow(number == null ? Page.INIT_VALUE : number.longValue());
             }
 
-            if (!page.isEmpty()) {
+            if (page.hasRecords()) {
                 List<E> entities = sqlSession.selectList(dataSelectId, preparedParams);
                 page.setRecords(entities);
             }

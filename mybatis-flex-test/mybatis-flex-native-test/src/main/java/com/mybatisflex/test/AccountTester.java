@@ -141,6 +141,41 @@ public class AccountTester {
     }
 
 
+    /**
+     * issues https://gitee.com/mybatis-flex/mybatis-flex/issues/I7VAG8
+     */
+    @Test
+    public void testLeftJoinSelectWithIgnoreColumn() {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper
+            .select(ACCOUNT.ID,ACCOUNT.AGE,ARTICLE.TITLE)
+            .from(ACCOUNT)
+            .leftJoin(ARTICLE).on(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID))
+            .where(ACCOUNT.ID.ge(1));
+        List<Account> accounts = accountMapper.selectListByQuery(queryWrapper);
+        System.out.println(accounts);
+    }
+
+
+    /**
+     * issues https://gitee.com/mybatis-flex/mybatis-flex/issues/I7RE0J
+     */
+    @Test
+    public void testUpdateByUpdateWrapper() {
+        Account account = new Account();
+        account.setId(1L);
+        account = UpdateWrapper.of(account)
+            .set(Account::getId,1)
+            .set(Account::getAge, 20)
+            //设置 Ignore 字段，会被自动忽略
+            .setRaw(Account::getTitle, "xxxx")
+            .toEntity();
+        accountMapper.update(account);
+    }
+
+
+
+
     @Test
     public void testSelectAsToDTO() {
         List<AccountDTO> accountDTOS = accountMapper.selectListByQueryAs(QueryWrapper.create(), AccountDTO.class);

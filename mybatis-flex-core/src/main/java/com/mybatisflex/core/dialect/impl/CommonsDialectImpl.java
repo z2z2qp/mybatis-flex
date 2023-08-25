@@ -32,8 +32,6 @@ import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.SqlUtil;
 import com.mybatisflex.core.util.StringUtil;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 import static com.mybatisflex.core.constant.SqlConsts.*;
@@ -748,11 +746,11 @@ public class CommonsDialectImpl implements IDialect {
 
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
 
-        for (String modifyAttr : updateColumns) {
-            if (rawValueMap.containsKey(modifyAttr)) {
-                stringJoiner.add(wrap(modifyAttr) + EQUALS + rawValueMap.get(modifyAttr).toSql(this));
+        for (String updateColumn : updateColumns) {
+            if (rawValueMap.containsKey(updateColumn)) {
+                stringJoiner.add(wrap(updateColumn) + EQUALS + rawValueMap.get(updateColumn).toSql(this));
             } else {
-                stringJoiner.add(wrap(modifyAttr) + EQUALS_PLACEHOLDER);
+                stringJoiner.add(wrap(updateColumn) + EQUALS_PLACEHOLDER);
             }
         }
 
@@ -856,15 +854,6 @@ public class CommonsDialectImpl implements IDialect {
         }
 
 
-//        String whereConditionSql = buildWhereConditionSql(queryWrapper);
-//
-//        //不允许全量更新
-//        if (StringUtil.isBlank(whereConditionSql)) {
-//            throw FlexExceptions.wrap(LocalizedFormats.UPDATE_OR_DELETE_NOT_ALLOW);
-//        }
-//
-//        sql.append(WHERE).append(whereConditionSql);
-
         List<String> endFragments = CPI.getEndFragments(queryWrapper);
         if (CollectionUtil.isNotEmpty(endFragments)) {
             for (String endFragment : endFragments) {
@@ -875,64 +864,6 @@ public class CommonsDialectImpl implements IDialect {
         return sqlBuilder.toString();
     }
 
-
-    @Override
-    public String forUpdateNumberAddByQuery(String schema, String tableName, String fieldName, Number value, QueryWrapper queryWrapper) {
-        StringBuilder sql = new StringBuilder();
-        sql.append(UPDATE).append(forHint(CPI.getHint(queryWrapper)));
-        if (StringUtil.isNotBlank(schema)) {
-            sql.append(wrap(getRealSchema(schema))).append(REFERENCE);
-        }
-        sql.append(wrap(getRealTable(tableName))).append(SET);
-        sql.append(wrap(fieldName)).append(EQUALS).append(wrap(fieldName)).append(geZero(value) ? PLUS_SIGN : MINUS_SIGN).append(abs(value));
-
-        String whereConditionSql = buildWhereConditionSql(queryWrapper);
-
-        //不允许全量更新
-        if (StringUtil.isBlank(whereConditionSql)) {
-            throw FlexExceptions.wrap(LocalizedFormats.UPDATE_OR_DELETE_NOT_ALLOW);
-        }
-
-        sql.append(WHERE).append(whereConditionSql);
-
-        List<String> endFragments = CPI.getEndFragments(queryWrapper);
-        if (CollectionUtil.isNotEmpty(endFragments)) {
-            for (String endFragment : endFragments) {
-                sql.append(BLANK).append(endFragment);
-            }
-        }
-        return sql.toString();
-    }
-
-
-    protected boolean geZero(Number number) {
-        if (number instanceof BigDecimal bd) {
-            return bd.signum() >= 0;
-        } else if (number instanceof BigInteger bi) {
-            return bi.signum() >= 0;
-        } else if (number instanceof Float f) {
-            return f >= 0;
-        } else if (number instanceof Double d) {
-            return d >= 0;
-        } else {
-            return number.longValue() >= 0;
-        }
-    }
-
-
-    protected Number abs(Number number) {
-        if (number instanceof BigDecimal num) {
-            return num.abs();
-        } else if (number instanceof BigInteger num) {
-            return num.abs();
-        } else if (number instanceof Float num) {
-            return Math.abs(num);
-        } else if (number instanceof Double num) {
-            return Math.abs(num);
-        } else {
-            return Math.abs(number.longValue());
-        }
-    }
 
 
     @Override
