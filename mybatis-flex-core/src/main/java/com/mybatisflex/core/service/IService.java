@@ -19,9 +19,7 @@ import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.exception.MybatisFlexException;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.QueryChain;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.ClassUtil;
@@ -90,34 +88,6 @@ public interface IService<T> {
      * {@code null} 属性的数据，使数据库配置的默认值生效。
      */
     default boolean saveBatch(Collection<T> entities, int batchSize) {
-        Class<BaseMapper<T>> usefulClass = (Class<BaseMapper<T>>) ClassUtil.getUsefulClass(getMapper().getClass());
-        return SqlUtil.toBool(Db.executeBatch(entities, batchSize, usefulClass, BaseMapper::insertSelective));
-    }
-
-    /**
-     * <p>批量保存实体类对象数据。
-     *
-     * @param entities 实体类对象
-     * @return {@code true} 保存成功，{@code false} 保存失败。
-     * @deprecated 为保持 Service 层 API 一致性，默认方法都是忽略实体类 {@code null} 属性的数据。
-     * 另外，该方法将在 1.6.0 版本被移除。
-     */
-    @Deprecated
-    default boolean saveBatchSelective(Collection<T> entities) {
-        return saveBatchSelective(entities, DEFAULT_BATCH_SIZE);
-    }
-
-    /**
-     * <p>批量保存实体类对象数据。
-     *
-     * @param entities  实体类对象
-     * @param batchSize 每次保存切分的数量
-     * @return {@code true} 保存成功，{@code false} 保存失败。
-     * @deprecated 为保持 Service 层 API 一致性，默认方法都是忽略实体类 {@code null} 属性的数据。
-     * 另外，该方法将在 1.6.0 版本被移除。
-     */
-    @Deprecated
-    default boolean saveBatchSelective(Collection<T> entities, int batchSize) {
         Class<BaseMapper<T>> usefulClass = (Class<BaseMapper<T>>) ClassUtil.getUsefulClass(getMapper().getClass());
         return SqlUtil.toBool(Db.executeBatch(entities, batchSize, usefulClass, BaseMapper::insertSelective));
     }
@@ -524,7 +494,7 @@ public interface IService<T> {
      * @return {@code true} 数据存在，{@code false} 数据不存在。
      */
     default boolean exists(QueryWrapper query) {
-        return CollectionUtil.isNotEmpty(getMapper().selectListByQuery(query.limit(1)));
+        return exists(CPI.getWhereQueryCondition(query));
     }
 
     /**
@@ -534,7 +504,15 @@ public interface IService<T> {
      * @return {@code true} 数据存在，{@code false} 数据不存在。
      */
     default boolean exists(QueryCondition condition) {
-        return CollectionUtil.isNotEmpty(getMapper().selectListByCondition(condition, 1L));
+        // 根据查询条件构建 SQL 语句
+        // SELECT 1 FROM table WHERE ... LIMIT 1
+        QueryWrapper queryWrapper = QueryMethods.selectOne()
+            .where(condition)
+            .limit(1);
+        // 获取数据集合，空集合：[] 不存在数据，有一个元素的集合：[1] 存在数据
+        List<Object> objects = getMapper().selectObjectListByQuery(queryWrapper);
+        // 判断是否存在数据
+        return CollectionUtil.isNotEmpty(objects);
     }
 
     /**

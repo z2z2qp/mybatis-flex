@@ -19,6 +19,7 @@ import com.mybatisflex.annotation.*;
 import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.constant.SqlConsts;
+import com.mybatisflex.core.constant.SqlOperator;
 import com.mybatisflex.core.dialect.IDialect;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.exception.locale.LocalizedFormats;
@@ -558,12 +559,8 @@ public class TableInfo {
                 return Collections.emptySet();
             }
             for (String property : updates.keySet()) {
-//                String column = getColumnByProperty(property);
-                String column = propertyColumnMapping.get(property);
-                if (column == null) {
-                    continue;
-                }
 
+                String column = getColumnByProperty(property);
 
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
                     continue;
@@ -606,17 +603,6 @@ public class TableInfo {
 
                 columns.add(column);
             }
-
-            // 普通 entity（非 ModifyAttrsRecord） 忽略 includePrimary 的设置
-//            if (includePrimary) {
-//                for (String column : this.primaryKeys) {
-//                    Object value = getColumnValue(metaObject, column);
-//                    if (ignoreNulls && value == null) {
-//                        continue;
-//                    }
-//                    columns.add(column);
-//                }
-//            }
         }
         return columns;
     }
@@ -637,11 +623,7 @@ public class TableInfo {
             }
             for (String property : updates.keySet()) {
 
-                String column = propertyColumnMapping.get(property);
-                if (column == null) {
-                    continue;
-                }
-
+                String column = getColumnByProperty(property);
 
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
                     continue;
@@ -666,6 +648,16 @@ public class TableInfo {
                         var typeHandler = columnInfo.buildTypeHandler();
                         if (typeHandler != null) {
                             value = new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
+                        }
+                    }
+
+                    // fixed: https://gitee.com/mybatis-flex/mybatis-flex/issues/I7TFBK
+                    if (value.getClass().isEnum()) {
+                        EnumWrapper enumWrapper = EnumWrapper.of(value.getClass());
+                        if (enumWrapper.hasEnumValueAnnotation()) {
+                            value = enumWrapper.getEnumValue((Enum) value);
+                        } else {
+                            value = ((Enum<?>)value).name();
                         }
                     }
                 }
@@ -922,7 +914,7 @@ public class TableInfo {
     }
 
 
-    public QueryWrapper buildQueryWrapper(Object entity) {
+    public QueryWrapper buildQueryWrapper(Object entity, SqlOperators operators) {
         QueryColumn[] queryColumns = new QueryColumn[defaultQueryColumns.length];
         for (int i = 0; i < defaultQueryColumns.length; i++) {
             queryColumns[i] = columnQueryMapping.get(defaultQueryColumns[i]);
@@ -941,7 +933,15 @@ public class TableInfo {
             Object value = metaObject.getValue(property);
             if (value != null && !"".equals(value)) {
                 QueryColumn queryColumn = buildQueryColumn(column);
-                queryWrapper.and(queryColumn.eq(value));
+                if (operators != null && operators.containsKey(property)) {
+                    SqlOperator operator = operators.get(property);
+                    if (operator == SqlOperator.LIKE || operator == SqlOperator.NOT_LIKE) {
+                        value = "%" + value + "%";
+                    }
+                    queryWrapper.and(QueryCondition.create(queryColumn, operator, value));
+                } else {
+                    queryWrapper.and(queryColumn.eq(value));
+                }
             }
         });
         return queryWrapper;
@@ -1151,7 +1151,8 @@ public class TableInfo {
         columnInfoMapping.forEach((column, columnInfo) -> {
             if (index <= 0) {
                 for (String rowKey : rowKeys) {
-                    if (column.equalsIgnoreCase(rowKey)) {
+                    // 修复: 开启 mapUnderscoreToCamelCase = true 时， row 无法转换 entity 的问题
+                    if (rowKey.equalsIgnoreCase(column) || rowKey.equalsIgnoreCase(column.replace("_", ""))) {
                         setInstancePropertyValue(row, instance, metaObject, columnInfo, rowKey);
                     }
                 }
@@ -1160,7 +1161,8 @@ public class TableInfo {
                     String newColumn = i <= 0 ? column : column + "$" + i;
                     boolean fillValue = false;
                     for (String rowKey : rowKeys) {
-                        if (newColumn.equalsIgnoreCase(rowKey)) {
+                        // 修复: 开启 mapUnderscoreToCamelCase = true 时， row 无法转换 entity 的问题
+                        if (rowKey.equalsIgnoreCase(column) || rowKey.equalsIgnoreCase(column.replace("_", ""))) {
                             setInstancePropertyValue(row, instance, metaObject, columnInfo, rowKey);
                             fillValue = true;
                             break;
@@ -1190,7 +1192,7 @@ public class TableInfo {
         if (rowValue != null && !metaObject.getSetterType(columnInfo.property).isAssignableFrom(rowValue.getClass())) {
             rowValue = ConvertUtil.convert(rowValue, metaObject.getSetterType(columnInfo.property), true);
         }
-        rowValue = invokeOnSetListener(instance, columnInfo.getProperty(), rowValue);
+        rowValue = invokeOnSetListener(instance, columnInfo.property, rowValue);
         metaObject.setValue(columnInfo.property, rowValue);
     }
 

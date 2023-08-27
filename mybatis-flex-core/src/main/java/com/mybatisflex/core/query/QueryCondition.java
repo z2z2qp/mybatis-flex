@@ -16,6 +16,7 @@
 package com.mybatisflex.core.query;
 
 
+import com.mybatisflex.core.constant.SqlConnector;
 import com.mybatisflex.core.constant.SqlConsts;
 import com.mybatisflex.core.constant.SqlOperator;
 import com.mybatisflex.core.dialect.IDialect;
@@ -27,7 +28,6 @@ import com.mybatisflex.core.util.StringUtil;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 
 public class QueryCondition implements CloneSupport<QueryCondition> {
 
@@ -39,6 +39,7 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
 
     //当前条件的上一个条件
     protected QueryCondition prev;
+
     //当前条件的下一个条件
     protected QueryCondition next;
 
@@ -123,37 +124,6 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
      */
     public QueryCondition when(BooleanSupplier fn) {
         this.effective = fn.getAsBoolean();
-        return this;
-    }
-
-    /**
-     * <p>动态条件构造。
-     *
-     * <p>推荐将 {@link Predicate} 推断写在填写的值的后面，以确保泛型对应，例如：
-     * <pre>{@code
-     * ACCOUNT.ID.in(idList, CollectionUtil::isNotEmpty);
-     * }</pre>
-     *
-     * @see #when(boolean)
-     * @see #when(BooleanSupplier)
-     * @deprecated 由于 {@link QueryCondition} 中属性 {@link #value} 的类型为 Object
-     * 类型，没有使用泛型，所以该方法泛型推断可能会出现问题。
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public <T> QueryCondition when(Predicate<T> fn) {
-        Object val = this.value;
-        if ((SqlConsts.LIKE.equals(logic) || SqlConsts.NOT_LIKE.equals(logic))
-            && val instanceof String valStr) {
-            if (valStr.startsWith(SqlConsts.PERCENT_SIGN)) {
-                valStr = valStr.substring(1);
-            }
-            if (valStr.endsWith(SqlConsts.PERCENT_SIGN)) {
-                valStr = valStr.substring(0, valStr.length() - 1);
-            }
-            val = valStr;
-        }
-        this.effective = fn.test((T) val);
         return this;
     }
 
