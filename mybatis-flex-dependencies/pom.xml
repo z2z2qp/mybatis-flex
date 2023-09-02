@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.mybatis-flex</groupId>
         <artifactId>parent</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.3</version>
     </parent>
 
     <artifactId>mybatis-flex-dependencies</artifactId>
@@ -46,7 +46,7 @@
                 <version>${mybatis-flex.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.mybatisflex</groupId>
+                <groupId>com.mybatis-flex</groupId>
                 <artifactId>mybatis-flex-spring-boot-starter</artifactId>
                 <version>${mybatis-flex.version}</version>
             </dependency>

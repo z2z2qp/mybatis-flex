@@ -83,12 +83,12 @@ public class AccountTester {
 
     @Test
     public void testExecutor() {
-        DbChain.create()
-                .select(ACCOUNT.ALL_COLUMNS)
-                .from(ACCOUNT)
-                .where(ACCOUNT.ID.ge(1))
-                .listAs(Account.class)
-                .forEach(System.out::println);
+        DbChain.table("tb_account")
+            .select(ACCOUNT.ALL_COLUMNS)
+            .from(ACCOUNT)
+            .where(ACCOUNT.ID.ge(1))
+            .listAs(Account.class)
+            .forEach(System.out::println);
 
         AccountMapper accountBaseMapper = (AccountMapper) Mappers.ofEntityClass(Account.class);
 
@@ -178,7 +178,12 @@ public class AccountTester {
 
     @Test
     public void testSelectAsToDTO() {
-        List<AccountDTO> accountDTOS = accountMapper.selectListByQueryAs(QueryWrapper.create(), AccountDTO.class);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+//        queryWrapper.select(ACCOUNT.ALL_COLUMNS,ARTICLE.TITLE.as(AccountDTO::getPermissions))
+        queryWrapper.select(ACCOUNT.ALL_COLUMNS,ACCOUNT.USER_NAME.as(AccountDTO::getTestOtherField))
+//        queryWrapper.select(ACCOUNT.ALL_COLUMNS)
+            .from(ACCOUNT).leftJoin(ARTICLE).on(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID));
+        List<AccountDTO> accountDTOS = accountMapper.selectListByQueryAs(queryWrapper, AccountDTO.class);
         System.out.println(accountDTOS);
     }
 

@@ -39,7 +39,6 @@ import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.type.UnknownTypeHandler;
 import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.Field;
@@ -645,7 +644,7 @@ public class TableInfo {
                 if (value != null) {
                     ColumnInfo columnInfo = columnInfoMapping.get(column);
                     if (columnInfo != null) {
-                        var typeHandler = columnInfo.buildTypeHandler();
+                        var typeHandler = columnInfo.buildTypeHandler(null);
                         if (typeHandler != null) {
                             value = new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
                         }
@@ -657,7 +656,7 @@ public class TableInfo {
                         if (enumWrapper.hasEnumValueAnnotation()) {
                             value = enumWrapper.getEnumValue((Enum) value);
                         } else {
-                            value = ((Enum<?>)value).name();
+                            value = ((Enum<?>) value).name();
                         }
                     }
                 }
@@ -1038,12 +1037,16 @@ public class TableInfo {
                     // List<String> List<Integer> 等
                     String columnName = TableInfoFactory.getColumnName(camelToUnderline, field, field.getAnnotation(Column.class));
                     // 映射 <result column="..."/>
-                    String nestedResultMapId = entityClass.getName() + "." + field.getName();
+
                     ResultMapping resultMapping = new ResultMapping.Builder(configuration, null)
                         .column(columnName)
-                        .typeHandler(new UnknownTypeHandler(configuration))
+                        .typeHandler(configuration.getTypeHandlerRegistry().getTypeHandler(genericClass))
                         .build();
-                    ResultMap nestedResultMap = new ResultMap.Builder(configuration, nestedResultMapId, genericClass, Collections.singletonList(resultMapping)).build();
+
+                    String nestedResultMapId = entityClass.getName() + "." + field.getName();
+                    ResultMap nestedResultMap = new ResultMap.Builder(configuration, nestedResultMapId, genericClass
+                        , Collections.singletonList(resultMapping)).build();
+
                     configuration.addResultMap(nestedResultMap);
                     // 映射 <collection property="..." ofType="genericClass">
                     resultMappings.add(new ResultMapping.Builder(configuration, field.getName())
@@ -1083,7 +1086,7 @@ public class TableInfo {
                     , columnInfo.propertyType)
                     .jdbcType(columnInfo.getJdbcType())
                     .flags(flags)
-                    .typeHandler(columnInfo.buildTypeHandler())
+                    .typeHandler(columnInfo.buildTypeHandler(configuration))
                     .build();
                 resultMappings.add(mapping);
                 existMappingColumns.add(mapping.getColumn());
@@ -1100,7 +1103,7 @@ public class TableInfo {
                         , columnInfo.propertyType)
                         .jdbcType(columnInfo.getJdbcType())
                         .flags(flags)
-                        .typeHandler(columnInfo.buildTypeHandler())
+                        .typeHandler(columnInfo.buildTypeHandler(configuration))
                         .build();
                     resultMappings.add(mapping);
                     existMappingColumns.add(mapping.getColumn());
@@ -1115,7 +1118,7 @@ public class TableInfo {
         Object value = getPropertyValue(metaObject, columnInfo.property);
 
         if (value != null) {
-            var typeHandler = columnInfo.buildTypeHandler();
+            var typeHandler = columnInfo.buildTypeHandler(null);
             if (typeHandler != null) {
                 return new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
             }
@@ -1180,7 +1183,7 @@ public class TableInfo {
 
     private void setInstancePropertyValue(Row row, Object instance, MetaObject metaObject, ColumnInfo columnInfo, String rowKey) {
         Object rowValue = row.get(rowKey);
-        TypeHandler<?> typeHandler = columnInfo.buildTypeHandler();
+        TypeHandler<?> typeHandler = columnInfo.buildTypeHandler(null);
         if (typeHandler != null) {
             try {
                 //通过 typeHandler 转换数据
