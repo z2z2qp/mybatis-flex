@@ -27,7 +27,8 @@ export default defineConfig({
 
             {text: '帮助文档', link: '/zh/intro/what-is-mybatisflex'},
             {text: '🆘 常见问题', link: '/zh/faq'},
-            {text: '周边', link: '/zh/awesome-things'},
+            {text: '周边 / 视频教程', link: '/zh/awesome-things'},
+            // {text: '周边', link: '/zh/awesome-things'},
             {text: 'ChangeLog', link: '/zh/changes'},
             {
                 text: '获取源码', items: [
@@ -108,7 +109,15 @@ export default defineConfig({
 
         footer: {
             message: 'Released under the Apache License.',
-            copyright: 'Copyright © 2022-present Mybatis-Flex，<span style="font-size: 12px">备案号：<a style="color:#777" target="_blank" rel="noopener" href="http://beian.miit.gov.cn/">黔ICP备19009310号-9 </a></span>'
+            copyright: 'Copyright © 2022-present Mybatis-Flex. ' +
+                '<span style="display: flex;align-items: center;justify-content: center;">' +
+                '<span style="font-size: 12px;margin-right:10px;"><a style="color:#777" target="_blank" rel="noopener" href="http://beian.miit.gov.cn/">黔ICP备19009310号-9 </a></span>' +
+
+                '<img src="/assets/images/beian.jpg" style="margin-top: -2px;margin-right: 2px;width: 15px;">' +
+
+                '<a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=52010202003658"' +
+                ' style="display:inline-block;text-decoration:none;color:#777;font-size: 12px">贵公网安备 52010202003658 号</a>' +
+                '</span>'
         }
     },
     head: [

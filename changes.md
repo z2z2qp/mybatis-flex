@@ -1,5 +1,43 @@
 # MyBatis-Flex ChangeLog
 
+查看 [全部代码贡献者](/zh/intro/what-is-mybatisflex.html#贡献者)。
+
+
+## v1.6.3 20230901:
+- 修复：紧急修复 v1.6.2 分页查询无法查询数据列表的问题
+
+
+
+## v1.6.2 20230831:
+- 新增：添加一个 mysql 函数 GROUP_CONCAT，感谢 @shen_jun_feng
+- 优化：优化 TableDefs 的多一次判断可能影响性能的问题
+- 优化：代码生成器的 Builder 缺少的字段构建，感谢 @Suomm
+- 修复：FlexMapWrapper 在开启 useCamelCaseMapping 时的一些错误问题
+- 修复：无法配置自定义 EnumTypeHandler 的问题 #I7WNQQ
+- 修复：自动映射无法对 List 进行自动忽略的问题 #I7X7G7 #I7XBQS
+- 修复：实体类在不同包名下，无法初始化全部 TableDefs 的问题，感谢 @hezhijie
+- 文档：优化多租户的忽略租户条件的相关文档
+- 文档：修改 QueryWrapper 的 SQL 示例错误
+- 文档：添加 select .. as 的使用注意事项
+- 文档：优化多数据源的示例代码错误的问题，感谢 @CrazyAirhead
+- 文档：修改 mybatis-flex-dependencies/pom.xml 中 groupId 拼写错误，感谢 @chaosforever
+
+
+
+## v1.6.1 20230827:
+- 新增：添加 QueryWrapper.create(entity,SqlOperators) 支持通过 Entity 转换为 QueryWrapper
+- 优化：移动 SqlConnector 的包名
+- 优化：优化 IService.exists() 的效率，感谢 @Suomm
+- 修复：开启 mapUnderscoreToCamelCase = true 时， row 无法转换 entity 的问题
+- 修复：使用 QueryColumn 无法构建 UPDATE SET 语句，感谢 @Suomm
+- 修复：UpdateChain 不支持 @EnumValue 注解的问题，感谢 @Suomm
+- 文档：添加 Entity 转换为 QueryWrapper 的相关文档
+- 文档：添加 `@Column(isLarge = true)` 的其他使用方式，感谢 @Suomm
+- 文档：优化 `@Column` 注解的一些错误描述，感谢 @Suomm
+- 文档：添加关于 QueryColumnBehavior 配置的相关文档，感谢 @Suomm
+
+
+
 ## v1.6.0 20230825:
 - 新增：添加 RelationManager.addQueryRelations() 方法用于只查询部分关联字段
 - 优化：重构移除已经标识删除的方法或类 ！！！破坏性更新
