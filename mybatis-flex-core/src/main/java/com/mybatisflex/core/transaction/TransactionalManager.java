@@ -179,15 +179,23 @@ public class TransactionalManager {
                 return;
             }
             Map<String, Connection> connections = holdMap.get(xid);
-            for (Connection conn : connections.values()) {
-                try (conn) {
-                    if (commit) {
-                        conn.commit();
-                    } else {
-                        conn.rollback();
+            if (connections != null) {
+                for (Connection conn : connections.values()) {
+                    try {
+                        if (commit) {
+                            conn.commit();
+                        } else {
+                            conn.rollback();
+                        }
+                    } catch (SQLException e) {
+                        exception = e;
+                    } finally {
+                        try {
+                            conn.close();
+                        } catch (SQLException e) {
+                            //ignore
+                        }
                     }
-                } catch (SQLException e) {
-                    exception = e;
                 }
             }
         } finally {
