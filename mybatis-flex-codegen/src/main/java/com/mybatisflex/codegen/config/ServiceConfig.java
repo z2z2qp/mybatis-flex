@@ -19,6 +19,8 @@ package com.mybatisflex.codegen.config;
 import com.mybatisflex.core.service.IService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 
+import java.io.Serializable;
+
 /**
  * 生成 Service 的配置。
  *
@@ -26,8 +28,9 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
  * @since 2023-05-15
  */
 @SuppressWarnings("unused")
-public class ServiceConfig {
+public class ServiceConfig implements Serializable {
 
+    private static final long serialVersionUID = -2152473328300910220L;
     /**
      * Service 类的前缀。
      */
