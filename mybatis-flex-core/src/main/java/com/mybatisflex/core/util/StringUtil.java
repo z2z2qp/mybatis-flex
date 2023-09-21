@@ -88,14 +88,16 @@ public class StringUtil {
         if (isBlank(string)) {
             return "";
         }
-        var temp = string.toLowerCase();
-        var strLen = temp.length();
+        if(Character.isUpperCase(string.charAt(0))){
+            string = string.toLowerCase();
+        }
+        var strLen = string.length();
         var sb = new StringBuilder(strLen);
-        for (var i = 0; i < strLen; i++) {
-            var c = temp.charAt(i);
+        for (int i = 0; i < strLen; i++) {
+            char c = string.charAt(i);
             if (c == '_') {
                 if (++i < strLen) {
-                    sb.append(Character.toUpperCase(temp.charAt(i)));
+                    sb.append(Character.toUpperCase(string.charAt(i)));
                 }
             } else {
                 sb.append(c);

@@ -21,13 +21,13 @@ import com.mybatisflex.core.dialect.IDialect;
 import com.mybatisflex.core.dialect.KeywordWrap;
 import com.mybatisflex.core.dialect.LimitOffsetProcessor;
 import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.dialect.impl.DmDialect;
+import com.mybatisflex.core.dialect.impl.OracleDialect;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.table.DynamicTableProcessor;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.table.TableManager;
-import com.mybatisflex.core.query.SqlOperators;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -106,10 +106,11 @@ public class AccountSqlTester {
     @Test
     public void testSelect1ColumnsSql() {
         QueryWrapper query = QueryWrapper.create()
-                .select(ACCOUNT.ID, ACCOUNT.USER_NAME,
-                        ARTICLE.ID.as("articleId"), ARTICLE.TITLE)
-                .from(ACCOUNT.as("a"), ARTICLE.as("b"))
-                .where(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID));
+            .select(ACCOUNT.ID, ACCOUNT.USER_NAME,
+                ARTICLE.ID.as("articleId"), ARTICLE.TITLE,
+                max(ACCOUNT.AGE).as("ageMax"))
+            .from(ACCOUNT.as("a"), ARTICLE.as("b"))
+            .where(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID));
 
         IDialect dialect = new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
         String sql = dialect.forSelectByQuery(query);
@@ -119,12 +120,39 @@ public class AccountSqlTester {
     @Test
     public void testSelectColumnsAndFunctionsSql() {
         QueryWrapper query = QueryWrapper.create()
-                .select(ACCOUNT.ID, ACCOUNT.USER_NAME, max(ACCOUNT.BIRTHDAY), avg(ACCOUNT.SEX).as("sex_avg"))
-                .from(ACCOUNT);
+            .select(ACCOUNT.ID, ACCOUNT.USER_NAME, ACCOUNT.AGE.as("aGe"), max(ACCOUNT.BIRTHDAY).as("Max_BirthDay"), avg(ACCOUNT.SEX).as("sex_avg"))
+            .from(ACCOUNT.as("tableAlias"));
 
-        IDialect dialect = new CommonsDialectImpl();
+        IDialect dialect = new OracleDialect();
         String sql = dialect.forSelectByQuery(query);
         System.out.println(sql);
+    }
+
+    @Test
+    public void testSelectColumnsAndFunctionsSqlAlias() {
+        QueryWrapper query = new QueryWrapper()
+            .select(ACCOUNT.ID, ACCOUNT.USER_NAME, ACCOUNT.AGE.as("aGe"), max(ACCOUNT.BIRTHDAY).as("Max_BirthDay"), avg(ACCOUNT.SEX).as("sex_avg"))
+            .from(ACCOUNT.as("tableAlias"));
+
+        IDialect dialect = new DmDialect();
+        String sql = dialect.forSelectByQuery(query);
+        System.out.println(sql);
+    }
+
+    @Test
+    public void testDistinctColumnAlias() {
+        QueryWrapper queryWrapper = new QueryWrapper()
+            .select(
+                new DistinctQueryColumn(ACCOUNT.SEX).as("sexDis"))
+            .select(  ACCOUNT.USER_NAME.add(ACCOUNT.AGE).as("addAlias"))
+            .select(new RawQueryColumn("abc").as("aBc"))
+            .from(ACCOUNT);
+//        IDialect dialect = new CommonsDialectImpl();
+        IDialect dialect = new OracleDialect();
+//        IDialect dialect = new DmDialect();
+        String sql = dialect.forSelectByQuery(queryWrapper);
+        System.out.println("sql = " + sql);
+
     }
 
 
