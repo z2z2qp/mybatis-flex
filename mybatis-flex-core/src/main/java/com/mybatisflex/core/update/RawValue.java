@@ -29,7 +29,7 @@ import java.io.Serializable;
  */
 public class RawValue implements Serializable {
 
-    private Object object;
+    private final Object object;
 
     public RawValue(Object object) {
         this.object = object;
@@ -37,23 +37,14 @@ public class RawValue implements Serializable {
 
 
     public String toSql(IDialect dialect) {
-        if (object instanceof String str) {
-            return str;
-        }
-
-        if (object instanceof QueryWrapper queryWrapper) {
-            return SqlConsts.BRACKET_LEFT + dialect.buildSelectSql(queryWrapper) + SqlConsts.BRACKET_RIGHT;
-        }
-
-        if (object instanceof QueryCondition queryCondition) {
-            return queryCondition.toSql(null, dialect);
-        }
-
-        if (object instanceof QueryColumn qc) {
-            return CPI.toSelectSql(qc, null, dialect);
-        }
-
-        return object.toString();
+        return switch (object) {
+            case String str -> str;
+            case QueryWrapper queryWrapper ->
+                SqlConsts.BRACKET_LEFT + dialect.buildSelectSql(queryWrapper) + SqlConsts.BRACKET_RIGHT;
+            case QueryCondition queryCondition -> queryCondition.toSql(null, dialect);
+            case QueryColumn queryColumn -> CPI.toSelectSql(queryColumn, null, dialect);
+            default -> object.toString();
+        };
     }
 
 }

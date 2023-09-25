@@ -180,23 +180,17 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
             //逻辑符号
             sql.append(logic);
 
-            //值（或者问号）
-            if (value instanceof QueryColumn qc) {
-                sql.append(qc.toConditionSql(queryTables, dialect));
-            }
-            //子查询
-            else if (value instanceof QueryWrapper qw) {
-                sql.append(SqlConsts.BRACKET_LEFT)
+            switch (value) {
+                //值（或者问号）
+                case QueryColumn qc -> sql.append(qc.toConditionSql(queryTables, dialect));
+                //子查询
+                case QueryWrapper qw -> sql.append(SqlConsts.BRACKET_LEFT)
                         .append(dialect.buildSelectSql(qw))
                         .append(SqlConsts.BRACKET_RIGHT);
-            }
-            //原生sql
-            else if (value instanceof RawFragment rf) {
-                sql.append(rf.getContent());
-            }
-            //正常查询，构建问号
-            else {
-                appendQuestionMark(sql);
+                //原生sql
+                case RawFragment rf -> sql.append(rf.getContent());
+                //正常查询，构建问号
+                case null, default -> appendQuestionMark(sql);
             }
         }
 

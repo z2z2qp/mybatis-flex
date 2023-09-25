@@ -19,7 +19,10 @@ package com.mybatisflex.core.util;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,26 +72,20 @@ public class DateUtil {
 
 
     public static Date parseDate(Object value) {
-        if (value instanceof Number number) {
-            return new Date(number.longValue());
-        }
-        if (value instanceof Timestamp timestamp) {
-            return new Date(timestamp.getTime());
-        }
-        if (value instanceof LocalDate localDate) {
-            return DateUtil.toDate(localDate);
-        }
-        if (value instanceof LocalDateTime localDateTime) {
-            return DateUtil.toDate(localDateTime);
-        }
-        if (value instanceof LocalTime localTime) {
-            return DateUtil.toDate(localTime);
-        }
-        String s = value.toString();
-        if (StringUtil.isNumeric(s)) {
-            return new Date(Long.parseLong(s));
-        }
-        return DateUtil.parseDate(s);
+        return switch (value) {
+            case Number num -> new Date(num.longValue());
+            case Timestamp timestamp -> new Date(timestamp.getTime());
+            case LocalDate localDate -> DateUtil.toDate(localDate);
+            case LocalDateTime localDateTime -> DateUtil.toDate(localDateTime);
+            case LocalTime localTime -> DateUtil.toDate(localTime);
+            default -> {
+                String s = value.toString();
+                if (StringUtil.isNumeric(s)) {
+                    yield new Date(Long.parseLong(s));
+                }
+                yield DateUtil.parseDate(s);
+            }
+        };
     }
 
 

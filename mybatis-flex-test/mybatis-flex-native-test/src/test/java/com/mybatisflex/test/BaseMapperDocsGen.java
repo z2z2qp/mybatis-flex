@@ -109,7 +109,7 @@ public class BaseMapperDocsGen {
             List<MethodDeclaration> methodDeclarations = compilationUnit.stream()
                 .filter(e -> e instanceof MethodDeclaration)
                 .map(e -> (MethodDeclaration) e)
-                .collect(Collectors.toList());
+                .toList();
             for (MethodDeclaration methodDeclaration : methodDeclarations) {
                 String methodName = methodDeclaration.getNameAsString();
                 String params = methodDeclaration.getParameters()
