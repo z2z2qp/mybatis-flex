@@ -50,6 +50,7 @@ import static com.mybatisflex.core.query.QueryMethods.count;
  * @author 王帅
  * @author yangs
  * @author lhzsdnu
+ * @author 王超
  */
 @SuppressWarnings({"varargs", "unchecked", "unused"})
 public interface BaseMapper<T> {
@@ -197,6 +198,19 @@ public interface BaseMapper<T> {
     }
 
     // === 删（delete） ===
+
+    /**
+     * 根据实体主键来删除数据。
+     *
+     * @param entity 实体对象，必须包含有主键
+     * @return 受影响的行数
+     */
+    default int delete(T entity) {
+        FlexAssert.notNull(entity, "entity can not be null");
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(entity.getClass());
+        Object[] pkArgs = tableInfo.buildPkSqlArgs(entity);
+        return deleteById(pkArgs);
+    }
 
     /**
      * 根据主键删除数据。如果是多个主键的情况下，需要传入数组，例如：{@code new Integer[]{100,101}}。
@@ -376,8 +390,20 @@ public interface BaseMapper<T> {
                       @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
 
-
     // === 查（select） ===
+
+    /**
+     * 根据实体主键查询数据。
+     *
+     * @param entity 实体对象，必须包含有主键
+     * @return 实体类数据
+     */
+    default T selectOneByEntityId(T entity) {
+        FlexAssert.notNull(entity, "entity can not be null");
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(entity.getClass());
+        Object[] pkArgs = tableInfo.buildPkSqlArgs(entity);
+        return selectOneById(pkArgs);
+    }
 
     /**
      * 根据主键查询数据。
