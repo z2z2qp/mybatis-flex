@@ -398,7 +398,7 @@ public interface BaseMapper<T> {
      * @param entity 实体对象，必须包含有主键
      * @return 实体类数据
      */
-    default T selectOneByEntityId(T entity) {
+    default Optional<T> selectOneByEntityId(T entity) {
         FlexAssert.notNull(entity, "entity can not be null");
         TableInfo tableInfo = TableInfoFactory.ofEntityClass(entity.getClass());
         Object[] pkArgs = tableInfo.buildPkSqlArgs(entity);

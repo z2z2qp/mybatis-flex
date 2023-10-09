@@ -302,7 +302,7 @@ public interface IService<T> {
      * @return 查询结果数据
      */
     default T getOneByEntityId(T entity) {
-        return getMapper().selectOneByEntityId(entity);
+        return getByEntityIdOpt(entity).orElseThrow(() -> new MybatisFlexException("entity = " + entity + ",find entity is null"));
     }
 
     /**
@@ -313,7 +313,7 @@ public interface IService<T> {
      * @apiNote 该方法会将查询结果封装为 {@link Optional} 类进行返回，方便链式操作。
      */
     default Optional<T> getByEntityIdOpt(T entity) {
-        return Optional.ofNullable(getOneByEntityId(entity));
+        return getMapper().selectOneByEntityId(entity);
     }
     /**
      * <p>根据数据主键查询一条数据。
