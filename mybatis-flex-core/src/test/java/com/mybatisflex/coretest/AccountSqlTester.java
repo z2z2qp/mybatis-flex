@@ -21,16 +21,15 @@ import com.mybatisflex.core.dialect.IDialect;
 import com.mybatisflex.core.dialect.KeywordWrap;
 import com.mybatisflex.core.dialect.LimitOffsetProcessor;
 import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
-import com.mybatisflex.core.dialect.impl.DmDialect;
-import com.mybatisflex.core.dialect.impl.OracleDialect;
-import com.mybatisflex.core.query.*;
-import com.mybatisflex.core.table.DynamicTableProcessor;
+import com.mybatisflex.core.query.DistinctQueryColumn;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.RawQueryColumn;
+import com.mybatisflex.core.query.SqlOperators;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.table.TableManager;
+import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static com.mybatisflex.core.query.QueryMethods.*;
 import static com.mybatisflex.coretest.table.Account01TableDef.ACCOUNT01;
@@ -46,9 +45,7 @@ public class AccountSqlTester {
             .select()
             .from(ACCOUNT);
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account`",query.toSQL());
     }
 
     @Test
@@ -57,23 +54,28 @@ public class AccountSqlTester {
             .select()
             .from(ACCOUNT01);
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `flex`.`tb_a01`",query.toSQL());
     }
 
     @Test
     public void testSelectWithSchemaSql01() {
         QueryWrapper query = new QueryWrapper()
             .select()
-            .from(ACCOUNT01).leftJoin(ACCOUNT).on(ACCOUNT01.ID.eq(ACCOUNT.ID))
+            .from(ACCOUNT01)
+            .leftJoin(ACCOUNT).on(ACCOUNT01.ID.eq(ACCOUNT.ID))
             .where(ACCOUNT01.ID.ge(100))
             .and(ACCOUNT.SEX.eq(1));
 
         TableManager.setDynamicTableProcessor(tableName -> tableName + "_01");
-        TableManager.setDynamicTableProcessor(original -> original + "_01");
+
+        Assert.assertEquals("SELECT * FROM `flex`.`tb_a01_01` " +
+                "LEFT JOIN `tb_account_01` ON `flex`.`tb_a01_01`.`id` = `tb_account_01`.`id` " +
+                "WHERE `flex`.`tb_a01_01`.`id` >= 100 AND `tb_account_01`.`sex` = 1"
+        ,query.toSQL());
 
         System.out.println(query.toSQL());
+        // 重置dynamicTableProcessor，防止影响其他的测试用例
+        TableManager.setDynamicTableProcessor(null);
     }
 
 
@@ -86,9 +88,15 @@ public class AccountSqlTester {
             .and(ACCOUNT.SEX.eq(1));
 
         TableManager.setDynamicTableProcessor(original -> original + "_01");
-        TableManager.setDynamicTableProcessor(original -> original + "_01");
+
+        Assert.assertEquals("SELECT * FROM `flex`.`tb_a01_01` AS `a1` " +
+                "LEFT JOIN `tb_account_01` ON `a1`.`id` = `tb_account_01`.`id` " +
+                "WHERE `a1`.`id` >= 100 AND `tb_account_01`.`sex` = 1"
+            ,query.toSQL());
 
         System.out.println(query.toSQL());
+        // 重置dynamicTableProcessor，防止影响其他的测试用例
+        TableManager.setDynamicTableProcessor(null);
     }
 
 
@@ -98,9 +106,10 @@ public class AccountSqlTester {
             .select(ACCOUNT.ID, ACCOUNT.USER_NAME)
             .from(ACCOUNT);
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT `id`, `user_name` FROM `tb_account`"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
@@ -112,9 +121,13 @@ public class AccountSqlTester {
             .from(ACCOUNT.as("a"), ARTICLE.as("b"))
             .where(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID));
 
-        IDialect dialect = new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT `a`.`id`, `a`.`user_name`, `b`.`id` AS `articleId`, `b`.`title`, " +
+                "MAX(`a`.`age`) AS `ageMax` " +
+                "FROM `tb_account` AS `a`, `tb_article` AS `b` " +
+                "WHERE `a`.`id` = `b`.`account_id`"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
@@ -123,9 +136,13 @@ public class AccountSqlTester {
             .select(ACCOUNT.ID, ACCOUNT.USER_NAME, ACCOUNT.AGE.as("aGe"), max(ACCOUNT.BIRTHDAY).as("Max_BirthDay"), avg(ACCOUNT.SEX).as("sex_avg"))
             .from(ACCOUNT.as("tableAlias"));
 
-        IDialect dialect = new OracleDialect();
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT `id`, `user_name`, `age` AS `aGe`, " +
+                "MAX(`birthday`) AS `Max_BirthDay`, " +
+                "AVG(`sex`) AS `sex_avg` " +
+                "FROM `tb_account` AS `tableAlias`"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
@@ -134,24 +151,29 @@ public class AccountSqlTester {
             .select(ACCOUNT.ID, ACCOUNT.USER_NAME, ACCOUNT.AGE.as("aGe"), max(ACCOUNT.BIRTHDAY).as("Max_BirthDay"), avg(ACCOUNT.SEX).as("sex_avg"))
             .from(ACCOUNT.as("tableAlias"));
 
-        IDialect dialect = new DmDialect();
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT `id`, `user_name`, `age` AS `aGe`, " +
+                "MAX(`birthday`) AS `Max_BirthDay`, " +
+                "AVG(`sex`) AS `sex_avg` " +
+                "FROM `tb_account` AS `tableAlias`"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
     public void testDistinctColumnAlias() {
-        QueryWrapper queryWrapper = new QueryWrapper()
+        QueryWrapper query = new QueryWrapper()
             .select(
                 new DistinctQueryColumn(ACCOUNT.SEX).as("sexDis"))
             .select(  ACCOUNT.USER_NAME.add(ACCOUNT.AGE).as("addAlias"))
             .select(new RawQueryColumn("abc").as("aBc"))
             .from(ACCOUNT);
-//        IDialect dialect = new CommonsDialectImpl();
-        IDialect dialect = new OracleDialect();
-//        IDialect dialect = new DmDialect();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println("sql = " + sql);
+
+        Assert.assertEquals("SELECT DISTINCT `sex` AS `sexDis`, (`user_name` + `age`) AS `addAlias`, abc AS `aBc` " +
+                "FROM `tb_account`"
+            ,query.toSQL());
+
+        System.out.println("sql = " + query.toSQL());
 
     }
 
@@ -162,9 +184,10 @@ public class AccountSqlTester {
             .select(ACCOUNT.ALL_COLUMNS)
             .from(ACCOUNT);
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account`"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
 
@@ -177,88 +200,115 @@ public class AccountSqlTester {
             .union(select(ARTICLE.ID).from(ARTICLE))
             .unionAll(select(ARTICLE.ID).from(ARTICLE));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(query);
-        System.out.println(sql);
+        Assert.assertEquals("(SELECT `id` FROM `tb_account` ORDER BY `id` DESC) " +
+                "UNION (SELECT `id` FROM `tb_article`) " +
+                "UNION ALL (SELECT `id` FROM `tb_article`)"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
 
     @Test
     public void testWhereSql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(ACCOUNT.ID.ge(100))
             .and(ACCOUNT.USER_NAME.like("michael"));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "WHERE `id` >= 100 AND `user_name` LIKE '%michael%'"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
     public void testWhere2Sql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select(column("A.*"), column("b.x"))
             .from(ACCOUNT)
             .where(ACCOUNT.ID.ge(100))
             .and(column("aaa").in("michael", "aaa"));
 
-        System.out.println(queryWrapper.toSQL());
+        Assert.assertEquals("SELECT A.*, b.x FROM `tb_account` " +
+                "WHERE `id` >= 100 AND aaa IN ('michael', 'aaa')"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
+
+
+    @Test
+    public void testWhereIssues181() {
+        int id = 100;
+        String name = null;
+        QueryWrapper query = QueryWrapper.create()
+            .from(ACCOUNT)
+            .where(ACCOUNT.ID.ge(100))
+            .and(ACCOUNT.USER_NAME.eq(name))
+            .or(ACCOUNT.SEX.eq(null).and(ACCOUNT.BIRTHDAY.eq(1)))
+            .or(ACCOUNT.SEX.eq(1).and(ACCOUNT.BIRTHDAY.eq(2)));
+
+        String sql = "SELECT * FROM `tb_account` WHERE `id` >= 100 OR (`birthday` = 1) OR (`sex` = 1 AND `birthday` = 2)";
+        Assert.assertEquals(sql,query.toSQL());
+        System.out.println(query.toSQL());
+    }
+
+
 
 
     @Test
     public void testWhereCond1Sql() {
         boolean flag = false;
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(ACCOUNT.ID.ge(100).when(flag))
             .and(ACCOUNT.USER_NAME.like("michael"));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` WHERE `user_name` LIKE '%michael%'"
+            ,query.toSQL());
 
-        Object[] valueArray = CPI.getValueArray(queryWrapper);
-        System.out.println(Arrays.toString(valueArray));
+        System.out.println(query.toSQL());
     }
 
 
     @Test
     public void testWhereSql3() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(ACCOUNT.ID.ge(100))
             .and(ACCOUNT.USER_NAME.notLike("michael"));
 
-        System.out.println(queryWrapper.toSQL());
+        Assert.assertEquals("SELECT * FROM `tb_account` WHERE `id` >= 100 AND `user_name` NOT LIKE '%michael%'"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
 
     @Test
     public void testWhereCond2Sql() {
         boolean flag = false;
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(flag ? ACCOUNT.ID.ge(100) : noCondition())
             .and(ACCOUNT.USER_NAME.like("michael"));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` WHERE `user_name` LIKE '%michael%'"
+            ,query.toSQL());
 
-        Object[] valueArray = CPI.getValueArray(queryWrapper);
-        System.out.println(Arrays.toString(valueArray));
+        System.out.println(query.toSQL());
     }
 
 
     @Test
     public void testWhereExistSql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(ACCOUNT.ID.ge(100))
@@ -268,50 +318,61 @@ public class AccountSqlTester {
                 )
             );
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "WHERE `id` >= 100 " +
+                "AND EXISTS (SELECT 1 FROM `tb_article` AS `a` WHERE `id` >= 100)"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
 
     @Test
     public void testWhereAndOrSql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(ACCOUNT.ID.ge(100))
             .and(ACCOUNT.SEX.eq(1).or(ACCOUNT.SEX.eq(2)))
             .or(ACCOUNT.AGE.in(18, 19, 20).or(ACCOUNT.USER_NAME.like("michael")));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "WHERE `id` >= 100 " +
+                "AND (`sex` = 1 OR `sex` = 2) " +
+                "OR (`age` IN (18, 19, 20) OR `user_name` LIKE '%michael%')"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
     public void testWhereSelectSql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .where(ACCOUNT.ID.ge(
                 select(ARTICLE.ACCOUNT_ID).from(ARTICLE).where(ARTICLE.ID.ge(100))
             ));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+
+        Assert.assertEquals("SELECT * FROM `tb_account`" +
+                " WHERE `id` >= (SELECT `account_id` FROM `tb_article` WHERE `id` >= 100)"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
     public void testGroupSql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .groupBy(ACCOUNT.USER_NAME);
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` GROUP BY `user_name`"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
 
@@ -322,38 +383,65 @@ public class AccountSqlTester {
             .from(ACCOUNT).as("a")
             .from(ACCOUNT01).as("b")
             .groupBy(year(ACCOUNT.BIRTHDAY));
+
+        Assert.assertEquals("SELECT * FROM `tb_account` AS `a`, `flex`.`tb_a01` AS `b` " +
+                "GROUP BY YEAR(`a`.`birthday`)"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
+    }
+
+    //https://gitee.com/mybatis-flex/mybatis-flex/issues/I7EAY9
+    @Test
+    public void testGroup184() {
+        QueryWrapper query = QueryWrapper .create()
+            .select(left(ACCOUNT.AGE, 6).as("regionCode"))
+            .from(ACCOUNT)
+            .groupBy("regionCode");
+
+        Assert.assertEquals("SELECT LEFT(`age`, 6) AS `regionCode` FROM `tb_account` " +
+                "GROUP BY regionCode"
+            ,query.toSQL());
+
         System.out.println(query.toSQL());
     }
 
     @Test
     public void testHavingSql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .groupBy(ACCOUNT.USER_NAME)
             .having(ACCOUNT.AGE.between(18, 25));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "GROUP BY `user_name` " +
+                "HAVING `age` BETWEEN  18 AND 25 "
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
     public void testJoinSql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .leftJoin(ARTICLE).on(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID))
             .where(ACCOUNT.AGE.ge(10));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "LEFT JOIN `tb_article` " +
+                "ON `tb_account`.`id` = `tb_article`.`account_id` " +
+                "WHERE `tb_account`.`age` >= 10"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
     public void testJoin2Sql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .leftJoin(ARTICLE).on(
@@ -361,14 +449,18 @@ public class AccountSqlTester {
             )
             .where(ACCOUNT.AGE.ge(10));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "LEFT JOIN `tb_article` " +
+                "ON `tb_account`.`id` = `tb_article`.`account_id` AND `tb_account`.`age` = 18 " +
+                "WHERE `tb_account`.`age` >= 10"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
     public void testJoin3Sql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .leftJoin(
@@ -378,9 +470,13 @@ public class AccountSqlTester {
             )
             .where(ACCOUNT.AGE.ge(10));
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "LEFT JOIN (SELECT * FROM `tb_article` WHERE `id` >= 100) AS `a` " +
+                "ON `tb_account`.`id` = a.id " +
+                "WHERE `tb_account`.`age` >= 10"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
 
@@ -395,6 +491,16 @@ public class AccountSqlTester {
             .leftJoin("base_admin_user_info").as("bui").on("bui.user_id = burm.user_id")
             .leftJoin("base_admin_user_info").as("burmc").on("burmc.user_id = burm.created_by")
             .where("bui.is_valid = ?", 3);
+
+        Assert.assertEquals("SELECT `burm`.*, bui.user_code, bui.user_name, burmc.user_name as created_by_name " +
+                "FROM `tb_account` AS `burm` " +
+                "LEFT JOIN `base_admin_user_info` AS `bui` " +
+                "ON  bui.user_id = burm.user_id  " +
+                "LEFT JOIN `base_admin_user_info` AS `burmc` " +
+                "ON  burmc.user_id = burm.created_by  " +
+                "WHERE  bui.is_valid = 3 "
+            ,query.toSQL());
+
         System.out.println(query.toSQL());
     }
 
@@ -408,6 +514,12 @@ public class AccountSqlTester {
             .leftJoin(ACCOUNT).as("a1").on(ACCOUNT.ID.eq(ACCOUNT.AGE).and(ACCOUNT.USER_NAME.like("a")))
             .where(ACCOUNT.AGE.ge(10));
 
+        Assert.assertEquals("SELECT `a0`.* " +
+            "FROM `tb_account` AS `a0` " +
+            "LEFT JOIN `tb_account` AS `a1` " +
+            "ON `a1`.`id` = `a0`.`age` AND `a1`.`user_name` LIKE '%a%' " +
+            "WHERE `a0`.`age` >= 10", queryWrapper.toSQL());
+
         System.out.println(queryWrapper.toSQL());
 
         QueryWrapper queryWrapper1 = QueryWrapper.create()
@@ -415,20 +527,25 @@ public class AccountSqlTester {
             .from(ACCOUNT)
             .where(ACCOUNT.AGE.ge(10));
 
+        Assert.assertEquals("SELECT `id` FROM `tb_account` WHERE `age` >= 10", queryWrapper1.toSQL());
+
         System.out.println(queryWrapper1.toSQL());
     }
 
 
     @Test
     public void testOrderBySql() {
-        QueryWrapper queryWrapper = QueryWrapper.create()
+        QueryWrapper query = QueryWrapper.create()
             .select()
             .from(ACCOUNT)
             .orderBy(ACCOUNT.AGE.asc(), ACCOUNT.USER_NAME.desc().nullsLast());
 
-        IDialect dialect = new CommonsDialectImpl();
-        String sql = dialect.forSelectByQuery(queryWrapper);
-        System.out.println(sql);
+
+        Assert.assertEquals("SELECT * FROM `tb_account` " +
+                "ORDER BY `age` ASC, `user_name` DESC NULLS LAST"
+            ,query.toSQL());
+
+        System.out.println(query.toSQL());
     }
 
     @Test
@@ -436,6 +553,10 @@ public class AccountSqlTester {
         IDialect dialect = new CommonsDialectImpl();
         TableInfo tableInfo = TableInfoFactory.ofEntityClass(Account.class);
         String sql = dialect.forDeleteEntityById(tableInfo);
+
+        Assert.assertEquals("UPDATE `tb_account` SET `is_delete` = 1 WHERE `id` = ?  AND `is_delete` = 0"
+            ,sql);
+
         System.out.println(sql);
     }
 
@@ -450,6 +571,10 @@ public class AccountSqlTester {
             .forUpdate();
 
         String sql = dialect.forSelectByQuery(queryWrapper);
+
+        Assert.assertEquals("SELECT * FROM `tb_account` WHERE `user_name` LIKE ? FOR UPDATE"
+            ,sql);
+
         System.out.println(sql);
     }
 
@@ -466,6 +591,13 @@ public class AccountSqlTester {
             );
 
         String sql = dialect.forSelectByQuery(queryWrapper);
+
+        Assert.assertEquals("SELECT *, CONVERT(NVARCHAR(30), GETDATE(), 126) AS `result` " +
+                "FROM `tb_account` " +
+                "WHERE `user_name` LIKE ? " +
+                "AND CONVERT(NVARCHAR(30), GETDATE(), 126) IN (SELECT `id` FROM `tb_account` WHERE `id` >= ?)"
+            ,sql);
+
         System.out.println(sql);
     }
 
@@ -481,6 +613,10 @@ public class AccountSqlTester {
                     .end().as("result"))
             .from(ACCOUNT)
             .and(ACCOUNT.USER_NAME.like("michael"));
+
+        Assert.assertEquals("SELECT *, (CASE WHEN `id` = 100 THEN 100 WHEN `id` >= 200 THEN 200 ELSE 300 END) AS `result` " +
+            "FROM `tb_account` " +
+            "WHERE `user_name` LIKE '%michael%'", queryWrapper.toSQL());
 
         System.out.println(queryWrapper.toSQL());
     }
@@ -500,6 +636,10 @@ public class AccountSqlTester {
             .and(ACCOUNT.USER_NAME.like("michael"));
 
         String sql = dialect.forSelectByQuery(queryWrapper);
+
+        Assert.assertEquals("SELECT *, (CASE `id` WHEN 100 THEN 100 WHEN 200 THEN 200 ELSE 300 END) AS `result` " +
+            "FROM `tb_account` WHERE `user_name` LIKE ?", sql);
+
         System.out.println(sql);
     }
 
@@ -519,6 +659,11 @@ public class AccountSqlTester {
             .and(ACCOUNT.USER_NAME.like("michael"));
 
         String sql = dialect.forSelectByQuery(queryWrapper);
+
+        Assert.assertEquals("SELECT *, (CASE `id` WHEN 100 THEN 100 WHEN 200 THEN 200 ELSE CONVERT(varchar, GETDATE(), 126) END) AS `result` " +
+            "FROM `tb_account` " +
+            "WHERE `user_name` LIKE ?", sql);
+
         System.out.println(sql);
     }
 
@@ -535,10 +680,14 @@ public class AccountSqlTester {
 
         IDialect dialect1 = new CommonsDialectImpl();
         String sql1 = dialect1.buildSelectSql(queryWrapper);
+        Assert.assertEquals("SELECT * FROM `tb_account` ORDER BY `id` DESC LIMIT 20, 10", sql1);
         System.out.println(sql1);
 
         IDialect dialect2 = new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
         String sql2 = dialect2.buildSelectSql(queryWrapper);
+        Assert.assertEquals("SELECT * FROM (SELECT TEMP_DATAS.*, ROWNUM RN " +
+            "FROM (SELECT * FROM \"tb_account\" ORDER BY \"id\" DESC) TEMP_DATAS WHERE ROWNUM <= 30) " +
+            "WHERE RN > 20", sql2);
         System.out.println(sql2);
 
 //        IDialect dialect3 = new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.DB2);
@@ -547,19 +696,23 @@ public class AccountSqlTester {
 
         IDialect dialect4 = new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
         String sql4 = dialect4.buildSelectSql(queryWrapper);
+        Assert.assertEquals("SELECT * FROM \"tb_account\" ORDER BY \"id\" DESC LIMIT 10 OFFSET 20", sql4);
         System.out.println(sql4);
 
         IDialect dialect5 = new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.INFORMIX);
         String sql5 = dialect5.buildSelectSql(queryWrapper);
+        Assert.assertEquals("SELECT SKIP 20 FIRST 10 * FROM \"tb_account\" ORDER BY \"id\" DESC", sql5);
         System.out.println(sql5);
 
         IDialect dialect6 = new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
         String sql6 = dialect6.buildSelectSql(queryWrapper);
+        Assert.assertEquals("SELECT TOP 10 START AT 21 * FROM \"tb_account\" ORDER BY \"id\" DESC", sql6);
         System.out.println(sql6);
 
 
         IDialect dialect7 = new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.FIREBIRD);
         String sql7 = dialect7.buildSelectSql(queryWrapper);
+        Assert.assertEquals("SELECT * FROM \"tb_account\" ORDER BY \"id\" DESC ROWS 20 TO 30", sql7);
         System.out.println(sql7);
     }
 
@@ -590,6 +743,15 @@ public class AccountSqlTester {
             .orderBy(ACCOUNT.ID.desc())
             .limit(10, 10);
 
+        Assert.assertEquals("SELECT DISTINCT `b1`.`id`, `a1`.*, `b1`.`id` AS `article_id`, MAX(`a1`.`sex`), COUNT(DISTINCT `b1`.`id`) " +
+            "FROM `tb_account` AS `a1` LEFT JOIN `tb_article` AS `b1` ON `b1`.`account_id` = `a1`.`id` " +
+            "WHERE `a1`.`id` >= (SELECT `id` FROM `tb_article` AS `cc` WHERE `id` = 111) " +
+            "AND `a1`.`user_name` LIKE '%michael%' " +
+            "AND `b1`.`id` IN (SELECT `tb_article`.`id` FROM `aaa`) " +
+            "AND NOT EXISTS (SELECT 1 FROM `aaa` WHERE `tb_article`.`id` >= 333) " +
+            "GROUP BY `a1`.`id` HAVING `b1`.`id` >= 0 " +
+            "ORDER BY `a1`.`id` DESC LIMIT 10, 10", queryWrapper.toSQL());
+
         System.out.println(queryWrapper.toSQL());
 
 //        String oracleSql = new OracleDialect().forSelectListByQuery(CPI.getQueryTable(queryWrapper).getName(), queryWrapper);
@@ -607,6 +769,15 @@ public class AccountSqlTester {
         account.setUserName("michael");
 
         QueryWrapper qw = QueryWrapper.create(account);
+
+        Assert.assertEquals("SELECT `id`, `user_name`, `birthday`, `sex`, `age`, `is_normal`, `is_delete` " +
+                "FROM `tb_account` " +
+                "WHERE `user_name` = 'michael' " +
+                "AND `sex` = 0 " +
+                "AND `age` = 18 " +
+                "AND `is_normal` = false"
+            ,qw.toSQL());
+
         System.out.println(qw.toSQL());
     }
 
@@ -623,6 +794,12 @@ public class AccountSqlTester {
 
         QueryWrapper qw = QueryWrapper.create(account, operators);
 
+        Assert.assertEquals("SELECT `id`, `user_name`, `birthday`, `sex`, `age`, `is_normal`, `is_delete` FROM `tb_account` " +
+                "WHERE `user_name` LIKE '%michael%' A" +
+                "ND `sex` = 0 " +
+                "AND `age` >= 18 " +
+                "AND `is_normal` = false"
+            ,qw.toSQL());
         System.out.println(qw.toSQL());
     }
 }
