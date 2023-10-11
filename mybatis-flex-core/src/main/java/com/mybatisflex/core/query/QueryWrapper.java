@@ -612,7 +612,7 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     }
 
     public QueryWrapper groupBy(String name) {
-        addGroupByColumns(new QueryColumn(name));
+        addGroupByColumns(new RawQueryColumn(name));
         return this;
     }
 
