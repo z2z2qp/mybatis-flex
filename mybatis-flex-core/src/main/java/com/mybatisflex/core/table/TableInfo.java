@@ -143,7 +143,8 @@ public class TableInfo {
 
     public String getWrapSchemaAndTableName(IDialect dialect) {
         if (StringUtil.isNotBlank(schema)) {
-            return dialect.wrap(dialect.getRealSchema(schema)) + "." + dialect.wrap(dialect.getRealTable(tableName));
+            String table = dialect.getRealTable(tableName);
+            return dialect.wrap(dialect.getRealSchema(schema, table)) + "." + dialect.wrap(table);
         } else {
             return dialect.wrap(dialect.getRealTable(tableName));
         }
@@ -448,10 +449,12 @@ public class TableInfo {
     public String[] obtainInsertColumns(Object entity, boolean ignoreNulls) {
         if (!ignoreNulls) {
             return ArrayUtil.concat(insertPrimaryKeys, columns);
-        } else {
+        }
+        // 忽略 null 字段，
+        else {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
             List<String> retColumns = new ArrayList<>();
-            for (String insertColumn : columns) {
+            for (String insertColumn : allColumns) {
                 if (onInsertColumns != null && onInsertColumns.containsKey(insertColumn)) {
                     retColumns.add(insertColumn);
                 } else {
@@ -462,7 +465,7 @@ public class TableInfo {
                     retColumns.add(insertColumn);
                 }
             }
-            return ArrayUtil.concat(insertPrimaryKeys, retColumns.toArray(new String[0]));
+            return retColumns.toArray(new String[0]);
         }
     }
 
@@ -715,6 +718,10 @@ public class TableInfo {
         return values;
     }
 
+    public Object getValue(Object entity, String property) {
+        FieldWrapper fieldWrapper = FieldWrapper.of(entityClass, property);
+        return fieldWrapper.get(entity);
+    }
 
     /**
      * 获取主键值
@@ -1116,7 +1123,6 @@ public class TableInfo {
     private Object buildColumnSqlArg(MetaObject metaObject, String column) {
         ColumnInfo columnInfo = columnInfoMapping.get(column);
         Object value = getPropertyValue(metaObject, columnInfo.property);
-
         if (value != null) {
             var typeHandler = columnInfo.buildTypeHandler(null);
             if (typeHandler != null) {
@@ -1134,7 +1140,7 @@ public class TableInfo {
     }
 
 
-    private Object getPropertyValue(MetaObject metaObject, String property) {
+    public Object getPropertyValue(MetaObject metaObject, String property) {
         if (property != null && metaObject.hasGetter(property)) {
             return metaObject.getValue(property);
         }

@@ -90,7 +90,7 @@ class ActiveRecordTest {
     void testSelectById() {
         Good good = Good.create()
             .setGoodId(11)
-            .oneById();
+            .oneById().orElse(null);
 
         System.out.println(good);
     }
@@ -99,15 +99,15 @@ class ActiveRecordTest {
     void testSelectOne() {
         Good good1 = Good.create()
             .setName("摆渡人")
-            .one();
+            .one().orElse(null);
 
         Good good2 = Good.create()
             .where(GOOD.NAME.eq("摆渡人"))
-            .one();
+            .one().orElse(null);
 
         Good good3 = Good.create()
             .where(Good::getName).eq("摆渡人")
-            .one();
+            .one().orElse(null);
 
         Assertions.assertEquals(good1, good2);
         Assertions.assertEquals(good1, good3);
@@ -127,12 +127,12 @@ class ActiveRecordTest {
             .leftJoin(USER_ROLE).as("ur").on(USER_ROLE.USER_ID.eq(USER.USER_ID))
             .leftJoin(ROLE).as("r").on(USER_ROLE.ROLE_ID.eq(ROLE.ROLE_ID))
             .where(USER.USER_ID.eq(2))
-            .one();
+            .one().orElse(null);
 
         User user2 = User.create()
             .where(USER.USER_ID.eq(2))
             .withRelations()
-            .one();
+            .one().orElse(null);
 
         Assertions.assertEquals(user1.toString(), user2.toString());
     }

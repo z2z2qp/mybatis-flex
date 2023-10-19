@@ -58,13 +58,13 @@ class QueryChainTest {
             .where(USER.USER_ID.eq(1))
             .withFields()
             .fieldMapping(User::getRoleList, builder)
-            .one();
+            .one().orElse(null);
 
         User user2 = User.create()
             .where(USER.USER_ID.eq(1))
             .withFields()
             .fieldMapping(User::getRoleList, builder)
-            .one();
+            .one().orElse(null);
 
         Assertions.assertEquals(user1.toString(), user2.toString());
     }
@@ -74,12 +74,12 @@ class QueryChainTest {
         User user1 = QueryChain.of(userMapper)
             .where(USER.USER_ID.eq(2))
             .withRelations()
-            .one();
+            .one().orElse(null);
 
         User user2 = User.create()
             .where(USER.USER_ID.eq(2))
             .withRelations()
-            .one();
+            .one().orElse(null);
 
         Assertions.assertEquals(user1.toString(), user2.toString());
     }

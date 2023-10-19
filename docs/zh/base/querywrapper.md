@@ -664,6 +664,43 @@ AND (sex =  ? OR sex =  ? )
 OR (age IN (?,?,?) AND user_name LIKE ? )
 ```
 
+## 自定义字符串列名
+
+
+```java
+// 静态导入 QueryMethods.column 方法
+QueryColumn a1 = column("a1");
+
+QueryWrapper queryWrapper = QueryWrapper.create()
+    .select()
+    .from(ACCOUNT)
+    .where(a1.ge(100))
+    .and(a1.ne(200))
+```
+
+其查询生成的 Sql 如下：
+
+```sql
+SELECT * FROM tb_account
+WHERE a1 >=  100
+AND a1 != 200
+```
+
+以上 SQL 的 Java 代码也可以简写为：
+
+```java
+QueryWrapper queryWrapper = QueryWrapper.create()
+    .from(ACCOUNT)
+    .where(column("a1").ge(100))
+    .and(column("a1").ne(200))
+```
+
+注意，以上代码需要静态导入 QueryMethods.column 方法：
+
+```java
+import static com.mybatisflex.core.query.QueryMethods.*;
+```
+
 ## group by
 
 ```java
@@ -672,6 +709,7 @@ QueryWrapper queryWrapper=QueryWrapper.create()
     .from(ACCOUNT)
     .groupBy(ACCOUNT.USER_NAME);
 ```
+
 
 其查询生成的 Sql 如下：
 
@@ -980,6 +1018,86 @@ WHERE `a`.`id` >=  100  AND
       )
 ```
 
+## MyBatis-Plus 兼容 API <Badge type="tip" text="^ v1.7.2" />
+
+从 MyBatis-Flex v1.7.2 开始，QueryWrapper 添加了一系列对 MyBatis-Plus 兼容的 API，方便喜欢 MyBatis-Flex 用户从 MyBatis-Plus 迁移到 MyBatis-Flex。
+
+示例代码如下：
+
+```java
+QueryWrapper queryWrapper = new QueryWrapper();
+queryWrapper.from("tb_account")
+    .eq("column1", "value1")
+    .ge(Account::getAge, 18)
+    .or(wrapper -> {
+        wrapper.eq("column2", "value2")
+            .ge(Account::getSex, 0);
+    });
+
+System.out.println(queryWrapper.toSQL());
+```
+
+以上代码内容，输出的 SQL 如下：
+
+```sql
+SELECT * FROM `tb_account`
+WHERE column1 = 'value1' AND `age` >= 18
+OR (column2 = 'value2' AND `sex` >= 0)
+```
+
+以上的 API 虽然尽量兼容 MyBatis-Plus，但也有所不同，需要用户注意以下几点：
+
+**注意点 1：**
+
+> 对于 `eq()`、`ne()`、`...` 等方法的忽略条件判断，MyBatis-Plus 在第一个参数，而 MyBatis-Flex 在 **最后一个** 参数。例如：
+
+MyBatis-Plus 的写法：
+
+```java
+QueryWrapper qw = new QueryWrapper();
+qw.eq(false, "column1", 0); // MyBatis-Plus 在第一个参数
+```
+
+MyBatis-Flex 的写法：
+
+```java
+QueryWrapper qw = new QueryWrapper();
+qw.eq("column1", 0, false); // MyBatis-Flex 在最后一个参数
+```
+
+**注意点 2：**
+
+> 对于 `likeLeft`、`likeRight`、 `notLikeLeft`、`notLikeRight` 这 4 个方法，MyBatis-Flex 和 MyBatis-Plus 是相反的。
+
+例如：
+
+```java
+QueryWrapper qw = new QueryWrapper();
+qw.likeLeft("name", "3");
+```
+MyBatis-Plus 生成的 where 条件是：
+
+```sql
+where name like '%3'
+```
+
+而 MyBatis-Flex 生成的 where 条件是：
+
+```sql
+where name like '3%'
+```
+
+因此，假设数据表的内容如下：
+
+```shell
+name
+————
+123
+345
+```
+相同的代码 `qw.likeLeft("name", "3")`，MyBatis-Flex 匹配到的内容是 `345`，而 MyBatis-Plus 匹配到的内容是 `123`。
+
+
 
 ## Entity 转化为 QueryWrapper
 
@@ -1027,8 +1145,9 @@ FROM `tb_account`
 WHERE `user_name` LIKE '%michael%' AND `age` >= 18
 ```
 
+## Map 转化为 QueryWrapper
 
-
+方法同 [Entity 转化为 QueryWrapper](#entity-转化为-querywrapper) 类似，只需要把 entity 变量替换为 map 即可。
 
 ## QueryWrapper 序列化
 
@@ -1110,13 +1229,18 @@ QueryWrapper query2 = QueryWrapper.create()
 ## QueryColumnBehavior <Badge type="tip" text="^ v1.5.7" />
 
 在以上的内容中，我们知道 MyBatis-Flex 会自动忽略 `null` 值的条件，但是在实际开发中，有的开发者希望除了自动忽略 `null`
-值以外，还可以自动忽略其他值，比如 `空字符串` 等。
+值以外，还可以自动忽略其他值，内置的规则有`null`(默认) 、`空字符串`、`空白字符串` ，当然也可以自定义。
 
 
-此时，我们可以通过配置 QueryColumnBehavior 来自定义忽略的值。如下的代码会自动忽略 `null` 和 `空字符串`：
+此时，我们可以通过配置 QueryColumnBehavior 来自定义忽略的值。
 
 ```java
-QueryColumnBehavior.setIgnoreFunction(o -> o == null || "".equals(o));
+// 使用内置规则自动忽略 null 和 空字符串
+QueryColumnBehavior.setIgnoreFunction(QueryColumnBehavior.IGNORE_EMPTY);
+// 使用内置规则自动忽略 null 和 空白字符串
+QueryColumnBehavior.setIgnoreFunction(QueryColumnBehavior.IGNORE_BLANK);
+// 其他自定义规则
+QueryColumnBehavior.setIgnoreFunction(o -> {...});
 ```
 
 另外，在某些场景下，开发者希望在构建 QueryWrapper 中，如果传入的值是集合或数组，则使用 `in` 逻辑，否则使用 `=`（等于）
