@@ -7,7 +7,7 @@
     <groupId>com.mybatis-flex</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.2</version>
+    <version>1.7.3</version>
 
     <name>mybatis-flex</name>
     <url>https://mybatis-flex.com</url>
@@ -57,7 +57,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.4.4</revision>
 
-        <mybatis-flex.version>1.7.2</mybatis-flex.version>
+        <mybatis-flex.version>1.7.3</mybatis-flex.version>
 
         <mybatis.version>3.5.13</mybatis.version>
         <mybatis-spring.version>2.1.1</mybatis-spring.version>
