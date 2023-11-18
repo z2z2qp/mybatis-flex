@@ -98,7 +98,7 @@ class WrapperUtil {
         Object value = condition.getValue();
         if (value == null
             || value instanceof QueryColumn
-            || value instanceof RawFragment) {
+            || value instanceof RawQueryCondition) {
             getValues(condition.next, params);
             return;
         }
@@ -134,7 +134,7 @@ class WrapperUtil {
         return switch (value) {
             case Number num -> String.valueOf(value);
             case Boolean bool -> String.valueOf(value);
-            case RawFragment rf -> rf.getContent();
+            case RawQueryCondition rf -> rf.getContent();
             case QueryColumn qc -> qc.toConditionSql(null, DialectFactory.getDialect());
             default -> SqlConsts.SINGLE_QUOTE + value + SqlConsts.SINGLE_QUOTE;
         };
