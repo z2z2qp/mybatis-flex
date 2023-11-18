@@ -320,6 +320,23 @@ SELECT (`id` + (`age` + 100)) AS `x100` FROM `tb_account`
 ```
 
 
+## select 取相反数
+
+```java
+import static com.mybatisflex.core.query.QueryMethods.*;
+
+QueryWrapper queryWrapper = QueryWrapper.create()
+    // 负数常量需要手动加括号，不能写成 number(-1)
+    .select(negative(column("(-1)")))
+    .select(negative(abs(ACCOUNT.AGE)).as("opp"))
+    .select(negative(ACCOUNT.ID.add(ACCOUNT.AGE)))
+    .from(ACCOUNT);
+```
+
+```sql
+SELECT -(-1), -ABS(`age`) AS `opp`, -(`id` + `age`) FROM `tb_account`
+```
+
 ## select case...when
 
 **示例 1：**
@@ -535,7 +552,8 @@ WHERE user_name LIKE  ?
 boolean flag = false;
 QueryWrapper queryWrapper = QueryWrapper.create()
     .select().from(ACCOUNT)
-    .where(ACCOUNT.ID.ge(100).when(flag)) // when....
+    .where(ACCOUNT.ID.ge(100, flag))
+    // 等同于 .where(ACCOUNT.ID.ge(100).when(flag))
     .and(ACCOUNT.USER_NAME.like("michael"));
 ```
 
@@ -553,7 +571,7 @@ String name = null;
 QueryWrapper queryWrapper = QueryWrapper.create()
     .select().from(ACCOUNT)
     .where(ACCOUNT.ID.ge(100)) // when....
-    .and(ACCOUNT.USER_NAME.like(name).when(StringUtil::isNotBlank));
+    .and(ACCOUNT.USER_NAME.like(name, StringUtil::isNotBlank));
 ```
 
 其查询生成的 Sql 如下：
@@ -662,6 +680,30 @@ SELECT * FROM tb_account
 WHERE id >=  ?
 AND (sex =  ? OR sex =  ? )
 OR (age IN (?,?,?) AND user_name LIKE ? )
+```
+
+## where 括号
+
+
+
+```java 6
+QueryWrapper queryWrapper = QueryWrapper.create()
+    .select()
+    .from(ACCOUNT)
+    .where(ACCOUNT.IS_DELETE.eq(0))
+    .and(ACCOUNT.ID.ge("1").and(
+        bracket(ACCOUNT.AGE.ge(18).or(ACCOUNT.USER_NAME.ge("zs")))
+    ))
+    .or(ACCOUNT.BIRTHDAY.le(new Date()));
+```
+
+其生成的 SQL 为：
+
+```sql
+SELECT * FROM `tb_account`
+WHERE `is_delete` = 0
+AND (`id` >= '1' AND (`age` >= 18 OR `user_name` >= 'zs'))
+OR `birthday` <= '2023-10-28 22:13:36'
 ```
 
 ## 自定义字符串列名
@@ -1204,7 +1246,27 @@ byte[] bytes = fst.asByteArray(wrapper);
 QueryWrapper newWrapper = (QueryWrapper) fst.asObject(bytes);
 ```
 
+## QueryWrapper 克隆
 
+当我们想对 `QueryWrapper` 进行改造而不想影响之前构建出来的 `QueryWrapper` 时，可以使用 `clone()` 方法，克隆出来一份
+`QueryWrapper` 进行操作，示例：
+
+```java 6
+QueryWrapper queryWrapper = QueryWrapper.create()
+    .from(ACCOUNT)
+    .select(ACCOUNT.DEFAULT_COLUMNS)
+    .where(ACCOUNT.ID.eq(1));
+
+QueryWrapper clone = queryWrapper.clone();
+
+// 清空 SELECT 语句
+CPI.setSelectColumns(clone, null);
+// 重新设置 SELECT 语句
+clone.select(ACCOUNT.ID, ACCOUNT.USER_NAME);
+
+System.out.println(queryWrapper.toSQL());
+System.out.println(clone.toSQL());
+```
 
 ## 特别注意事项!!!
 在 QueryWrapper 的条件构建中，如果传入 null 值，则自动忽略该条件，这有许多的好处，不需要额外的通过 `when()` 方法判断。但是也带来一些额外的知识记忆点，

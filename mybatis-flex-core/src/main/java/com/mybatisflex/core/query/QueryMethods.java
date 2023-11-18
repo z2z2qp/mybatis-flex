@@ -2409,6 +2409,13 @@ public class QueryMethods {
     }
 
     /**
+     * 构建相反数。
+     */
+    public static QueryColumn negative(QueryColumn queryColumn) {
+        return new NegativeQueryColumn(queryColumn);
+    }
+
+    /**
      * 构建自定义列。
      */
     public static QueryColumn column(String column, Object... params) {
@@ -2564,6 +2571,13 @@ public class QueryMethods {
         return QueryCondition.createEmpty();
     }
 
+    /**
+     * 括号条件。
+     */
+    public static QueryCondition bracket(QueryCondition condition) {
+        return new Brackets(condition);
+    }
+
     // === 构建 QueryWrapper 查询 ===
 
     /**
@@ -2614,14 +2628,14 @@ public class QueryMethods {
      * 构建原生查询条件。
      */
     public static QueryCondition raw(String raw) {
-        return new RawFragment(raw);
+        return new RawQueryCondition(raw);
     }
 
     /**
      * 构建原生查询条件，并附带参数。
      */
     public static QueryCondition raw(String raw, Object... params) {
-        return new RawFragment(raw, params);
+        return new RawQueryCondition(raw, params);
     }
 
 
