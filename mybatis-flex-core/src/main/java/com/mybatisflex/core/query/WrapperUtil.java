@@ -130,12 +130,12 @@ class WrapperUtil {
 
     }
 
-    static String buildValue(Object value) {
+    static String buildValue(List<QueryTable> queryTables,Object value) {
         return switch (value) {
             case Number num -> String.valueOf(value);
             case Boolean bool -> String.valueOf(value);
             case RawQueryCondition rf -> rf.getContent();
-            case QueryColumn qc -> qc.toConditionSql(null, DialectFactory.getDialect());
+            case QueryColumn qc -> qc.toConditionSql(queryTables, DialectFactory.getDialect());
             default -> SqlConsts.SINGLE_QUOTE + value + SqlConsts.SINGLE_QUOTE;
         };
     }
