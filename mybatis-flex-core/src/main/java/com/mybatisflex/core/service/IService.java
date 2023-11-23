@@ -16,7 +16,6 @@
 package com.mybatisflex.core.service;
 
 import com.mybatisflex.core.BaseMapper;
-import com.mybatisflex.core.exception.MybatisFlexException;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.*;
@@ -292,29 +291,30 @@ public interface IService<T> {
      * @return 查询结果数据
      */
     default T getById(Serializable id) {
-        return getMapper().selectOneById(id).orElseThrow(() -> new MybatisFlexException("id = " + id + ", entity is null"));
+        return getMapper().selectOneById(id).orElse(null);
     }
 
     /**
      * <p>根据实体主键查询数据。
      *
-     * @param entity    实体对象，必须包含有主键
+     * @param entity 实体对象，必须包含有主键
      * @return 查询结果数据
      */
     default T getOneByEntityId(T entity) {
-        return getByEntityIdOpt(entity).orElseThrow(() -> new MybatisFlexException("entity = " + entity + ",find entity is null"));
+        return getByEntityIdOpt(entity).orElse(null);
     }
 
     /**
      * <p>根据实体主键查询数据。
      *
-     * @param entity    实体对象，必须包含有主键
+     * @param entity 实体对象，必须包含有主键
      * @return 查询结果数据
      * @apiNote 该方法会将查询结果封装为 {@link Optional} 类进行返回，方便链式操作。
      */
     default Optional<T> getByEntityIdOpt(T entity) {
         return getMapper().selectOneByEntityId(entity);
     }
+
     /**
      * <p>根据数据主键查询一条数据。
      *
@@ -333,7 +333,7 @@ public interface IService<T> {
      * @return 查询结果数据
      */
     default T getOne(QueryWrapper query) {
-        return getMapper().selectOneByQuery(query).orElseThrow(() -> new MybatisFlexException("entity is null"));
+        return getMapper().selectOneByQuery(query).orElse(null);
     }
 
     /**
