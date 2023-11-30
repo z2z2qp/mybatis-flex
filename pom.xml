@@ -68,7 +68,7 @@
 
         <spring.version>5.3.30</spring.version>
         <spring-boot.version>3.1.6</spring-boot.version>
-        <solon.version>2.5.11</solon.version>
+        <solon.version>2.5.12</solon.version>
 
         <junit.version>4.13.2</junit.version>
         <maven-flatten.version>1.5.0</maven-flatten.version>
