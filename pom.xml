@@ -7,7 +7,7 @@
     <groupId>com.mybatis-flex</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.4</version>
+    <version>1.7.5</version>
 
     <name>mybatis-flex</name>
     <url>https://mybatis-flex.com</url>
@@ -57,9 +57,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.4.4</revision>
 
-        <mybatis-flex.version>1.7.4</mybatis-flex.version>
+        <mybatis-flex.version>1.7.5</mybatis-flex.version>
 
-        <mybatis.version>3.5.13</mybatis.version>
+        <mybatis.version>3.5.14</mybatis.version>
         <mybatis-spring.version>2.1.1</mybatis-spring.version>
         <mybatis-freemarker.version>1.2.4</mybatis-freemarker.version>
         <mybatis-velocity.version>2.1.2</mybatis-velocity.version>
@@ -69,8 +69,8 @@
         <HikariCP.version>4.0.3</HikariCP.version>
 
         <spring.version>5.3.30</spring.version>
-        <spring-boot.version>3.1.5</spring-boot.version>
-        <solon.version>2.5.11</solon.version>
+        <spring-boot.version>3.1.6</spring-boot.version>
+        <solon.version>2.5.12</solon.version>
 
         <junit.version>4.13.2</junit.version>
         <maven-flatten.version>1.5.0</maven-flatten.version>
