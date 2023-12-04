@@ -20,8 +20,12 @@ import java.util.Map;
 
 import org.apache.ibatis.util.MapUtil;
 
+import java.util.EnumMap;
+import java.util.Map;
+import org.apache.ibatis.util.MapUtil;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
+import com.mybatisflex.core.dialect.impl.DB2105Dialect;
 import com.mybatisflex.core.dialect.impl.DmDialect;
 import com.mybatisflex.core.dialect.impl.OracleDialect;
 import com.mybatisflex.core.util.ObjectUtil;
@@ -106,6 +110,7 @@ public class DialectFactory {
             case TDENGINE -> new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
             case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
             case FIREBIRD, DB2 -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.DERBY);
+            case DB2_1005 -> new DB2105Dialect(KeywordWrap.NONE, DB2105Dialect.DB2105LimitOffsetProcessor.DB2105);
             case SQLSERVER -> new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER);
             case SQLSERVER_2005 ->
                 new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
