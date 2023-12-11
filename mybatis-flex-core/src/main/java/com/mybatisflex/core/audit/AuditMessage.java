@@ -189,18 +189,21 @@ public class AuditMessage implements Serializable {
     }
 
     private void doAddParam(Statement statement, Object object) {
-        try {
-
-            switch (object) {
-                case TypeHandlerObject tho -> tho.setParameter(createPreparedStatement(statement), 0);
-                case java.sql.Array arr -> {
-                    Object array = arr.getArray();
-                    queryParams.add(array);
+        if (object == null) {
+            queryParams.add(null);
+        } else {
+            try {
+                switch (object) {
+                    case TypeHandlerObject tho -> tho.setParameter(createPreparedStatement(statement), 0);
+                    case java.sql.Array arr -> {
+                        Object array = arr.getArray();
+                        queryParams.add(array);
+                    }
+                    default -> queryParams.add(object);
                 }
-                default -> queryParams.add(object);
+            } catch (SQLException e) {
+                //ignore
             }
-        } catch (SQLException e) {
-            //ignore
         }
     }
 
