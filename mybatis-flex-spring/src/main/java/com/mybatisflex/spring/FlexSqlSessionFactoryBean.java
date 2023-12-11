@@ -42,7 +42,6 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -91,7 +90,7 @@ import static org.springframework.util.StringUtils.tokenizeToStringArray;
  * @author life
  */
 public class FlexSqlSessionFactoryBean extends SqlSessionFactoryBean
-        implements FactoryBean<SqlSessionFactory>, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
+    implements FactoryBean<SqlSessionFactory>, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBean.class);
 
