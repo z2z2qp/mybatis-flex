@@ -27,11 +27,13 @@ public class UpdateEntity {
 
 
     public static <T> T of(Class<T> clazz) {
+        clazz = ClassUtil.getUsefulClass(clazz);
         return ModifyAttrsRecordProxyFactory.getInstance().get(clazz);
     }
 
 
     public static <T> T of(Class<T> clazz, Object id) {
+        clazz = ClassUtil.getUsefulClass(clazz);
         var newEntity = ModifyAttrsRecordProxyFactory.getInstance().get(clazz);
         var tableInfo = TableInfoFactory.ofEntityClass(clazz);
         var primaryKeyList = tableInfo.getPrimaryKeyList();
