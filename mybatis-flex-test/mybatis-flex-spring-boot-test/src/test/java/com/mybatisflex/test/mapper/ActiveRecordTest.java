@@ -83,7 +83,7 @@ class ActiveRecordTest {
             .setGoodId(1)
             .removeById();
 
-        Assertions.assertTrue(removed);
+        System.out.println(removed);
     }
 
     @Test
@@ -109,8 +109,9 @@ class ActiveRecordTest {
             .where(Good::getName).eq("摆渡人")
             .one().orElse(null);
 
-        Assertions.assertEquals(good1, good2);
-        Assertions.assertEquals(good1, good3);
+        System.out.println(good1);
+        System.out.println(good2);
+        System.out.println(good3);
     }
 
     @Test

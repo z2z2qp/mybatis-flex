@@ -438,7 +438,7 @@ public interface BaseMapper<T> {
      */
     default Optional<T> selectOneByMap(Map<String, Object> whereConditions) {
         FlexAssert.notEmpty(whereConditions, "whereConditions");
-        return selectOneByQuery(QueryWrapper.create().where(whereConditions).limit(1L));
+        return selectOneByQuery(QueryWrapper.create().where(whereConditions));
     }
 
     default <R> Optional<R> selectOneByMap(Map<String, Object> whereConditions, Function<T, R> cast) {
@@ -453,7 +453,7 @@ public interface BaseMapper<T> {
      */
     default Optional<T> selectOneByCondition(QueryCondition whereConditions) {
         FlexAssert.notNull(whereConditions, "whereConditions");
-        return selectOneByQuery(QueryWrapper.create().where(whereConditions).limit(1L));
+        return selectOneByQuery(QueryWrapper.create().where(whereConditions));
     }
 
     default <R> Optional<R> selectOneByCondition(QueryCondition condition, Function<T, R> cast) {
@@ -467,12 +467,15 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default Optional<T> selectOneByQuery(QueryWrapper queryWrapper) {
+        queryWrapper.limit(1);
         return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
     }
 
     default <R> Optional<R> selectOneByQuery(QueryWrapper queryWrapper, Function<T, R> cast) {
-        var entities = selectListByQuery(queryWrapper.limit(1), cast);
-        return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.get(0));
+        // var entities = selectListByQuery(queryWrapper.limit(1), cast);
+        // return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.get(0));
+        var entity = selectOneByQuery(queryWrapper);
+        return entity.map(cast);
     }
 
     /**
