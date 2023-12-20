@@ -15,19 +15,6 @@
  */
 package com.mybatisflex.test;
 
-import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
-import static com.mybatisflex.test.table.ArticleTableDef.ARTICLE;
-
-import java.util.List;
-
-import javax.sql.DataSource;
-
-import org.apache.ibatis.logging.stdout.StdOutImpl;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.MybatisFlexBootstrap;
 import com.mybatisflex.core.audit.AuditManager;
@@ -44,11 +31,7 @@ import com.mybatisflex.mapper.ArticleMapper;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.assertj.core.api.WithAssertions;
 import org.assertj.core.data.Index;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -170,7 +153,7 @@ public class AccountNativeTest implements WithAssertions {
     }
 
     /**
-     * issues  https://gitee.com/mybatis-flex/mybatis-flex/issues/I7QD29
+     * issues  <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7QD29">gitee_I7QD29</a>
      */
     @Test
     public void testGiteeIssue_I7QD29() {
@@ -189,7 +172,7 @@ public class AccountNativeTest implements WithAssertions {
     }
 
     /**
-     * issues https://gitee.com/mybatis-flex/mybatis-flex/issues/I7VAG8
+     * issues <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7VAG8">gitee_I7VAG8</a>
      */
     @Test
     public void testGiteeIssue_I7VAG8() {
@@ -213,7 +196,7 @@ public class AccountNativeTest implements WithAssertions {
 
 
     /**
-     * issues https://gitee.com/mybatis-flex/mybatis-flex/issues/I7RE0J
+     * issues <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7RE0J">gitee_I7RE0J</a>
      */
     @Test
     @Ignore
@@ -292,7 +275,7 @@ public class AccountNativeTest implements WithAssertions {
     }
 
     /**
-     * https://gitee.com/mybatis-flex/mybatis-flex/issues/I7L6DF
+     * <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7L6DF">gitee_I7L6DF</a>
      */
     @Test
     public void testGiteeIssue_I7L6DF() {

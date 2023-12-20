@@ -52,7 +52,7 @@ public class AccountTest implements WithAssertions {
             .where(ACCOUNT.AGE.eq(18));
         List<Account> accounts = accountMapper.selectListByQuery(queryWrapper);
         assertThat(accounts.size()).isEqualTo(1);
-        assertThat(accounts.get(0).getAge()).isEqualTo(18);
+        assertThat(accounts.getFirst().getAge()).isEqualTo(18);
     }
 
     @Test

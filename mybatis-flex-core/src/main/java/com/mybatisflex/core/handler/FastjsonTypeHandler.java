@@ -92,9 +92,7 @@ public class FastjsonTypeHandler extends BaseJsonTypeHandler<Object> {
                 return true;
             } else if (o != null && this.getClass() == o.getClass()) {
                 ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
-                if (!Arrays.equals(this.actualTypeArguments, that.actualTypeArguments)) {
-                    return false;
-                } else {
+                if (Arrays.equals(this.actualTypeArguments, that.actualTypeArguments)) {
                     if (this.ownerType != null) {
                         if (this.ownerType.equals(that.ownerType)) {
                             return Objects.equals(this.rawType, that.rawType);
@@ -103,8 +101,8 @@ public class FastjsonTypeHandler extends BaseJsonTypeHandler<Object> {
                         return Objects.equals(this.rawType, that.rawType);
                     }
 
-                    return false;
                 }
+                return false;
             } else {
                 return false;
             }

@@ -15,11 +15,6 @@
  */
 package com.mybatisflex.test;
 
-import javax.sql.DataSource;
-
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-
 import com.mybatisflex.core.MybatisFlexBootstrap;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
@@ -34,7 +29,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
 import static com.mybatisflex.test.table.ArticleTableDef.ARTICLE;

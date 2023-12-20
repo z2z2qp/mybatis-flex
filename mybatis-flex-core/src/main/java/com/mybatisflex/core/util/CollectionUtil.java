@@ -55,7 +55,7 @@ public class CollectionUtil {
         } else if (isEmpty(list)) {
             return other;
         }
-        var newList = new ArrayList<T>(list);
+        var newList = new ArrayList<>(list);
         newList.addAll(other);
         return newList;
     }
@@ -112,13 +112,15 @@ public class CollectionUtil {
     }
 
 
+    @SafeVarargs
     public static <T> Set<T> newHashSet(T... elements) {
-        return new HashSet<>(Arrays.asList(elements));
+        return Set.of(elements);
     }
 
 
+    @SafeVarargs
     public static <T> List<T> newArrayList(T... elements) {
-        return new ArrayList<>(Arrays.asList(elements));
+        return List.of(elements);
     }
 
 

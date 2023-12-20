@@ -154,7 +154,7 @@ public class OracleDialect extends CommonsDialectImpl {
          * SELECT 1 FROM DUAL;
          */
         StringBuilder fields = new StringBuilder();
-        Row firstRow = rows.get(0);
+        Row firstRow = rows.getFirst();
         Set<String> attrs = RowCPI.getInsertAttrs(firstRow);
         int index = 0;
         for (String column : attrs) {

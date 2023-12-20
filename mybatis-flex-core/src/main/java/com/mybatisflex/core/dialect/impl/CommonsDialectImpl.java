@@ -116,7 +116,7 @@ public class CommonsDialectImpl implements IDialect {
         StringBuilder fields = new StringBuilder();
         StringBuilder questions = new StringBuilder();
 
-        Row firstRow = rows.get(0);
+        Row firstRow = rows.getFirst();
         Set<String> attrs = RowCPI.getInsertAttrs(firstRow);
         int index = 0;
         for (String column : attrs) {
@@ -274,7 +274,7 @@ public class CommonsDialectImpl implements IDialect {
         }
 
         //fix: support schema
-        QueryTable queryTable = queryTables.get(0);
+        QueryTable queryTable = queryTables.getFirst();
         sqlBuilder.append(UPDATE).append(queryTable.toSql(this)).append(SET);
         int index = 0;
         for (String modifyAttr : modifyAttrs) {
@@ -313,7 +313,7 @@ public class CommonsDialectImpl implements IDialect {
     @Override
     public String forUpdateBatchById(String schema, String tableName, List<Row> rows) {
         if (rows.size() == 1) {
-            return forUpdateById(schema, tableName, rows.get(0));
+            return forUpdateById(schema, tableName, rows.getFirst());
         }
         StringBuilder sql = new StringBuilder();
         for (Row row : rows) {
@@ -363,7 +363,7 @@ public class CommonsDialectImpl implements IDialect {
 
         //多表查询时，自动映射
         if (queryTablesCount > 0 && queryTablesCount + joinTablesCount > 1) {
-            QueryTable firstTable = queryTables.get(0);
+            QueryTable firstTable = queryTables.getFirst();
             if (!(firstTable instanceof SelectQueryTable)) {
                 TableInfo tableInfo = TableInfoFactory.ofTableName(firstTable.getName());
                 if (tableInfo != null && selectColumns != null && !selectColumns.isEmpty()) {
@@ -506,7 +506,7 @@ public class CommonsDialectImpl implements IDialect {
             } else if (queryTables.size() != 1) {
                 throw new IllegalArgumentException("Delete with join sql must has 1 table only. but current has " + queryTables.size());
             }
-            QueryTable queryTable = queryTables.get(0);
+            QueryTable queryTable = queryTables.getFirst();
             String table = getRealTable(queryTable.getName());
             if (StringUtil.isNotBlank(queryTable.getSchema())) {
                 sqlBuilder.append(wrap(getRealSchema(queryTable.getSchema(), table))).append(REFERENCE);

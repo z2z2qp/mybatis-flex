@@ -70,7 +70,7 @@ public class RelationManager {
     /**
      * 查询时，仅查询这个配置的 Relations
      */
-    private static ThreadLocal<Set<String>> onlyQueryRelations = new ThreadLocal<>();
+    private static final ThreadLocal<Set<String>> onlyQueryRelations = new ThreadLocal<>();
 
 
     /**
@@ -288,7 +288,7 @@ public class RelationManager {
             return;
         }
 
-        Class<Entity> entityClass = (Class<Entity>) ClassUtil.getUsefulClass(entities.get(0).getClass());
+        Class<Entity> entityClass = (Class<Entity>) ClassUtil.getUsefulClass(entities.getFirst().getClass());
         List<AbstractRelation> relations = getRelations(entityClass);
         if (relations.isEmpty()) {
             return;

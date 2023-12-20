@@ -19,7 +19,6 @@ package com.mybatisflex.test;
 import com.mybatisflex.core.MybatisFlexBootstrap;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
-import com.mybatisflex.core.tenant.TenantFactory;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.mapper.TenantAccountMapper;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;

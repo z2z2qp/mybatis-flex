@@ -24,10 +24,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Map;
@@ -94,11 +90,11 @@ public class HttpUtil {
         }
 
         @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
         }
 
         @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {
         }
 
     }
@@ -130,8 +126,8 @@ public class HttpUtil {
         HttpUtil.readTimeout = readTimeout;
     }
 
-    private static HttpURLConnection getHttpConnection(String url, String method, Map<String, String> headers) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, KeyManagementException {
-        URL _url = new URL(url);
+    private static HttpURLConnection getHttpConnection(String url, String method, Map<String, String> headers) throws IOException, URISyntaxException {
+        URL _url = new URI(url).toURL();
         HttpURLConnection conn = (HttpURLConnection) _url.openConnection();
         if (conn instanceof HttpsURLConnection huc) {
             huc.setSSLSocketFactory(sslSocketFactory);

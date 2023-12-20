@@ -15,7 +15,6 @@
  */
 package com.mybatisflex.core.mybatis;
 
-import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.annotations.AutomapConstructor;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.MapperMethod.ParamMap;
@@ -98,18 +97,8 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
         public ResultMapping propertyMapping;
     }
 
-    private static class UnMappedColumnAutoMapping {
-        private final String column;
-        private final String property;
-        private final TypeHandler<?> typeHandler;
-        private final boolean primitive;
-
-        public UnMappedColumnAutoMapping(String column, String property, TypeHandler<?> typeHandler, boolean primitive) {
-            this.column = column;
-            this.property = property;
-            this.typeHandler = typeHandler;
-            this.primitive = primitive;
-        }
+    private record UnMappedColumnAutoMapping(String column, String property, TypeHandler<?> typeHandler,
+                                             boolean primitive) {
     }
 
     public FlexDefaultResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler,
@@ -226,7 +215,7 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
             throw new ExecutorException("Cursor results cannot be mapped to multiple resultMaps");
         }
 
-        ResultMap resultMap = resultMaps.get(0);
+        ResultMap resultMap = resultMaps.getFirst();
         return new DefaultCursor<>(this, resultMap, rsw, rowBounds);
     }
 
@@ -317,7 +306,7 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
 
     @SuppressWarnings("unchecked")
     private List<Object> collapseSingleResultList(List<Object> multipleResults) {
-        return multipleResults.size() == 1 ? (List<Object>) multipleResults.get(0) : multipleResults;
+        return multipleResults.size() == 1 ? (List<Object>) multipleResults.getFirst() : multipleResults;
     }
 
     //
@@ -853,10 +842,10 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
         final String columnName;
         if (!resultMap.getResultMappings().isEmpty()) {
             final List<ResultMapping> resultMappingList = resultMap.getResultMappings();
-            final ResultMapping mapping = resultMappingList.get(0);
+            final ResultMapping mapping = resultMappingList.getFirst();
             columnName = prependPrefix(mapping.getColumn(), columnPrefix);
         } else {
-            columnName = rsw.getColumnNames().get(0);
+            columnName = rsw.getColumnNames().getFirst();
         }
         final TypeHandler<?> typeHandler = rsw.getTypeHandler(resultType, columnName);
         return typeHandler.getResult(rsw.getResultSet(), columnName);
@@ -999,7 +988,7 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
 
 
     protected String prependPrefix(String columnName, String prefix) {
-        if (columnName == null || columnName.length() == 0 || prefix == null || prefix.length() == 0) {
+        if (columnName == null || columnName.isEmpty() || prefix == null || prefix.isEmpty()) {
             return columnName;
         }
         return prefix + columnName;
@@ -1094,7 +1083,7 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
         if (resultMapping.getColumnPrefix() != null) {
             columnPrefixBuilder.append(resultMapping.getColumnPrefix());
         }
-        return columnPrefixBuilder.length() == 0 ? null : columnPrefixBuilder.toString().toUpperCase(Locale.ENGLISH);
+        return columnPrefixBuilder.isEmpty() ? null : columnPrefixBuilder.toString().toUpperCase(Locale.ENGLISH);
     }
 
     private boolean anyNotNullColumnHasValue(ResultMapping resultMapping, String columnPrefix, ResultSetWrapper rsw)
@@ -1262,7 +1251,7 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
 
     private boolean hasTypeHandlerForResultObject(ResultSetWrapper rsw, Class<?> resultType) {
         if (rsw.getColumnNames().size() == 1) {
-            return typeHandlerRegistry.hasTypeHandler(resultType, rsw.getJdbcType(rsw.getColumnNames().get(0)));
+            return typeHandlerRegistry.hasTypeHandler(resultType, rsw.getJdbcType(rsw.getColumnNames().getFirst()));
         }
         return typeHandlerRegistry.hasTypeHandler(resultType);
     }

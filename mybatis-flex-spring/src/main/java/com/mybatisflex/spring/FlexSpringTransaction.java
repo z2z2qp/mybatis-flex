@@ -81,7 +81,7 @@ public class FlexSpringTransaction implements Transaction {
     }
 
     @Override
-    public Integer getTimeout() throws SQLException {
+    public Integer getTimeout() {
         return null;
     }
 }

@@ -16,17 +16,17 @@
 
 package com.mybatisflex.core.activerecord.query;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import com.mybatisflex.core.activerecord.Model;
 import com.mybatisflex.core.field.FieldQueryManager;
 import com.mybatisflex.core.field.QueryBuilder;
 import com.mybatisflex.core.mybatis.MappedStatementTypes;
 import com.mybatisflex.core.query.FieldsBuilder;
 import com.mybatisflex.core.util.LambdaGetter;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * 使用 {@code Fields Query} 的方式进行关联查询。
@@ -84,7 +84,7 @@ public class FieldsQuery<T extends Model<T>> extends FieldsBuilder<T> {
             MappedStatementTypes.setCurrentType(asType);
             List<R> entities = Collections.singletonList((R) baseMapper().selectOneById((Serializable) pkValue()));
             FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
-            return entities.get(0);
+            return entities.getFirst();
         } finally {
             MappedStatementTypes.clear();
         }

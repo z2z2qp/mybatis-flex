@@ -51,7 +51,7 @@ public class MybatisKeyGeneratorUtil {
             return new MultiPrimaryKeyGenerator(ms, tableInfo, primaryKeyList);
         }
 
-        return createIdKeyGenerator(tableInfo, ms, primaryKeyList.get(0));
+        return createIdKeyGenerator(tableInfo, ms, primaryKeyList.getFirst());
     }
 
 

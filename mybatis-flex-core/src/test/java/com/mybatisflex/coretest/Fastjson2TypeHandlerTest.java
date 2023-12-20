@@ -93,10 +93,10 @@ public class Fastjson2TypeHandlerTest {
         assert (ftpFileClientConfig.getDomain().equals(ftpFileClientConfig2.getDomain()));
 
         ftpFileClientConfigList = (List<FtpFileClientConfig>) interfaceListHandler.parseJson(interfaceListJson);
-        assert (ftpFileClientConfig.getDomain().equals(ftpFileClientConfigList.get(0).getDomain()));
+        assert (ftpFileClientConfig.getDomain().equals(ftpFileClientConfigList.getFirst().getDomain()));
 
         ftpFileClientConfigList = (List<FtpFileClientConfig>) classListHandler.parseJson(interfaceListJson);
-        assert (ftpFileClientConfig.getDomain().equals(ftpFileClientConfigList.get(0).getDomain()));
+        assert (ftpFileClientConfig.getDomain().equals(ftpFileClientConfigList.getFirst().getDomain()));
 
     }
 }

@@ -71,6 +71,7 @@ public class ArrayUtil {
     }
 
 
+    @SafeVarargs
     public static <T> T[] concat(T[] first, T[] second, T[] third, T[]... others) {
         var results = concat(first, second);
         results = concat(results, third);

@@ -148,7 +148,7 @@ public class RowUtil {
             return;
         }
 
-        Row firstRow = rows.get(0);
+        Row firstRow = rows.getFirst();
         List<Integer> textConsoleLengthList = new ArrayList<>();
         StringBuilder sb = new StringBuilder("\nTotal Count: " + rows.size() + "\n");
         Set<String> keys = firstRow.keySet();

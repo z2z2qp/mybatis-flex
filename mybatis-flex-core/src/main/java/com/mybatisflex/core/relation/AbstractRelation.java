@@ -359,7 +359,7 @@ abstract class AbstractRelation<SelfEntity> {
             throw FlexExceptions.wrap(message);
         }
 
-        return primaryKeyList.get(0).getProperty();
+        return primaryKeyList.getFirst().getProperty();
     }
 
 

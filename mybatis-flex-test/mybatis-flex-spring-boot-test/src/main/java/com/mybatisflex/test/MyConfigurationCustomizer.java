@@ -19,7 +19,6 @@ package com.mybatisflex.test;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.datasource.DataSourceDecipher;
 import com.mybatisflex.core.datasource.DataSourceManager;
-import com.mybatisflex.core.datasource.DataSourceProperty;
 import com.mybatisflex.core.mybatis.FlexConfiguration;
 import com.mybatisflex.spring.boot.ConfigurationCustomizer;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;

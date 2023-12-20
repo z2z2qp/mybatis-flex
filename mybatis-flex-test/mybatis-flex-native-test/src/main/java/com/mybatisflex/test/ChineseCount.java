@@ -19,6 +19,7 @@ package com.mybatisflex.test;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,12 +52,12 @@ public class ChineseCount {
 
     private static String readString(File file) {
         try (FileInputStream fis = new FileInputStream(file);
-             ByteArrayOutputStream bao = new ByteArrayOutputStream();) {
+             ByteArrayOutputStream bao = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[1024];
             for (int len; (len = fis.read(buffer)) > 0; ) {
                 bao.write(buffer, 0, len);
             }
-            return bao.toString("utf-8");
+            return bao.toString(StandardCharsets.UTF_8);
         } catch (Exception e) {
             return "";
         }

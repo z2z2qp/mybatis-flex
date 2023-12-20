@@ -229,7 +229,7 @@ public interface RowMapper {
         if (rows == null || rows.isEmpty()) {
             return null;
         } else if (rows.size() == 1) {
-            return rows.get(0);
+            return rows.getFirst();
         } else {
             /** 当返回多条数据时，抛出异常, 保持和 Mybatis DefaultSqlSession 的统一逻辑,
              * see: {@link org.apache.ibatis.session.defaults.DefaultSqlSession#selectOne(String, Object)} **/
@@ -276,7 +276,7 @@ public interface RowMapper {
         if (rows == null || rows.isEmpty()) {
             return null;
         } else {
-            return rows.get(0);
+            return rows.getFirst();
         }
     }
 
@@ -378,7 +378,7 @@ public interface RowMapper {
         if (objects == null || objects.isEmpty()) {
             return null;
         }
-        return objects.get(0);
+        return objects.getFirst();
     }
 
 

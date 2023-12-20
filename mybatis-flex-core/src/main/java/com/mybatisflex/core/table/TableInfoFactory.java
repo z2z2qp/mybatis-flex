@@ -162,8 +162,7 @@ public class TableInfoFactory {
 
     private static void adjustTypeArguments(Class<?> subclass, Type[] subclassTypeArguments, Type[] typeArguments) {
         for (int i = 0; i < typeArguments.length; i++) {
-            if (typeArguments[i] instanceof TypeVariable) {
-                TypeVariable<?> typeVariable = (TypeVariable<?>) typeArguments[i];
+            if (typeArguments[i] instanceof TypeVariable<?> typeVariable) {
                 TypeVariable<?>[] typeParameters = subclass.getTypeParameters();
                 for (int j = 0; j < typeParameters.length; j++) {
                     if (Objects.equals(typeVariable.getName(), typeParameters[j].getName())) {

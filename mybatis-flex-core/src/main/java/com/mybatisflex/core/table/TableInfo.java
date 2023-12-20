@@ -360,8 +360,7 @@ public class TableInfo {
     void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
         List<String> columnNames = new ArrayList<>();
-        for (int i = 0; i < columnInfoList.size(); i++) {
-            ColumnInfo columnInfo = columnInfoList.get(i);
+        for (ColumnInfo columnInfo : columnInfoList) {
             //真正的字段（没有做忽略标识）
             if (!columnInfo.isIgnore()) {
                 columnNames.add(columnInfo.column);

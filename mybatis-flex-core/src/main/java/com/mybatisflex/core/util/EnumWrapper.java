@@ -31,8 +31,8 @@ public class EnumWrapper<E extends Enum<E>> {
 
     private boolean hasEnumValueAnnotation = false;
 
-    private Class<?> enumClass;
-    private E[] enums;
+    private final Class<?> enumClass;
+    private final E[] enums;
     private Field property;
     private Class<?> propertyType;
     private Method getterMethod;

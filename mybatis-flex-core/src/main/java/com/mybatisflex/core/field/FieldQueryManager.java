@@ -80,11 +80,16 @@ public class FieldQueryManager {
                 } else if (Map.class.isAssignableFrom(filedType)) {
                     List<Row> rows = mapper.selectRowsByQuery(queryWrapper);
                     // 转换成 Map 子类，或者空 Map 对象，避免 NPE
-                    if (rows != null && !rows.isEmpty() && rows.get(0) != null) {
-                        value = getMapValue(filedType, rows.get(0));
-                    } else {
-                        value = new HashMap<>();
-                    }
+//                    if (rows != null && !rows.isEmpty() && rows.getFirst() != null) {
+//                        value = getMapValue(filedType, rows.getFirst());
+//                    } else {
+//                        value = new HashMap<>();
+//                    }
+                    value = Optional.ofNullable(rows)
+                        .filter(it -> !it.isEmpty())
+                        .map(List::getFirst)
+                        .map(it -> getMapValue(filedType, it))
+                        .orElseGet(HashMap::new);
                 } else if (filedType.isArray()) {
                     Class<?> componentType = filedType.getComponentType();
                     List<?> objects = mapper.selectListByQueryAs(queryWrapper, componentType);

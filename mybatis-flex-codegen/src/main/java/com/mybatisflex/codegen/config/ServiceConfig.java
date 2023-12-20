@@ -16,7 +16,6 @@
 package com.mybatisflex.codegen.config;
 
 
-import com.mybatisflex.core.service.IService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 
 import java.io.Serializable;

@@ -23,20 +23,9 @@ import com.mybatisflex.core.dialect.DialectFactory;
 import com.mybatisflex.core.table.TableDef;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
-import com.mybatisflex.core.util.ArrayUtil;
-import com.mybatisflex.core.util.ClassUtil;
-import com.mybatisflex.core.util.CollectionUtil;
-import com.mybatisflex.core.util.LambdaGetter;
-import com.mybatisflex.core.util.LambdaUtil;
-import com.mybatisflex.core.util.SqlUtil;
-import com.mybatisflex.core.util.StringUtil;
+import com.mybatisflex.core.util.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -137,8 +126,8 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
     }
 
     public <T> QueryWrapper select(LambdaGetter<T>... lambdaGetters) {
-        for (LambdaGetter<?> lambdaGetter : lambdaGetters) {
-            QueryColumn queryColumn = LambdaUtil.getQueryColumn(lambdaGetter);
+        for (var lambdaGetter : lambdaGetters) {
+            var queryColumn = LambdaUtil.getQueryColumn(lambdaGetter);
             addSelectColumn(queryColumn);
         }
         return this;
@@ -242,7 +231,7 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         if (CollectionUtil.isEmpty(queryTables)) {
             throw new IllegalArgumentException("query table must not be empty.");
         }
-        queryTables.get(queryTables.size() - 1).alias = alias;
+        queryTables.getLast().alias = alias;
         return this;
     }
 

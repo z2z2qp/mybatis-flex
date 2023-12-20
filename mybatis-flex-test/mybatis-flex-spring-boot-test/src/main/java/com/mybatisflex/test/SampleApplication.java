@@ -37,7 +37,7 @@ public class SampleApplication implements CommandLineRunner, ApplicationListener
 
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 //        System.out.println(this.accountMapper.selectOneById(1));
     }
 

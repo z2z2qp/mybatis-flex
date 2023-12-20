@@ -55,17 +55,12 @@ public class TableDefConfig implements Serializable {
     private String instanceSuffix = "";
 
     public String buildFieldName(String property) {
-        switch (propertiesNameStyle) {
-            case UPPER_CASE:
-                return StringUtil.camelToUnderline(property).toUpperCase();
-            case LOWER_CASE:
-                return StringUtil.camelToUnderline(property).toLowerCase();
-            case UPPER_CAMEL_CASE:
-                return StringUtil.firstCharToUpperCase(property);
-            case LOWER_CAMEL_CASE:
-            default:
-                return StringUtil.firstCharToLowerCase(property);
-        }
+        return switch (propertiesNameStyle) {
+            case UPPER_CASE -> StringUtil.camelToUnderline(property).toUpperCase();
+            case LOWER_CASE -> StringUtil.camelToUnderline(property).toLowerCase();
+            case UPPER_CAMEL_CASE -> StringUtil.firstCharToUpperCase(property);
+            default -> StringUtil.firstCharToLowerCase(property);
+        };
     }
 
     /**

@@ -5,14 +5,10 @@ import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.datasource.DataSourceKey;
 import com.mybatisflex.core.keygen.KeyGeneratorFactory;
+import com.mybatisflex.mapper.Account7Mapper;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.assertj.core.api.WithAssertions;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import com.mybatisflex.mapper.Account7Mapper;
+import org.junit.*;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -65,13 +61,13 @@ public class Account7Test implements WithAssertions {
     }
 
     /**
-     * issues https://gitee.com/mybatis-flex/mybatis-flex/issues/I88TX1
+     * issues <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I88TX1">gitee_I88TX1</a>
      */
     @Test
     public void testGiteeIssue_I88TX1() {
         List<Account7> list = this.mapper.selectAll();
         OptionalLong maxIdOpt = list.stream().mapToLong(Account7::getId).max();
-        if (!maxIdOpt.isPresent()) {
+        if (maxIdOpt.isEmpty()) {
             Assert.fail();
         }
 

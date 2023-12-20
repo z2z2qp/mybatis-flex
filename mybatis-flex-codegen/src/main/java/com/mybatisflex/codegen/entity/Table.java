@@ -293,7 +293,7 @@ public class Table {
             String[] tablePrefixes = tablePrefix.split(",");
             for (String prefix : tablePrefixes) {
                 String trimPrefix = prefix.trim();
-                if (trimPrefix.length() > 0 && name.startsWith(trimPrefix)) {
+                if (!trimPrefix.isEmpty() && name.startsWith(trimPrefix)) {
                     entityJavaFileName = name.substring(trimPrefix.length());
                     break;
                 }

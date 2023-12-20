@@ -25,7 +25,10 @@ import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
-import com.mybatisflex.core.util.*;
+import com.mybatisflex.core.util.ClassUtil;
+import com.mybatisflex.core.util.CollectionUtil;
+import com.mybatisflex.core.util.ConvertUtil;
+import com.mybatisflex.core.util.MapperUtil;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.builder.annotation.ProviderContext;
 import org.apache.ibatis.cursor.Cursor;
@@ -473,7 +476,7 @@ public interface BaseMapper<T> {
 
     default <R> Optional<R> selectOneByQuery(QueryWrapper queryWrapper, Function<T, R> cast) {
         // var entities = selectListByQuery(queryWrapper.limit(1), cast);
-        // return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.get(0));
+        // return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.getFirst());
         var entity = selectOneByQuery(queryWrapper);
         return entity.map(cast);
     }
@@ -887,7 +890,7 @@ public interface BaseMapper<T> {
                 // 未设置 COUNT(...) 列，默认使用 COUNT(*) 查询
                 queryWrapper.select(count());
                 objects = selectObjectListByQuery(queryWrapper);
-            } else if (selectColumns.get(0) instanceof FunctionQueryColumn fqc) {
+            } else if (selectColumns.getFirst() instanceof FunctionQueryColumn fqc) {
                 // COUNT 函数必须在第一列
                 if (!FuncName.COUNT.equalsIgnoreCase(fqc.getFnName())) {
                     // 第一个查询列不是 COUNT 函数，使用 COUNT(*) 替换所有的查询列

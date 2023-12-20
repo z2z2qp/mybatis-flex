@@ -247,14 +247,14 @@ public class MapperUtil {
         }
         int size = list.size();
         if (size == 1) {
-            return list.get(0);
+            return list.getFirst();
         }
         throw new TooManyResultsException(
             "Expected one result (or null) to be returned by selectOne(), but found: " + size);
     }
 
     public static long getLongNumber(List<Object> objects) {
-        Object object = objects == null || objects.isEmpty() ? null : objects.get(0);
+        Object object = objects == null || objects.isEmpty() ? null : objects.getFirst();
         if (object == null) {
             return 0;
         } else if (object instanceof Number number) {

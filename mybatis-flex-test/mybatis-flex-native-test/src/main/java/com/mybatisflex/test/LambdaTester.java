@@ -31,11 +31,13 @@ public class LambdaTester {
     static BiConsumer<Account, List<Article>> setArticles = Account::setArticles;
 
     static Map<String,Function<?,?>> getters = new HashMap<>();
-    {
+
+    static {
         getters.put("getArticles",getArticles);
     }
     static Map<String,BiConsumer<?,?>> setters = new HashMap<>();
-    {
+
+    static {
         setters.put("setArticles",setArticles);
     }
 

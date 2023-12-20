@@ -17,7 +17,6 @@
 package com.mybatisflex.test.mapper;
 
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.test.entity.Inner;
 import com.mybatisflex.test.entity.Outer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,7 @@ class OuterMapperTest {
         Outer outer = new Outer();
         outer.setName("outer 01");
         int result = outerMapper.insertSelective(outer);
-        Assertions.assertEquals(result,1);
+        Assertions.assertEquals(result, 1);
     }
 
     @Test

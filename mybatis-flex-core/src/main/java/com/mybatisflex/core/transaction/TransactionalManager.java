@@ -42,11 +42,7 @@ public class TransactionalManager {
 
     public static void hold(String xid, String ds, Connection connection) {
         Map<String, Map<String, Connection>> holdMap = CONNECTION_HOLDER.get();
-        Map<String, Connection> connMap = holdMap.get(xid);
-        if (connMap == null) {
-            connMap = new ConcurrentHashMap<>();
-            holdMap.put(xid, connMap);
-        }
+        Map<String, Connection> connMap = holdMap.computeIfAbsent(xid, k -> new ConcurrentHashMap<>());
 
         if (connMap.containsKey(ds)) {
             return;
@@ -181,7 +177,7 @@ public class TransactionalManager {
             Map<String, Connection> connections = holdMap.get(xid);
             if (connections != null) {
                 for (Connection conn : connections.values()) {
-                    try {
+                    try (conn) {
                         if (commit) {
                             conn.commit();
                         } else {
@@ -189,12 +185,6 @@ public class TransactionalManager {
                         }
                     } catch (SQLException e) {
                         exception = e;
-                    } finally {
-                        try {
-                            conn.close();
-                        } catch (SQLException e) {
-                            //ignore
-                        }
                     }
                 }
             }

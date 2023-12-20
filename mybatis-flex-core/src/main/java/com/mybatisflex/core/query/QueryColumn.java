@@ -1004,7 +1004,7 @@ public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<Query
             return selfTable;
         }
 
-        if (queryTables.size() == 1 && queryTables.get(0).isSameTable(selfTable)) {
+        if (queryTables.size() == 1 && queryTables.getFirst().isSameTable(selfTable)) {
             //ignore table
             return null;
         }
@@ -1014,7 +1014,7 @@ public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<Query
         }
 
         if (selfTable == null && queryTables.size() == 1) {
-            return queryTables.get(0);
+            return queryTables.getFirst();
         }
 
         for (QueryTable table : queryTables) {

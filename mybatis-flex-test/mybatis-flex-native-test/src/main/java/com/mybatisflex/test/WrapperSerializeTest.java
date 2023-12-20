@@ -26,7 +26,7 @@ import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
 
 public class WrapperSerializeTest {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         QueryWrapper wrapper = QueryWrapper.create()
             .select().from(ACCOUNT)
             .where(ACCOUNT.ID.eq("michael"))

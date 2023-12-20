@@ -80,7 +80,7 @@ public class TableInfo {
     public void setTableName(String tableName) {
         int indexOf = tableName.indexOf(".");
         if (indexOf > 0) {
-            if (schema == null || schema.trim().length() == 0) {
+            if (schema == null || schema.trim().isEmpty()) {
                 this.schema = tableName.substring(0, indexOf);
                 this.tableName = tableName.substring(indexOf + 1);
             } else {

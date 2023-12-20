@@ -8,11 +8,7 @@ import com.mybatisflex.mapper.Account6Mapper;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.WithAssertions;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -63,7 +59,7 @@ public class Account6Test implements WithAssertions {
     }
 
     /**
-     * issues https://gitee.com/mybatis-flex/mybatis-flex/issues/I873OZ
+     * issues <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I873OZ">gitee_I873OZ</a>
      */
     @Test
     public void testGiteeIssue_I873OZ() {

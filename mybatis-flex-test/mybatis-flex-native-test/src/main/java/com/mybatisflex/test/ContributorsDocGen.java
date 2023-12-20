@@ -13,7 +13,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,8 +31,10 @@ public class ContributorsDocGen {
             , "https://gitee.com/mybatis-flex/mybatis-flex/contributors?page=2&ref=main"
         );
         StringBuilder markdown = new StringBuilder();
-        markdown.append("|     |     |     |     |     |\n" +
-            "|-----|-----|-----|-----|-----|\n");
+        markdown.append("""
+            |     |     |     |     |     |
+            |-----|-----|-----|-----|-----|
+            """);
 
         int startIndex = 0;
         for (String url : urls) {
@@ -78,7 +79,7 @@ public class ContributorsDocGen {
             }
 
             markdown.append("|");
-            markdown.append("![](" + src + ")");
+            markdown.append("![](").append(src).append(")");
             markdown.append(userName);
 
             startIndex++;
@@ -155,11 +156,11 @@ public class ContributorsDocGen {
         }
 
         @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
         }
 
         @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {
         }
 
     }

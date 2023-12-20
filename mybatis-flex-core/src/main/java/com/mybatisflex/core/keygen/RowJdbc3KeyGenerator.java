@@ -87,7 +87,7 @@ public class RowJdbc3KeyGenerator implements KeyGenerator {
             // Multi-param or single param with @Param
             assignKeysToParamMap(configuration, rs, rsmd, keyProperties, (Map<String, ?>) parameter);
         } else if (parameter instanceof ArrayList list && !list.isEmpty()
-                && list.get(0) instanceof ParamMap) {
+                && list.getFirst() instanceof ParamMap) {
             // Multi-param or single param with @Param in batch operation
             assignKeysToParamMapList(configuration, rs, rsmd, keyProperties, list);
         } else {

@@ -73,7 +73,7 @@ class ListenerTest {
         baseMapper.insert(accountMissingListenerTestModel);
 
         //实际执行结果
-        AccountMissingListenerTestModel dbData = (AccountMissingListenerTestModel) baseMapper.selectOneById(accountMissingListenerTestModel.getId());
+        AccountMissingListenerTestModel dbData = (AccountMissingListenerTestModel) baseMapper.selectOneById(accountMissingListenerTestModel.getId()).orElse(null);
 
         //预期数据
         AccountMissingListenerTestModel expectedData = new AccountMissingListenerTestModel();

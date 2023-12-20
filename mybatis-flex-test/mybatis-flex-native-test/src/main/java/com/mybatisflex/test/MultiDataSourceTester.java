@@ -29,7 +29,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class MultiDataSourceTester {
 

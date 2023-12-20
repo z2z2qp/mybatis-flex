@@ -66,8 +66,8 @@ public class FlexResultSetHandler extends FlexDefaultResultSetHandler {
      * 修复当实体类中存在 List<String> 或者 List<Integer> 等自动映射出错的问题
      * 本质问题应该出现 mybatis 判断有误
      * <p>
-     * https://gitee.com/mybatis-flex/mybatis-flex/issues/I7XBQS
-     * https://gitee.com/mybatis-flex/mybatis-flex/issues/I7X7G7
+     * <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7XBQS">gitee_I7XBQS</a>
+     * <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7X7G7">gitee_I7X7G7</a>
      *
      * @param rsw
      * @param resultMap
@@ -80,7 +80,7 @@ public class FlexResultSetHandler extends FlexDefaultResultSetHandler {
         final Class<?> resultType = resultMap.getType();
         if (!resultMap.getResultMappings().isEmpty()) {
             final List<ResultMapping> resultMappingList = resultMap.getResultMappings();
-            final ResultMapping mapping = resultMappingList.get(0);
+            final ResultMapping mapping = resultMappingList.getFirst();
             String columnName = prependPrefix(mapping.getColumn(), columnPrefix);
             TypeHandler<?> typeHandler = mapping.getTypeHandler();
 
@@ -90,7 +90,7 @@ public class FlexResultSetHandler extends FlexDefaultResultSetHandler {
             }
             return null;
         } else {
-            String columnName = rsw.getColumnNames().get(0);
+            String columnName = rsw.getColumnNames().getFirst();
             TypeHandler<?> typeHandler = rsw.getTypeHandler(resultType, columnName);
             return typeHandler.getResult(rsw.getResultSet(), columnName);
         }

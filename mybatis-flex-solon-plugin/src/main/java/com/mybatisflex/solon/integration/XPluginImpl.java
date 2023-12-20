@@ -30,7 +30,7 @@ public class XPluginImpl implements Plugin {
 
     // 兼容 2.5 以上版本
     @Override
-    public void start(AppContext context) throws Throwable {
+    public void start(AppContext context) {
         // 此插件的 solon.plugin.priority 会大于 mybatis-solon-plugin 的值
         MybatisAdapterManager.setAdapterFactory(new MybatisAdapterFactoryFlex());
     }

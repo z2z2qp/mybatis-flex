@@ -19,18 +19,15 @@ package com.mybatisflex.test.mapper;
 import com.mybatisflex.core.logicdelete.LogicDeleteManager;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
-import com.mybatisflex.core.row.Row;
 import com.mybatisflex.test.model.Account;
 import com.mybatisflex.test.model.AccountVO;
 import com.mybatisflex.test.model.AccountVO2;
-import lombok.val;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Date;
-import java.util.List;
 
 import static com.mybatisflex.core.query.QueryMethods.*;
 import static com.mybatisflex.test.model.table.AccountTableDef.ACCOUNT;
@@ -138,13 +135,13 @@ class AccountMapperTest {
         Account account = new Account();
         account.setAge(10);
         Assertions.assertThrows(Exception.class, () ->
-            LogicDeleteManager.execWithoutLogicDelete(()->accountMapper.updateByQuery(account, QueryWrapper.create())));
+            LogicDeleteManager.execWithoutLogicDelete(() -> accountMapper.updateByQuery(account, QueryWrapper.create())));
     }
 
     @Test
     void testDeleteAll() {
         Assertions.assertThrows(Exception.class, () ->
-            LogicDeleteManager.execWithoutLogicDelete(()-> accountMapper.deleteByQuery(QueryWrapper.create())));
+            LogicDeleteManager.execWithoutLogicDelete(() -> accountMapper.deleteByQuery(QueryWrapper.create())));
     }
 
     @Test

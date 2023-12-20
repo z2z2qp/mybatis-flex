@@ -52,7 +52,7 @@ public class FieldWrapperTest {
             Map<String, Object> map1 = (Map<String, Object>) fieldWrapper1.get(demo);
             Map<String, List<Long>> map2 = (Map<String, List<Long>>) fieldWrapper1.get(demo);
             System.out.println(map1.get("1"));
-            System.out.println(map2.get("1").get(0));
+            System.out.println(map2.get("1").getFirst());
         }catch (Exception e){
             assert false;
         }

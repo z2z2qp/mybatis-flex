@@ -34,7 +34,7 @@ public class QueryColumnBehavior {
      */
     public static final Predicate<Object> IGNORE_NULL = Objects::isNull;
     public static final Predicate<Object> IGNORE_EMPTY = o -> o == null || "".equals(o);
-    public static final Predicate<Object> IGNORE_BLANK = o -> o == null || "".equals(o.toString().trim());
+    public static final Predicate<Object> IGNORE_BLANK = o -> o == null || o.toString().trim().isEmpty();
 
     /**
      * 自定义全局的自动忽略参数的方法。

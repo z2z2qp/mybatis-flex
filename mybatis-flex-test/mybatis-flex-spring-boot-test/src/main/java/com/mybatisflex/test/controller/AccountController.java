@@ -26,11 +26,11 @@ import com.mybatisflex.test.mapper.MyAccountMapper;
 import com.mybatisflex.test.model.Account;
 import com.mybatisflex.test.model.AccountDto;
 import com.mybatisflex.test.service.AccountService;
+import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -86,8 +86,7 @@ public class AccountController {
             .where(Account::getAge).eq(18)
             .and(Account::getId).ge(0);
 
-        Page<AccountDto> accountPage = myAccountMapper.xmlPaginate("selectByName", Page.of(1, 10), qw);
-        return accountPage;
+        return myAccountMapper.xmlPaginate("selectByName", Page.of(1, 10), qw);
     }
 
 

@@ -220,7 +220,7 @@ public class ClassUtil {
     public static Field getFirstField(Class<?> clazz, Predicate<Field> predicate) {
         List<Field> fields = new ArrayList<>();
         doGetFields(clazz, fields, predicate, true);
-        return fields.isEmpty() ? null : fields.get(0);
+        return fields.isEmpty() ? null : fields.getFirst();
     }
 
     private static void doGetFields(Class<?> clazz, List<Field> fields, Predicate<Field> predicate, boolean firstOnly) {
@@ -264,7 +264,7 @@ public class ClassUtil {
     public static Method getFirstMethod(Class<?> clazz, Predicate<Method> predicate) {
         List<Method> methods = new ArrayList<>();
         doGetMethods(clazz, methods, predicate, true);
-        return methods.isEmpty() ? null : methods.get(0);
+        return methods.isEmpty() ? null : methods.getFirst();
     }
 
     private static void doGetMethods(Class<?> clazz, List<Method> methods, Predicate<Method> predicate,

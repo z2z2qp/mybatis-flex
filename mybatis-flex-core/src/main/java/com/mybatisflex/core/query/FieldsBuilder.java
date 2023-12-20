@@ -95,7 +95,7 @@ public class FieldsBuilder<T> extends AbstractQueryBuilder<T> {
     public <R> R oneAs(Class<R> asType) {
         List<R> entities = Collections.singletonList(baseMapper().selectOneByQueryAs(queryWrapper(), asType));
         FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
-        return entities.get(0);
+        return entities.getFirst();
     }
 
     /**

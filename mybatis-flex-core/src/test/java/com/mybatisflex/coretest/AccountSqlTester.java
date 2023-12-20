@@ -21,7 +21,10 @@ import com.mybatisflex.core.dialect.IDialect;
 import com.mybatisflex.core.dialect.KeywordWrap;
 import com.mybatisflex.core.dialect.LimitOffsetProcessor;
 import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
-import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.query.DistinctQueryColumn;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.RawQueryColumn;
+import com.mybatisflex.core.query.SqlOperators;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.table.TableManager;
@@ -559,7 +562,7 @@ public class AccountSqlTester {
 
 
     /**
-     * test https://gitee.com/mybatis-flex/mybatis-flex/issues/I8ASWS
+     * test <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I8ASWS">gitee_I8ASWS</a>
      */
     @Test
     public void testDeleteWithJoin() {

@@ -33,7 +33,7 @@ import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
 import static com.mybatisflex.test.table.ArticleTableDef.ARTICLE;
 
 /**
- * test https://gitee.com/mybatis-flex/mybatis-flex/issues/I7EV67
+ * test <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7EV67">gitee_I7EV67</a>
  */
 public class JoinWithDeleteColumnTestStarter {
 
