@@ -15,7 +15,11 @@
  */
 package com.mybatisflex.core.util;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,26 +37,25 @@ public class ClassUtil {
     private ClassUtil() {
     }
 
-    private static final String[] OBJECT_METHODS = new String[]{
-        "toString",
-        "getClass",
-        "equals",
-        "hashCode",
-        "wait",
-        "notify",
-        "notifyAll",
-        "clone",
-        "finalize"
+    private static final String[] OBJECT_METHODS = new String[] {
+            "toString",
+            "getClass",
+            "equals",
+            "hashCode",
+            "wait",
+            "notify",
+            "notifyAll",
+            "clone",
+            "finalize"
     };
 
-    //proxy frameworks
+    // proxy frameworks
     private static final List<String> PROXY_CLASS_NAMES = Arrays.asList("net.sf.cglib.proxy.Factory"
-        // cglib
-        , "org.springframework.cglib.proxy.Factory"
+    // cglib
+            , "org.springframework.cglib.proxy.Factory"
 
-        // javassist
-        , "javassist.util.proxy.ProxyObject"
-        , "org.apache.ibatis.javassist.util.proxy.ProxyObject");
+            // javassist
+            , "javassist.util.proxy.ProxyObject", "org.apache.ibatis.javassist.util.proxy.ProxyObject");
     private static final String ENHANCER_BY = "$$EnhancerBy";
     private static final String JAVASSIST_BY = "_$$_";
 
@@ -71,10 +74,13 @@ public class ClassUtil {
             return getJdkProxySuperClass(clazz);
         }
 
+        // if (ProxyObject.class.isAssignableFrom(clazz)){
+        // return (Class<T>) clazz.getSuperclass();
+        // }
+
         // ControllerTest$ServiceTest$$EnhancerByGuice$$40471411#hello -------> Guice
         // com.demo.blog.Blog$$EnhancerByCGLIB$$69a17158 ----> CGLIB
         // io.jboot.test.app.TestAppListener_$$_jvstb9f_0 ------> javassist
-
         final var name = clazz.getName();
         if (name.contains(ENHANCER_BY) || name.contains(JAVASSIST_BY)) {
             return (Class<T>) clazz.getSuperclass();
@@ -111,17 +117,16 @@ public class ClassUtil {
 
     public static boolean isArray(Class<?> clazz) {
         return clazz.isArray()
-            || clazz == int[].class
-            || clazz == long[].class
-            || clazz == short[].class
-            || clazz == float[].class
-            || clazz == double[].class;
+                || clazz == int[].class
+                || clazz == long[].class
+                || clazz == short[].class
+                || clazz == float[].class
+                || clazz == double[].class;
     }
 
     public static boolean canInstance(int mod) {
         return !Modifier.isAbstract(mod) || !Modifier.isInterface(mod);
     }
-
 
     public static <T> T newInstance(Class<T> clazz) {
         try {
@@ -153,9 +158,9 @@ public class ClassUtil {
             // 没有任何构造函数的情况下，去查找 static 工厂方法，满足 lombok 注解的需求
             else {
                 Method factoryMethod = ClassUtil.getFirstMethod(clazz, m -> m.getParameterCount() == 0
-                    && clazz == m.getReturnType()
-                    && Modifier.isPublic(m.getModifiers())
-                    && Modifier.isStatic(m.getModifiers()));
+                        && clazz == m.getReturnType()
+                        && Modifier.isPublic(m.getModifiers())
+                        && Modifier.isStatic(m.getModifiers()));
                 if (factoryMethod != null) {
                     return (T) factoryMethod.invoke(null);
                 }
@@ -189,7 +194,7 @@ public class ClassUtil {
         }
 
         if (constructor.getParameterCount() > 0
-            && (paras == null || paras.length != constructor.getParameterCount())) {
+                && (paras == null || paras.length != constructor.getParameterCount())) {
             return false;
         }
 
@@ -290,7 +295,6 @@ public class ClassUtil {
         final Class<?> proxyClass = Proxy.getProxyClass(clazz.getClassLoader(), clazz.getInterfaces());
         return (Class<T>) proxyClass.getInterfaces()[0];
     }
-
 
     public static boolean isGetterMethod(Method method, String property) {
         String methodName = method.getName();
