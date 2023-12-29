@@ -15,16 +15,17 @@
  */
 package com.mybatisflex.core.dialect;
 
+import java.util.EnumMap;
+import java.util.Map;
+
+import org.apache.ibatis.util.MapUtil;
+
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
 import com.mybatisflex.core.dialect.impl.DB2105Dialect;
 import com.mybatisflex.core.dialect.impl.DmDialect;
 import com.mybatisflex.core.dialect.impl.OracleDialect;
 import com.mybatisflex.core.util.ObjectUtil;
-import org.apache.ibatis.util.MapUtil;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
  * 方言工厂类，用于创建方言
@@ -53,7 +54,7 @@ public class DialectFactory {
      */
     public static IDialect getDialect() {
         DbType dbType = ObjectUtil.requireNonNullElse(dbTypeThreadLocal.get(),
-            FlexGlobalConfig.getDefaultConfig().getDbType());
+                FlexGlobalConfig.getDefaultConfig().getDbType());
         return MapUtil.computeIfAbsent(dialectMap, dbType, DialectFactory::createDialect);
     }
 
@@ -96,12 +97,12 @@ public class DialectFactory {
         return switch (dbType) {
             case MYSQL, H2, MARIADB, GBASE, OSCAR, XUGU, OCEAN_BASE, CUBRID, GOLDILOCKS, CSIIDB, HIVE, DORIS ->
                 new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
-            case CLICK_HOUSE -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
+            case CLICK_HOUSE, GBASE_8S -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
             case DM -> new DmDialect();
             case ORACLE -> new OracleDialect();
             case GAUSS -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
             case POSTGRE_SQL, SQLITE, HSQL, KINGBASE_ES, PHOENIX, SAP_HANA, IMPALA, HIGH_GO, VERTICA, REDSHIFT,
-                OPENGAUSS, UXDB, LEALONE ->
+                    OPENGAUSS, UXDB, LEALONE ->
                 new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
             case TDENGINE -> new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
             case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
