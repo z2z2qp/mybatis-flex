@@ -21,11 +21,7 @@ import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.datasource.DataSourceKey;
 import com.mybatisflex.mapper.Account5Mapper;
 import org.assertj.core.api.WithAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -77,7 +73,7 @@ public class AccountInsertWithArrayAttrTest implements WithAssertions {
         accountMapper.insertWithPk(account, false);
 
         // todo argument type mismatch
-        Account5 result = accountMapper.selectOneById(3L);
+        Account5 result = accountMapper.selectOneById(3L).orElse(null);
         assertThat(result).isNotNull()
             .extracting(Account5::getUserName, Account5::getDataScope)
             .containsExactly("lisi", new Long[]{1L, 2L});

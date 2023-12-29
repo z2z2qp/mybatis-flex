@@ -86,7 +86,7 @@ public class UpdateChainTest implements WithAssertions {
             .where(Account::getId).eq(1)
             .update();
 
-        Account account = accountMapper.selectOneById(1);
+        Account account = accountMapper.selectOneById(1).orElse(null);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String toParse = "2020-01-11";
         assertThat(account).isNotNull()

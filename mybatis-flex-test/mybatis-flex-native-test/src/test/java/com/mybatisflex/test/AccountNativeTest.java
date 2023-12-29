@@ -109,7 +109,7 @@ public class AccountNativeTest implements WithAssertions {
         AccountMapper accountMapper = Mappers.ofMapperClass(AccountMapper.class);
         assertThat(accountBaseMapper).isSameAs(accountMapper);
 
-        Account account = accountBaseMapper.selectOneById(1);
+        Account account = accountBaseMapper.selectOneById(1).orElse(null);
         assertThat(account).isNotNull()
             .extracting(Account::getId, Account::getUserName)
             .containsExactly(1L, "张*");
