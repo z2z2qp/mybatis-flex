@@ -474,12 +474,19 @@ public interface BaseMapper<T> {
         return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
     }
 
+    /**
+     * 根据指定的QueryWrapper和Function，执行查询并返回结果的Optional对象。
+     *
+     * @param queryWrapper 查询条件封装对象
+     * @param cast         转换函数，用于将实体对象转换为指定类型的对象
+     * @param <R>          转换后的对象类型
+     * @return 转换后的结果的Optional对象
+     */
     default <R> Optional<R> selectOneByQuery(QueryWrapper queryWrapper, Function<T, R> cast) {
-        // var entities = selectListByQuery(queryWrapper.limit(1), cast);
-        // return (entities == null || entities.isEmpty()) ? Optional.empty() : Optional.ofNullable(entities.getFirst());
         var entity = selectOneByQuery(queryWrapper);
         return entity.map(cast);
     }
+
 
     /**
      * 根据查询条件来查询 1 条数据。
