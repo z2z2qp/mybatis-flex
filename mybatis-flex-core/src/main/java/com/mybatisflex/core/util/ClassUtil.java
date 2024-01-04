@@ -15,11 +15,10 @@
  */
 package com.mybatisflex.core.util;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
+
+import org.apache.ibatis.javassist.util.proxy.ProxyObject;
+
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,57 +36,60 @@ public class ClassUtil {
     private ClassUtil() {
     }
 
-    private static final String[] OBJECT_METHODS = new String[] {
-            "toString",
-            "getClass",
-            "equals",
-            "hashCode",
-            "wait",
-            "notify",
-            "notifyAll",
-            "clone",
-            "finalize"
+    private static final String[] OBJECT_METHODS = new String[]{
+        "toString",
+        "getClass",
+        "equals",
+        "hashCode",
+        "wait",
+        "notify",
+        "notifyAll",
+        "clone",
+        "finalize"
     };
 
-    // proxy frameworks
+    //proxy frameworks
     private static final List<String> PROXY_CLASS_NAMES = Arrays.asList("net.sf.cglib.proxy.Factory"
-    // cglib
-            , "org.springframework.cglib.proxy.Factory"
+        // cglib
+        , "org.springframework.cglib.proxy.Factory"
 
-            // javassist
-            , "javassist.util.proxy.ProxyObject", "org.apache.ibatis.javassist.util.proxy.ProxyObject");
+        // javassist
+        , "javassist.util.proxy.ProxyObject"
+        , "org.apache.ibatis.javassist.util.proxy.ProxyObject");
     private static final String ENHANCER_BY = "$$EnhancerBy";
     private static final String JAVASSIST_BY = "_$$_";
 
     public static boolean isProxy(Class<?> clazz) {
-        for (var cls : clazz.getInterfaces()) {
+        for (Class<?> cls : clazz.getInterfaces()) {
             if (PROXY_CLASS_NAMES.contains(cls.getName())) {
                 return true;
             }
         }
-        // java proxy
+        //java proxy
         return Proxy.isProxyClass(clazz);
     }
 
     public static <T> Class<T> getUsefulClass(Class<T> clazz) {
+
+        if (ProxyObject.class.isAssignableFrom(clazz)) {
+            return (Class<T>) clazz.getSuperclass();
+        }
+
         if (isProxy(clazz)) {
             return getJdkProxySuperClass(clazz);
         }
 
-        // if (ProxyObject.class.isAssignableFrom(clazz)){
-        // return (Class<T>) clazz.getSuperclass();
-        // }
-
-        // ControllerTest$ServiceTest$$EnhancerByGuice$$40471411#hello -------> Guice
-        // com.demo.blog.Blog$$EnhancerByCGLIB$$69a17158 ----> CGLIB
-        // io.jboot.test.app.TestAppListener_$$_jvstb9f_0 ------> javassist
-        final var name = clazz.getName();
+        //ControllerTest$ServiceTest$$EnhancerByGuice$$40471411#hello   -------> Guice
+        //com.demo.blog.Blog$$EnhancerByCGLIB$$69a17158  ----> CGLIB
+        //io.jboot.test.app.TestAppListener_$$_jvstb9f_0 ------> javassist
+        final String name = clazz.getName();
         if (name.contains(ENHANCER_BY) || name.contains(JAVASSIST_BY)) {
             return (Class<T>) clazz.getSuperclass();
         }
 
         return clazz;
     }
+
 
     public static Class<?> getWrapType(Class<?> clazz) {
         if (clazz == null || !clazz.isPrimitive()) {
@@ -115,18 +117,20 @@ public class ClassUtil {
         return clazz;
     }
 
+
     public static boolean isArray(Class<?> clazz) {
         return clazz.isArray()
-                || clazz == int[].class
-                || clazz == long[].class
-                || clazz == short[].class
-                || clazz == float[].class
-                || clazz == double[].class;
+            || clazz == int[].class
+            || clazz == long[].class
+            || clazz == short[].class
+            || clazz == float[].class
+            || clazz == double[].class;
     }
 
     public static boolean canInstance(int mod) {
         return !Modifier.isAbstract(mod) || !Modifier.isInterface(mod);
     }
+
 
     public static <T> T newInstance(Class<T> clazz) {
         try {
@@ -158,9 +162,9 @@ public class ClassUtil {
             // 没有任何构造函数的情况下，去查找 static 工厂方法，满足 lombok 注解的需求
             else {
                 Method factoryMethod = ClassUtil.getFirstMethod(clazz, m -> m.getParameterCount() == 0
-                        && clazz == m.getReturnType()
-                        && Modifier.isPublic(m.getModifiers())
-                        && Modifier.isStatic(m.getModifiers()));
+                    && clazz == m.getReturnType()
+                    && Modifier.isPublic(m.getModifiers())
+                    && Modifier.isStatic(m.getModifiers()));
                 if (factoryMethod != null) {
                     return (T) factoryMethod.invoke(null);
                 }
@@ -171,16 +175,17 @@ public class ClassUtil {
         }
     }
 
+
     public static <T> T newInstance(Class<T> clazz, Object... paras) {
         try {
-            var constructors = clazz.getDeclaredConstructors();
-            for (var constructor : constructors) {
+            Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+            for (Constructor<?> constructor : constructors) {
                 if (isMatchedParas(constructor, paras)) {
-                    return (T) constructor.newInstance(paras);
+                    Object ret = constructor.newInstance(paras);
+                    return (T) ret;
                 }
             }
-            throw new IllegalArgumentException("Can not find constructor by paras: \"" + Arrays.toString(paras)
-                    + "\" in class[" + clazz.getName() + "]");
+            throw new IllegalArgumentException("Can not find constructor by paras: \"" + Arrays.toString(paras) + "\" in class[" + clazz.getName() + "]");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -188,20 +193,21 @@ public class ClassUtil {
         return null;
     }
 
+
     private static boolean isMatchedParas(Constructor<?> constructor, Object[] paras) {
         if (constructor.getParameterCount() == 0) {
             return paras == null || paras.length == 0;
         }
 
         if (constructor.getParameterCount() > 0
-                && (paras == null || paras.length != constructor.getParameterCount())) {
+            && (paras == null || paras.length != constructor.getParameterCount())) {
             return false;
         }
 
-        var parameterTypes = constructor.getParameterTypes();
-        for (var i = 0; i < parameterTypes.length; i++) {
-            var parameterType = parameterTypes[i];
-            var paraObject = paras[i];
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> parameterType = parameterTypes[i];
+            Object paraObject = paras[i];
             if (paraObject != null && !parameterType.isAssignableFrom(paraObject.getClass())) {
                 return false;
             }
@@ -210,14 +216,15 @@ public class ClassUtil {
         return true;
     }
 
+
     public static List<Field> getAllFields(Class<?> clazz) {
-        var fields = new ArrayList<Field>();
+        List<Field> fields = new ArrayList<>();
         doGetFields(clazz, fields, null, false);
         return fields;
     }
 
     public static List<Field> getAllFields(Class<?> clazz, Predicate<Field> predicate) {
-        var fields = new ArrayList<Field>();
+        List<Field> fields = new ArrayList<>();
         doGetFields(clazz, fields, predicate, false);
         return fields;
     }
@@ -225,7 +232,7 @@ public class ClassUtil {
     public static Field getFirstField(Class<?> clazz, Predicate<Field> predicate) {
         List<Field> fields = new ArrayList<>();
         doGetFields(clazz, fields, predicate, true);
-        return fields.isEmpty() ? null : fields.getFirst();
+        return fields.isEmpty() ? null : fields.get(0);
     }
 
     private static void doGetFields(Class<?> clazz, List<Field> fields, Predicate<Field> predicate, boolean firstOnly) {
@@ -233,8 +240,8 @@ public class ClassUtil {
             return;
         }
 
-        var declaredFields = clazz.getDeclaredFields();
-        for (var declaredField : declaredFields) {
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
             if (predicate == null || predicate.test(declaredField)) {
                 fields.add(declaredField);
                 if (firstOnly) {
@@ -250,14 +257,14 @@ public class ClassUtil {
         doGetFields(clazz.getSuperclass(), fields, predicate, firstOnly);
     }
 
-    public static List<Method> getAllMethods(Class<?> cl) {
-        var methods = new ArrayList<Method>();
-        doGetMethods(cl, methods, null, false);
+    public static List<Method> getAllMethods(Class<?> clazz) {
+        List<Method> methods = new ArrayList<>();
+        doGetMethods(clazz, methods, null, false);
         return methods;
     }
 
     public static List<Method> getAllMethods(Class<?> clazz, Predicate<Method> predicate) {
-        var methods = new ArrayList<Method>();
+        List<Method> methods = new ArrayList<>();
         doGetMethods(clazz, methods, predicate, false);
         return methods;
     }
@@ -269,17 +276,17 @@ public class ClassUtil {
     public static Method getFirstMethod(Class<?> clazz, Predicate<Method> predicate) {
         List<Method> methods = new ArrayList<>();
         doGetMethods(clazz, methods, predicate, true);
-        return methods.isEmpty() ? null : methods.getFirst();
+        return methods.isEmpty() ? null : methods.get(0);
     }
 
-    private static void doGetMethods(Class<?> clazz, List<Method> methods, Predicate<Method> predicate,
-            boolean firstOnly) {
+
+    private static void doGetMethods(Class<?> clazz, List<Method> methods, Predicate<Method> predicate, boolean firstOnly) {
         if (clazz == null || clazz == Object.class) {
             return;
         }
 
-        var declaredMethods = clazz.getDeclaredMethods();
-        for (var method : declaredMethods) {
+        Method[] declaredMethods = clazz.getDeclaredMethods();
+        for (Method method : declaredMethods) {
             if (predicate == null || predicate.test(method)) {
                 methods.add(method);
                 if (firstOnly) {
@@ -288,13 +295,19 @@ public class ClassUtil {
             }
         }
 
+        if (firstOnly && !methods.isEmpty()) {
+            return;
+        }
+
         doGetMethods(clazz.getSuperclass(), methods, predicate, firstOnly);
     }
+
 
     private static <T> Class<T> getJdkProxySuperClass(Class<T> clazz) {
         final Class<?> proxyClass = Proxy.getProxyClass(clazz.getClassLoader(), clazz.getInterfaces());
         return (Class<T>) proxyClass.getInterfaces()[0];
     }
+
 
     public static boolean isGetterMethod(Method method, String property) {
         String methodName = method.getName();
