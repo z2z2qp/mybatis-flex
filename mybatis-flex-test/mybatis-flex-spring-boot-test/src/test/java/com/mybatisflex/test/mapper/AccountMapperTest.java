@@ -19,6 +19,7 @@ package com.mybatisflex.test.mapper;
 import com.mybatisflex.core.logicdelete.LogicDeleteManager;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
+import com.mybatisflex.test.TestInfrastructure;
 import com.mybatisflex.test.model.Account;
 import com.mybatisflex.test.model.AccountVO;
 import com.mybatisflex.test.model.AccountVO2;
@@ -41,7 +42,7 @@ import static com.mybatisflex.test.model.table.UserTableDef.USER;
  */
 @SpringBootTest
 @SuppressWarnings("all")
-class AccountMapperTest {
+class AccountMapperTest extends TestInfrastructure {
 
     @Autowired
     private AccountMapper accountMapper;

@@ -29,6 +29,7 @@ public class ContributorsDocGen {
         List<String> urls = Arrays.asList(
             "https://gitee.com/mybatis-flex/mybatis-flex/contributors?ref=main"
             , "https://gitee.com/mybatis-flex/mybatis-flex/contributors?page=2&ref=main"
+            , "https://gitee.com/mybatis-flex/mybatis-flex/contributors?page=3&ref=main"
         );
         StringBuilder markdown = new StringBuilder();
         markdown.append("""
@@ -74,12 +75,16 @@ public class ContributorsDocGen {
             if (userName.contains("@")) {
                 userName = userName.substring(0, userName.indexOf("@"));
             }
-            if (StringUtil.isBlank(src)) {
-                src = "https://api.dicebear.com/7.x/initials/svg?seed=" + userName;
-            }
+//            if (StringUtil.isBlank(src)) {
+//                src = "https://api.dicebear.com/7.x/initials/svg?seed=" + userName;
+//            }
 
             markdown.append("|");
-            markdown.append("![](").append(src).append(")");
+
+            if (StringUtil.isNotBlank(src)) {
+                markdown.append("![](").append(src).append(")");
+            }
+
             markdown.append(userName);
 
             startIndex++;

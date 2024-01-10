@@ -74,6 +74,7 @@
         <solon.version>2.6.2</solon.version>
 
         <junit.version>4.13.2</junit.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
         <maven-flatten.version>1.5.0</maven-flatten.version>
     </properties>
 
@@ -189,6 +190,14 @@
                 <artifactId>HikariCP</artifactId>
                 <version>${HikariCP.version}</version>
                 <optional>true</optional>
+            </dependency>
+
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
         </dependencies>
