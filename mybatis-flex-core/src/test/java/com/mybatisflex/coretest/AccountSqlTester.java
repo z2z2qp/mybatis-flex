@@ -45,7 +45,7 @@ public class AccountSqlTester {
                 .select()
                 .from(ACCOUNT);
 
-        Assert.assertEquals("SELECT * FROM `tb_account`",query.toSQL());
+        Assert.assertEquals("SELECT * FROM `tb_account`", query.toSQL());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class AccountSqlTester {
                 .select()
                 .from(ACCOUNT01);
 
-        Assert.assertEquals("SELECT * FROM `flex`.`tb_a01`",query.toSQL());
+        Assert.assertEquals("SELECT * FROM `flex`.`tb_a01`", query.toSQL());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class AccountSqlTester {
         Assert.assertEquals("SELECT * FROM `flex`.`tb_a01_01` " +
                 "LEFT JOIN `tb_account_01` ON `flex`.`tb_a01_01`.`id` = `tb_account_01`.`id` " +
                 "WHERE `flex`.`tb_a01_01`.`id` >= 100 AND `tb_account_01`.`sex` = 1"
-        ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
         // 重置dynamicTableProcessor，防止影响其他的测试用例
@@ -92,7 +92,7 @@ public class AccountSqlTester {
         Assert.assertEquals("SELECT * FROM `flex`.`tb_a01_01` AS `a1` " +
                 "LEFT JOIN `tb_account_01` ON `a1`.`id` = `tb_account_01`.`id` " +
                 "WHERE `a1`.`id` >= 100 AND `tb_account_01`.`sex` = 1"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
         // 重置dynamicTableProcessor，防止影响其他的测试用例
@@ -107,7 +107,7 @@ public class AccountSqlTester {
                 .from(ACCOUNT);
 
         Assert.assertEquals("SELECT `id`, `user_name` FROM `tb_account`"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -125,7 +125,7 @@ public class AccountSqlTester {
                 "MAX(`a`.`age`) AS `ageMax` " +
                 "FROM `tb_account` AS `a`, `tb_article` AS `b` " +
                 "WHERE `a`.`id` = `b`.`account_id`"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -140,7 +140,7 @@ public class AccountSqlTester {
                 "MAX(`birthday`) AS `Max_BirthDay`, " +
                 "AVG(`sex`) AS `sex_avg` " +
                 "FROM `tb_account` AS `tableAlias`"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -155,7 +155,7 @@ public class AccountSqlTester {
                 "MAX(`birthday`) AS `Max_BirthDay`, " +
                 "AVG(`sex`) AS `sex_avg` " +
                 "FROM `tb_account` AS `tableAlias`"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -165,13 +165,13 @@ public class AccountSqlTester {
         QueryWrapper query = new QueryWrapper()
             .select(
                 new DistinctQueryColumn(ACCOUNT.SEX).as("sexDis"))
-            .select(  ACCOUNT.USER_NAME.add(ACCOUNT.AGE).as("addAlias"))
+            .select(ACCOUNT.USER_NAME.add(ACCOUNT.AGE).as("addAlias"))
             .select(new RawQueryColumn("abc").as("aBc"))
             .from(ACCOUNT);
 
         Assert.assertEquals("SELECT DISTINCT `sex` AS `sexDis`, (`user_name` + `age`) AS `addAlias`, abc AS `aBc` " +
                 "FROM `tb_account`"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println("sql = " + query.toSQL());
 
@@ -185,7 +185,7 @@ public class AccountSqlTester {
                 .from(ACCOUNT);
 
         Assert.assertEquals("SELECT * FROM `tb_account`"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -203,7 +203,7 @@ public class AccountSqlTester {
         Assert.assertEquals("(SELECT `id` FROM `tb_account` ORDER BY `id` DESC) " +
                 "UNION (SELECT `id` FROM `tb_article`) " +
                 "UNION ALL (SELECT `id` FROM `tb_article`)"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -219,7 +219,7 @@ public class AccountSqlTester {
 
         Assert.assertEquals("SELECT * FROM `tb_account` " +
                 "WHERE `id` >= 100 AND `user_name` LIKE '%michael%'"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -234,7 +234,7 @@ public class AccountSqlTester {
 
         Assert.assertEquals("SELECT A.*, b.x FROM `tb_account` " +
                 "WHERE `id` >= 100 AND aaa IN ('michael', 'aaa')"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -252,11 +252,9 @@ public class AccountSqlTester {
             .or(ACCOUNT.SEX.eq(1).and(ACCOUNT.BIRTHDAY.eq(2)));
 
         String sql = "SELECT * FROM `tb_account` WHERE `id` >= 100 OR (`birthday` = 1) OR (`sex` = 1 AND `birthday` = 2)";
-        Assert.assertEquals(sql,query.toSQL());
+        Assert.assertEquals(sql, query.toSQL());
         System.out.println(query.toSQL());
     }
-
-
 
 
     @Test
@@ -269,7 +267,7 @@ public class AccountSqlTester {
             .and(ACCOUNT.USER_NAME.like("michael"));
 
         Assert.assertEquals("SELECT * FROM `tb_account` WHERE `user_name` LIKE '%michael%'"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -284,7 +282,7 @@ public class AccountSqlTester {
             .and(ACCOUNT.USER_NAME.notLike("michael"));
 
         Assert.assertEquals("SELECT * FROM `tb_account` WHERE `id` >= 100 AND `user_name` NOT LIKE '%michael%'"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -300,7 +298,7 @@ public class AccountSqlTester {
             .and(ACCOUNT.USER_NAME.like("michael"));
 
         Assert.assertEquals("SELECT * FROM `tb_account` WHERE `user_name` LIKE '%michael%'"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -321,11 +319,20 @@ public class AccountSqlTester {
         Assert.assertEquals("SELECT * FROM `tb_account` " +
                 "WHERE `id` >= 100 " +
                 "AND EXISTS (SELECT 1 FROM `tb_article` AS `a` WHERE `id` >= 100)"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
 
+    @Test
+    public void testSelectCountOne() {
+        QueryWrapper query = selectCountOne()
+            .from(ARTICLE);
+        Assert.assertEquals("SELECT COUNT(1) AS `temp_count_one` FROM `tb_article`"
+            , query.toSQL());
+
+        System.out.println(query.toSQL());
+    }
 
     @Test
     public void testWhereAndOrSql() {
@@ -340,7 +347,7 @@ public class AccountSqlTester {
                 "WHERE `id` >= 100 " +
                 "AND (`sex` = 1 OR `sex` = 2) " +
                 "OR (`age` IN (18, 19, 20) OR `user_name` LIKE '%michael%')"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -357,7 +364,7 @@ public class AccountSqlTester {
 
         Assert.assertEquals("SELECT * FROM `tb_account`" +
                 " WHERE `id` >= (SELECT `account_id` FROM `tb_article` WHERE `id` >= 100)"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -370,7 +377,7 @@ public class AccountSqlTester {
             .groupBy(ACCOUNT.USER_NAME);
 
         Assert.assertEquals("SELECT * FROM `tb_account` GROUP BY `user_name`"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -386,7 +393,7 @@ public class AccountSqlTester {
 
         Assert.assertEquals("SELECT * FROM `tb_account` AS `a`, `flex`.`tb_a01` AS `b` " +
                 "GROUP BY YEAR(`a`.`birthday`)"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -394,14 +401,14 @@ public class AccountSqlTester {
     //https://gitee.com/mybatis-flex/mybatis-flex/issues/I7EAY9
     @Test
     public void testGroup184() {
-        QueryWrapper query = QueryWrapper .create()
+        QueryWrapper query = QueryWrapper.create()
             .select(left(ACCOUNT.AGE, 6).as("regionCode"))
             .from(ACCOUNT)
             .groupBy("regionCode");
 
         Assert.assertEquals("SELECT LEFT(`age`, 6) AS `regionCode` FROM `tb_account` " +
                 "GROUP BY regionCode"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -417,7 +424,7 @@ public class AccountSqlTester {
         Assert.assertEquals("SELECT * FROM `tb_account` " +
                 "GROUP BY `user_name` " +
                 "HAVING `age` BETWEEN  18 AND 25 "
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -434,7 +441,7 @@ public class AccountSqlTester {
                 "LEFT JOIN `tb_article` " +
                 "ON `tb_account`.`id` = `tb_article`.`account_id` " +
                 "WHERE `tb_account`.`age` >= 10"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -453,7 +460,7 @@ public class AccountSqlTester {
                 "LEFT JOIN `tb_article` " +
                 "ON `tb_account`.`id` = `tb_article`.`account_id` AND `tb_account`.`age` = 18 " +
                 "WHERE `tb_account`.`age` >= 10"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -474,7 +481,7 @@ public class AccountSqlTester {
                 "LEFT JOIN (SELECT * FROM `tb_article` WHERE `id` >= 100) AS `a` " +
                 "ON `tb_account`.`id` = a.id " +
                 "WHERE `tb_account`.`age` >= 10"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -499,7 +506,7 @@ public class AccountSqlTester {
                 "LEFT JOIN `base_admin_user_info` AS `burmc` " +
                 "ON  burmc.user_id = burm.created_by  " +
                 "WHERE  bui.is_valid = 3 "
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -543,7 +550,7 @@ public class AccountSqlTester {
 
         Assert.assertEquals("SELECT * FROM `tb_account` " +
                 "ORDER BY `age` ASC, `user_name` DESC NULLS LAST"
-            ,query.toSQL());
+            , query.toSQL());
 
         System.out.println(query.toSQL());
     }
@@ -555,7 +562,7 @@ public class AccountSqlTester {
         String sql = dialect.forDeleteEntityById(tableInfo);
 
         Assert.assertEquals("UPDATE `tb_account` SET `is_delete` = 1 WHERE `id` = ?  AND `is_delete` = 0"
-            ,sql);
+            , sql);
 
         System.out.println(sql);
     }
@@ -567,14 +574,14 @@ public class AccountSqlTester {
     @Test
     public void testDeleteWithJoin() {
         QueryWrapper qw = QueryWrapper.create()
-                .from(ACCOUNT).leftJoin(ARTICLE).on(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID))
-                .where(ACCOUNT.USER_NAME.eq("x"));
+            .from(ACCOUNT).leftJoin(ARTICLE).on(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID))
+            .where(ACCOUNT.USER_NAME.eq("x"));
         IDialect dialect = new CommonsDialectImpl();
         String sql = dialect.forDeleteByQuery(qw);
         Assert.assertEquals("DELETE `tb_account` FROM `tb_account` " +
                 "LEFT JOIN `tb_article` ON `tb_account`.`id` = `tb_article`.`account_id` " +
                 "WHERE `tb_account`.`user_name` = ?"
-            ,sql);
+            , sql);
         System.out.println(sql);
     }
 
@@ -591,7 +598,7 @@ public class AccountSqlTester {
         String sql = dialect.forSelectByQuery(queryWrapper);
 
         Assert.assertEquals("SELECT * FROM `tb_account` WHERE `user_name` LIKE ? FOR UPDATE"
-            ,sql);
+            , sql);
 
         System.out.println(sql);
     }
@@ -614,7 +621,7 @@ public class AccountSqlTester {
                 "FROM `tb_account` " +
                 "WHERE `user_name` LIKE ? " +
                 "AND CONVERT(NVARCHAR(30), GETDATE(), 126) IN (SELECT `id` FROM `tb_account` WHERE `id` >= ?)"
-            ,sql);
+            , sql);
 
         System.out.println(sql);
     }
@@ -794,7 +801,7 @@ public class AccountSqlTester {
                 "AND `sex` = 0 " +
                 "AND `age` = 18 " +
                 "AND `is_normal` = false"
-            ,qw.toSQL());
+            , qw.toSQL());
 
         System.out.println(qw.toSQL());
     }
@@ -817,7 +824,7 @@ public class AccountSqlTester {
                 "ND `sex` = 0 " +
                 "AND `age` >= 18 " +
                 "AND `is_normal` = false"
-            ,qw.toSQL());
+            , qw.toSQL());
         System.out.println(qw.toSQL());
     }
 }

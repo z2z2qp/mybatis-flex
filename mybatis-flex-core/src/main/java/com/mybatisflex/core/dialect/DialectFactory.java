@@ -18,6 +18,7 @@ package com.mybatisflex.core.dialect;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.mybatisflex.core.exception.MybatisFlexException;
 import org.apache.ibatis.util.MapUtil;
 
 import com.mybatisflex.core.FlexGlobalConfig;
@@ -46,6 +47,7 @@ public class DialectFactory {
      * 通过设置当前线程的数据库类型，以达到在代码执行时随时切换方言的功能
      */
     private static final ThreadLocal<DbType> dbTypeThreadLocal = new ThreadLocal<>();
+    private static  DbType dbTypeGlobal  = null ;
 
     /**
      * 获取方言
@@ -74,6 +76,20 @@ public class DialectFactory {
      */
     public static DbType getHintDbType() {
         return dbTypeThreadLocal.get();
+    }
+
+    public static DbType getGlobalDbType() {
+        return dbTypeGlobal;
+    }
+
+    public static void setGlobalDbType(DbType dbType) {
+        if(dbTypeGlobal == null&&dbType!=null){
+            dbTypeGlobal = dbType ;
+        }else if(dbTypeGlobal != null){
+            throw new MybatisFlexException("dbTypeGlobal is only set once");
+        }else if(dbType==null){
+            throw new MybatisFlexException("dbType can not be null");
+        }
     }
 
     /**
