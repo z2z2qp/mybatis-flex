@@ -327,8 +327,12 @@ public class RelationManager {
 
                     //通过中间表关联查询
                     if (relation.isRelationByMiddleTable()) {
-                        targetValues = new HashSet<>();
+
                         Set selfFieldValues = relation.getSelfFieldValues(entities);
+                        // 当数据对应的字段没有值的情况下，直接返回
+                        if (selfFieldValues.isEmpty()) {
+                            return;
+                        }
                         QueryWrapper queryWrapper = QueryWrapper.create().select()
                             .from(relation.getJoinTable());
                         if (selfFieldValues.size() > 1) {
@@ -341,6 +345,8 @@ public class RelationManager {
                         if (CollectionUtil.isEmpty(mappingRows)) {
                             return;
                         }
+
+                        targetValues = new HashSet<>();
 
                         for (Row mappingData : mappingRows) {
                             Object targetValue = mappingData.getIgnoreCase(relation.getJoinTargetColumn());
