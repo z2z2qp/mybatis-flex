@@ -96,6 +96,11 @@ public class AuditMessage implements Serializable {
     private long elapsedTime;
 
     /**
+     * 数据库名称
+     */
+    private String dsName;
+
+    /**
      * 其他扩展元信息。
      */
     private Map<String, Object> metas;
@@ -264,6 +269,14 @@ public class AuditMessage implements Serializable {
         metas.put(key, value);
     }
 
+    public String getDsName() {
+        return dsName;
+    }
+
+    public void setDsName(String dsName) {
+        this.dsName = dsName;
+    }
+
     @Override
     public String toString() {
         return "AuditMessage{" +
@@ -279,6 +292,7 @@ public class AuditMessage implements Serializable {
             ", queryCount=" + queryCount +
             ", queryTime=" + queryTime +
             ", elapsedTime=" + elapsedTime +
+            ", dsName=" + dsName +
             ", metas=" + metas +
             '}';
     }
