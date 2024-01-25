@@ -70,8 +70,8 @@
         <HikariCP.version>4.0.3</HikariCP.version>
 
         <spring.version>5.3.31</spring.version>
-        <spring-boot.version>3.2.1</spring-boot.version>
-        <solon.version>2.6.3</solon.version>
+        <spring-boot.version>3.2.2</spring-boot.version>
+        <solon.version>2.6.4</solon.version>
 
         <junit.version>4.13.2</junit.version>
         <testcontainers.version>1.19.3</testcontainers.version>
