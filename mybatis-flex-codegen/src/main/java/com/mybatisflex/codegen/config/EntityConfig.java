@@ -28,6 +28,11 @@ public class EntityConfig implements Serializable {
 
     private static final long serialVersionUID = -6790274333595436008L;
     /**
+     * 代码生成目录，当未配置时，使用 PackageConfig 的配置
+     */
+    private String sourceDir;
+
+    /**
      * Entity 类的前缀。
      */
     private String classPrefix = "";
@@ -76,6 +81,19 @@ public class EntityConfig implements Serializable {
      * 实体类数据源。
      */
     private String dataSource;
+
+    /**
+     * 项目jdk版本
+     */
+    private int jdkVersion;
+
+    public String getSourceDir() {
+        return sourceDir;
+    }
+
+    public void setSourceDir(String sourceDir) {
+        this.sourceDir = sourceDir;
+    }
 
     /**
      * 获取类前缀。
@@ -226,6 +244,21 @@ public class EntityConfig implements Serializable {
      */
     public EntityConfig setDataSource(String dataSource) {
         this.dataSource = dataSource;
+        return this;
+    }
+
+    /**
+     * 获取项目jdk版本
+     */
+    public int getJdkVersion() {
+        return jdkVersion;
+    }
+
+    /**
+     * 设置项目jdk版本
+     */
+    public EntityConfig setJdkVersion(int jdkVersion) {
+        this.jdkVersion = jdkVersion;
         return this;
     }
 
