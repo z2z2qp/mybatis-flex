@@ -33,6 +33,15 @@ MyBatis-Flex 使用了 APT 技术，这两个类是自动生成的，需要编�
 
 参考：[MyBatis-Flex APT 配置 - MyBatis-Flex 官方网站](./others/apt.md)
 
+## 与 spring-data 整合输出警告：trationDelegate$BeanPostProcessorChecker : Bean 'x' of type [x] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [projectingArgumentResolverBeanPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+排除 `SpringDataWebAutoConfiguration` 自动配置类即可：
+
+```java
+@SpringBootApplication(exclude = SpringDataWebAutoConfiguration.class)
+public class SampleApplication {}
+```
+
 ## 阿里镜像找不到依赖？
 
 ```txt
@@ -67,26 +76,13 @@ in alimaven (http://maven.aliyun.com/nexus/content/groups/public/)
 
 ## SpringBoot 3.2 项目，启动报错 Invalid value type for attribute 'factoryBeanObjectType': java.lang.String
 
-这个是 `mybatis-spring` 依赖版本过低造成的，需要将内置的低版本 `mybatis-spring` 换为最新版。
+这个是 `mybatis-spring` 依赖版本过低造成的，需要使用 springboot 3 对应的 starter 依赖。
 
-```xml {6-9,17}
+```xml 3
 <dependency>
     <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-spring-boot-starter</artifactId>
+    <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
     <version>${mybatis-flex.version}</version>
-    <exclusions>
-        <exclusion>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis-spring</artifactId>
-        </exclusion>
-    </exclusions>
-</dependency>
-
-<!-- 添加已适配 springboot 3.2 的 mybatis-spring 依赖-->
-<dependency>
-    <groupId>org.mybatis</groupId>
-    <artifactId>mybatis-spring</artifactId>
-    <version>3.0.3</version>
 </dependency>
 ```
 
@@ -122,6 +118,7 @@ SpringBoot v3.x 添加 hikariCP 的内容如下：
 > 如果使用的是 druid 数据库连接池，则需要添加数据源类型的配置 `spring.datasource.type=com.alibaba.druid.pool.DruidDataSource`。
 
 ## SpringBoot 项目中出现 class "com.xxx" cannot be cast class "com.xxx" 的错误
+
 这个问题是由于 Spring 的 devtools 热加载引起的，可以在项目的 `resources/META-INF`
 目录下创建一个名为 `spring-devtools.properties` 的配置文件，配置内容如下：
 
@@ -133,6 +130,10 @@ restart.include.mybatis-flex=/mybatis-flex-[\\w-\\.]+jar
 相关文档参考 Spring 的官方网站：https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using.devtools.restart.customizing-the-classload
 
 
+## SpringBoot 项目中出现 java.lang.IllegalArgumentException: object is not an instance of declaring class 的错误
+
+这个问题也是由于 Spring 的 devtools 热加载引起的，解决办法参考 [上述问题](#springboot-项目中出现-class-comxxx-cannot-be-cast-class-comxxx-的错误)。
+
 ## java.sql.SQLException: No value specified for parameter x
 出现这个问题，原因是 MyBatis-Flex 未能正常启动，SQL 执行没有经过 MyBatis-Flex 导致的。其直接是因为和其他第三方增强框架整合使用了，
 比如和 MyBatis-Plus、或者 PageHelper 等整合造成的。
@@ -142,30 +143,15 @@ restart.include.mybatis-flex=/mybatis-flex-[\\w-\\.]+jar
 
 ## 整合 Springboot 3 出现 ClassNotFoundException： NestedIOException 的错误
 
-需要排除 flex 中的 mybatis-spring 的依赖，主动添加最新版本的 mybatis-spring 依赖。
+需要使用 springboot 3 对应的 starter 依赖。
 
-
-```xml 6,7,8,9
+```xml 3
 <dependency>
     <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-spring-boot-starter</artifactId>
+    <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
     <version>${mybatis-flex.version}</version>
-    <exclusions>
-        <exclusion>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis-spring</artifactId>
-        </exclusion>
-    </exclusions>
-</dependency>
-
-<!-- 添加已适配 springboot 3 的 mybatis-spring 依赖-->
-<dependency>
-    <groupId>org.mybatis</groupId>
-    <artifactId>mybatis-spring</artifactId>
-    <version>3.0.1</version>
 </dependency>
 ```
-
 
 
 ## Spring 下使用 Druid 数据源无法启动
