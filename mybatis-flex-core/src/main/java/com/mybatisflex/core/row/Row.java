@@ -546,13 +546,19 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
     }
 
 
-    Object[] obtainAllModifyValues() {
+    /**
+     * 获取更新的数据，主键后置
+     *
+     * @return 数据内容
+     */
+    Object[] obtainUpdateValues() {
         return ArrayUtil.concat(obtainModifyValuesWithoutPk(), obtainsPrimaryValues());
     }
 
 
     public Object[] obtainInsertValues() {
         List<Object> values = new ArrayList<>();
+
         if (primaryKeys != null && !primaryKeys.isEmpty()) {
             for (RowKey primaryKey : primaryKeys) {
                 if (primaryKey.before) {
@@ -570,6 +576,16 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
 
         return values.toArray();
     }
+
+    public Object[] obtainInsertValues(Set<String> withAttrs) {
+        List<Object> values = new ArrayList<>();
+        for (String key : withAttrs) {
+            Object value = get(key);
+            values.add(value);
+        }
+        return values.toArray();
+    }
+
 
     public Set<String> getInsertAttrs() {
         Set<String> attrs = new LinkedHashSet<>();
