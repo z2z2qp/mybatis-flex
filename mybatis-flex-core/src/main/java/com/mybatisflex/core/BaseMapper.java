@@ -470,7 +470,6 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default Optional<T> selectOneByQuery(QueryWrapper queryWrapper) {
-        queryWrapper.limit(1);
         return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
     }
 
@@ -507,7 +506,7 @@ public interface BaseMapper<T> {
      */
     default T selectOneWithRelationsByMap(Map<String, Object> whereConditions) {
         FlexAssert.notEmpty(whereConditions, "whereConditions");
-        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions).limit(1L));
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions));
     }
 
     /**
