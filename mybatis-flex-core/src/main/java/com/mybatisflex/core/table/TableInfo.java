@@ -1102,8 +1102,13 @@ public class TableInfo {
                         .typeHandler(configuration.getTypeHandlerRegistry().getTypeHandler(genericClass))
                         .build();
                     String nestedResultMapId = entityClass.getName() + "." + field.getName();
-                    ResultMap nestedResultMap = new ResultMap.Builder(configuration, nestedResultMapId, genericClass, Collections.singletonList(resultMapping)).build();
-                    configuration.addResultMap(nestedResultMap);
+                    ResultMap nestedResultMap;
+                    if (configuration.hasResultMap(nestedResultMapId)) {
+                        nestedResultMap = configuration.getResultMap(nestedResultMapId);
+                    } else {
+                        nestedResultMap = new ResultMap.Builder(configuration, nestedResultMapId, genericClass, Collections.singletonList(resultMapping)).build();
+                        configuration.addResultMap(nestedResultMap);
+                    }
                     // 映射 <collection property="..." ofType="genericClass">
                     resultMappings.add(new ResultMapping.Builder(configuration, field.getName())
                         .javaType(field.getType())
@@ -1207,12 +1212,11 @@ public class TableInfo {
         ColumnInfo columnInfo = columnInfoMapping.get(column);
         Object value = getPropertyValue(metaObject, columnInfo.property);
         if (value != null) {
-            TypeHandler typeHandler = columnInfo.buildTypeHandler(null);
+            TypeHandler<?> typeHandler = columnInfo.buildTypeHandler(null);
             if (typeHandler != null) {
                 return new TypeHandlerObject(typeHandler, value, columnInfo.getJdbcType());
             }
         }
-
         return value;
     }
 

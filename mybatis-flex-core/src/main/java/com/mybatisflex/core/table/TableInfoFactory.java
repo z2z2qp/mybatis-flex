@@ -305,7 +305,8 @@ public class TableInfoFactory {
 
             Column columnAnnotation = field.getAnnotation(Column.class);
 
-            //满足以下 3 种情况，不支持该类型
+
+            //满足以下 3 种情况，不支持该类型的属性自动映射为字段
             if ((columnAnnotation == null || columnAnnotation.typeHandler() == UnknownTypeHandler.class) // 未配置 typeHandler
                 && !fieldType.isEnum()   // 类型不是枚举
                 && !defaultSupportColumnTypes.contains(fieldType) //默认的自动类型不包含该类型
@@ -422,7 +423,7 @@ public class TableInfoFactory {
 
             //typeHandler 配置
             if (columnAnnotation != null && columnAnnotation.typeHandler() != UnknownTypeHandler.class) {
-                TypeHandler<?> typeHandler;
+                TypeHandler<?> typeHandler = null;
 
                 //集合类型，支持泛型
                 //fixed https://gitee.com/mybatis-flex/mybatis-flex/issues/I7S2YE
@@ -433,9 +434,18 @@ public class TableInfoFactory {
                 //非集合类型
                 else {
                     Class<?> typeHandlerClass = columnAnnotation.typeHandler();
-                    Configuration configuration = FlexGlobalConfig.getDefaultConfig().getConfiguration();
-                    TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-                    typeHandler = typeHandlerRegistry.getInstance(columnInfo.getPropertyType(), typeHandlerClass);
+                    Configuration configuration = config.getConfiguration();
+                    if (configuration != null) {
+                        TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+                        Class<?> propertyType = columnInfo.getPropertyType();
+                        JdbcType jdbcType = columnAnnotation.jdbcType();
+                        if (jdbcType != JdbcType.UNDEFINED) {
+                            typeHandler = typeHandlerRegistry.getTypeHandler(propertyType, jdbcType);
+                        }
+                        if (typeHandler == null || !typeHandlerClass.isAssignableFrom(typeHandler.getClass())) {
+                            typeHandler = typeHandlerRegistry.getInstance(propertyType, typeHandlerClass);
+                        }
+                    }
                 }
 
                 columnInfo.setTypeHandler(typeHandler);
