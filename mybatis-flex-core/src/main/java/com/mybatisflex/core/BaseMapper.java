@@ -15,13 +15,41 @@
  */
 package com.mybatisflex.core;
 
+import static com.mybatisflex.core.query.QueryMethods.count;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import org.apache.ibatis.annotations.DeleteProvider;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.builder.annotation.ProviderContext;
+import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+
 import com.mybatisflex.core.constant.FuncName;
 import com.mybatisflex.core.exception.FlexAssert;
 import com.mybatisflex.core.field.FieldQueryBuilder;
 import com.mybatisflex.core.mybatis.MappedStatementTypes;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.provider.EntitySqlProvider;
-import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.query.CPI;
+import com.mybatisflex.core.query.FunctionQueryColumn;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
@@ -29,19 +57,6 @@ import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.ConvertUtil;
 import com.mybatisflex.core.util.MapperUtil;
-import org.apache.ibatis.annotations.*;
-import org.apache.ibatis.builder.annotation.ProviderContext;
-import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import static com.mybatisflex.core.query.QueryMethods.count;
 
 /**
  * 通用 Mapper 接口。
@@ -55,7 +70,7 @@ import static com.mybatisflex.core.query.QueryMethods.count;
  * @author lhzsdnu
  * @author 王超
  */
-@SuppressWarnings({"varargs", "unchecked", "unused"})
+@SuppressWarnings({ "varargs", "unchecked", "unused" })
 public interface BaseMapper<T> {
 
     /**
@@ -93,7 +108,7 @@ public interface BaseMapper<T> {
      * @param ignoreNulls 是否忽略 {@code null} 值
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#insert(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @InsertProvider(type = EntitySqlProvider.class, method = "insert")
     int insert(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
@@ -125,7 +140,7 @@ public interface BaseMapper<T> {
      * @param ignoreNulls 是否忽略 {@code null} 值
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#insertWithPk(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @InsertProvider(type = EntitySqlProvider.class, method = "insertWithPk")
     int insertWithPk(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
@@ -136,7 +151,7 @@ public interface BaseMapper<T> {
      * @param entities 插入的数据列表
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#insertBatch(Map,
-     * ProviderContext)
+     *      ProviderContext)
      * @see com.mybatisflex.core.FlexConsts#METHOD_INSERT_BATCH
      */
     @InsertProvider(type = EntitySqlProvider.class, method = FlexConsts.METHOD_INSERT_BATCH)
@@ -221,7 +236,7 @@ public interface BaseMapper<T> {
      * @param id 主键数据
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteById(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @DeleteProvider(type = EntitySqlProvider.class, method = "deleteById")
     int deleteById(@Param(FlexConsts.PRIMARY_VALUE) Serializable id);
@@ -232,7 +247,7 @@ public interface BaseMapper<T> {
      * @param ids 主键列表
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @DeleteProvider(type = EntitySqlProvider.class, method = "deleteBatchByIds")
     int deleteBatchByIds(@Param(FlexConsts.PRIMARY_VALUE) Collection<? extends Serializable> ids);
@@ -244,7 +259,7 @@ public interface BaseMapper<T> {
      * @param size 切分大小
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     default int deleteBatchByIds(List<? extends Serializable> ids, int size) {
         if (size <= 0) {
@@ -288,7 +303,7 @@ public interface BaseMapper<T> {
      * @param queryWrapper 条件
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteByQuery(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @DeleteProvider(type = EntitySqlProvider.class, method = "deleteByQuery")
     int deleteByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
@@ -312,7 +327,7 @@ public interface BaseMapper<T> {
      * @param ignoreNulls 是否忽略空内容字段
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#update(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @UpdateProvider(type = EntitySqlProvider.class, method = "update")
     int update(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls);
@@ -386,12 +401,11 @@ public interface BaseMapper<T> {
      * @param queryWrapper 条件
      * @return 受影响的行数
      * @see com.mybatisflex.core.provider.EntitySqlProvider#updateByQuery(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @UpdateProvider(type = EntitySqlProvider.class, method = "updateByQuery")
     int updateByQuery(@Param(FlexConsts.ENTITY) T entity, @Param(FlexConsts.IGNORE_NULLS) boolean ignoreNulls,
-                      @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
-
+            @Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
     // === 查（select） ===
 
@@ -414,7 +428,7 @@ public interface BaseMapper<T> {
      * @param id 主键
      * @return 实体类数据
      * @see com.mybatisflex.core.provider.EntitySqlProvider#selectOneById(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectOneById")
     Optional<T> selectOneById(@Param(FlexConsts.PRIMARY_VALUE) Serializable id);
@@ -470,7 +484,13 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default Optional<T> selectOneByQuery(QueryWrapper queryWrapper) {
-        return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
@@ -486,7 +506,6 @@ public interface BaseMapper<T> {
         return entity.map(cast);
     }
 
-
     /**
      * 根据查询条件来查询 1 条数据。
      *
@@ -495,7 +514,13 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default <R> R selectOneByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
-        return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
@@ -517,7 +542,7 @@ public interface BaseMapper<T> {
      */
     default T selectOneWithRelationsByCondition(QueryCondition whereConditions) {
         FlexAssert.notNull(whereConditions, "whereConditions");
-        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions).limit(1L));
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions));
     }
 
     /**
@@ -527,7 +552,13 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default T selectOneWithRelationsByQuery(QueryWrapper queryWrapper) {
-        return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
@@ -566,7 +597,7 @@ public interface BaseMapper<T> {
      */
     default <R> R selectOneWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
         return MapperUtil.queryRelations(this,
-            MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType)));
+                MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType)));
     }
 
     /**
@@ -575,7 +606,7 @@ public interface BaseMapper<T> {
      * @param ids 主键列表
      * @return 数据列表
      * @see com.mybatisflex.core.provider.EntitySqlProvider#selectListByIds(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByIds")
     List<T> selectListByIds(@Param(FlexConsts.PRIMARY_VALUE) Collection<? extends Serializable> ids);
@@ -661,7 +692,7 @@ public interface BaseMapper<T> {
      * @param queryWrapper 条件
      * @return 数据列表
      * @see com.mybatisflex.core.provider.EntitySqlProvider#selectListByQuery(Map,
-     * ProviderContext)
+     *      ProviderContext)
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
     List<T> selectListByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
@@ -723,7 +754,7 @@ public interface BaseMapper<T> {
      */
     default <R> List<R> selectListByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
         if (Number.class.isAssignableFrom(asType)
-            || String.class == asType) {
+                || String.class == asType) {
             return selectObjectListByQueryAs(queryWrapper, asType);
         }
 
@@ -748,7 +779,7 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default <R> List<R> selectListByQueryAs(QueryWrapper queryWrapper, Class<R> asType,
-                                            Consumer<FieldQueryBuilder<R>>... consumers) {
+            Consumer<FieldQueryBuilder<R>>... consumers) {
         List<R> list = selectListByQueryAs(queryWrapper, asType);
         if (list == null || list.isEmpty()) {
             return Collections.emptyList();
@@ -776,7 +807,7 @@ public interface BaseMapper<T> {
      */
     default <R> List<R> selectListWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
         if (Number.class.isAssignableFrom(asType)
-            || String.class == asType) {
+                || String.class == asType) {
             return selectObjectListByQueryAs(queryWrapper, asType);
         }
 
@@ -803,7 +834,7 @@ public interface BaseMapper<T> {
      * @return 数据列表
      */
     default <R> List<R> selectListWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType,
-                                                         Consumer<FieldQueryBuilder<R>>... consumers) {
+            Consumer<FieldQueryBuilder<R>>... consumers) {
         List<R> list = selectListByQueryAs(queryWrapper, asType);
         if (list == null || list.isEmpty()) {
             return Collections.emptyList();
@@ -1011,7 +1042,7 @@ public interface BaseMapper<T> {
     }
 
     default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryWrapper queryWrapper,
-                                 Function<T, R> cast) {
+            Function<T, R> cast) {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, queryWrapper, cast);
     }
@@ -1025,7 +1056,8 @@ public interface BaseMapper<T> {
      * @param queryWrapper 条件
      * @return 分页数据
      */
-    default Page<T> paginateWithRelations(Number pageNumber, Number pageSize, Number totalRow, QueryWrapper queryWrapper) {
+    default Page<T> paginateWithRelations(Number pageNumber, Number pageSize, Number totalRow,
+            QueryWrapper queryWrapper) {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginateWithRelations(page, queryWrapper);
     }
@@ -1046,7 +1078,7 @@ public interface BaseMapper<T> {
     }
 
     default <R> Page<R> paginate(int pageNumber, int pageSize, int totalRow, QueryCondition condition,
-                                 Function<T, R> cast) {
+            Function<T, R> cast) {
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginate(page, QueryWrapper.create().where(condition), cast);
     }
@@ -1060,7 +1092,8 @@ public interface BaseMapper<T> {
      * @param whereConditions 条件
      * @return 分页数据
      */
-    default Page<T> paginateWithRelations(Number pageNumber, Number pageSize, Number totalRow, QueryCondition whereConditions) {
+    default Page<T> paginateWithRelations(Number pageNumber, Number pageSize, Number totalRow,
+            QueryCondition whereConditions) {
         FlexAssert.notNull(whereConditions, "whereConditions");
         Page<T> page = new Page<>(pageNumber, pageSize, totalRow);
         return paginateWithRelations(page, QueryWrapper.create().where(whereConditions));
@@ -1109,7 +1142,7 @@ public interface BaseMapper<T> {
      * @return 分页数据
      */
     default Page<T> paginateWithRelations(Page<T> page, QueryWrapper queryWrapper,
-                                          Consumer<FieldQueryBuilder<T>>... consumers) {
+            Consumer<FieldQueryBuilder<T>>... consumers) {
         return paginateWithRelationsAs(page, queryWrapper, null, consumers);
     }
 
@@ -1137,7 +1170,8 @@ public interface BaseMapper<T> {
      * @param asType       接收数据类型
      * @return 分页数据
      */
-    default <R> Page<R> paginateAs(Number pageNumber, Number pageSize, Number totalRow, QueryWrapper queryWrapper, Class<R> asType) {
+    default <R> Page<R> paginateAs(Number pageNumber, Number pageSize, Number totalRow, QueryWrapper queryWrapper,
+            Class<R> asType) {
         Page<R> page = new Page<>(pageNumber, pageSize, totalRow);
         return MapperUtil.doPaginate(this, page, queryWrapper, asType, false);
     }
@@ -1164,7 +1198,7 @@ public interface BaseMapper<T> {
      * @return 分页数据
      */
     default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType,
-                                   Consumer<FieldQueryBuilder<R>>... consumers) {
+            Consumer<FieldQueryBuilder<R>>... consumers) {
         return MapperUtil.doPaginate(this, page, queryWrapper, asType, false, consumers);
     }
 
@@ -1177,7 +1211,8 @@ public interface BaseMapper<T> {
      * @param asType       接收数据类型
      * @return 分页数据
      */
-    default <R> Page<R> paginateWithRelationsAs(Number pageNumber, Number pageSize, QueryWrapper queryWrapper, Class<R> asType) {
+    default <R> Page<R> paginateWithRelationsAs(Number pageNumber, Number pageSize, QueryWrapper queryWrapper,
+            Class<R> asType) {
         Page<R> page = new Page<>(pageNumber, pageSize);
         return MapperUtil.doPaginate(this, page, queryWrapper, asType, true);
     }
@@ -1192,7 +1227,8 @@ public interface BaseMapper<T> {
      * @param asType       接收数据类型
      * @return 分页数据
      */
-    default <R> Page<R> paginateWithRelationsAs(Number pageNumber, Number pageSize, Number totalRow, QueryWrapper queryWrapper, Class<R> asType) {
+    default <R> Page<R> paginateWithRelationsAs(Number pageNumber, Number pageSize, Number totalRow,
+            QueryWrapper queryWrapper, Class<R> asType) {
         Page<R> page = new Page<>(pageNumber, pageSize, totalRow);
         return MapperUtil.doPaginate(this, page, queryWrapper, asType, true);
     }
@@ -1219,10 +1255,9 @@ public interface BaseMapper<T> {
      * @return 分页数据
      */
     default <R> Page<R> paginateWithRelationsAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType,
-                                                Consumer<FieldQueryBuilder<R>>... consumers) {
+            Consumer<FieldQueryBuilder<R>>... consumers) {
         return MapperUtil.doPaginate(this, page, queryWrapper, asType, true, consumers);
     }
-
 
     default <R> Page<R> paginate(Page<T> page, QueryWrapper queryWrapper, Function<T, R> cast) {
         var r = paginate(page, queryWrapper);
@@ -1238,11 +1273,13 @@ public interface BaseMapper<T> {
         return xmlPaginate(dataSelectId, dataSelectId + "_COUNT", page, null, otherParams);
     }
 
-    default <E> Page<E> xmlPaginate(String dataSelectId, Page<E> page, QueryWrapper queryWrapper, Map<String, Object> otherParams) {
+    default <E> Page<E> xmlPaginate(String dataSelectId, Page<E> page, QueryWrapper queryWrapper,
+            Map<String, Object> otherParams) {
         return xmlPaginate(dataSelectId, dataSelectId + "_COUNT", page, queryWrapper, otherParams);
     }
 
-    default <E> Page<E> xmlPaginate(String dataSelectId, String countSelectId, Page<E> page, QueryWrapper queryWrapper, Map<String, Object> otherParams) {
+    default <E> Page<E> xmlPaginate(String dataSelectId, String countSelectId, Page<E> page, QueryWrapper queryWrapper,
+            Map<String, Object> otherParams) {
         SqlSessionFactory sqlSessionFactory = FlexGlobalConfig.getDefaultConfig().getSqlSessionFactory();
         ExecutorType executorType = FlexGlobalConfig.getDefaultConfig().getConfiguration().getDefaultExecutorType();
         String mapperClassName = ClassUtil.getUsefulClass(this.getClass()).getName();

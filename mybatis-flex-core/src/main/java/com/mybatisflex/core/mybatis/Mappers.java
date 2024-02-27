@@ -21,6 +21,7 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -108,6 +109,8 @@ public class Mappers {
             try (SqlSession sqlSession = openSession()) {
                 Object mapper = sqlSession.getMapper(mapperClass);
                 return method.invoke(mapper, args);
+            } catch (Throwable throwable) {
+                throw ExceptionUtil.unwrapThrowable(throwable);
             }
         }
 
