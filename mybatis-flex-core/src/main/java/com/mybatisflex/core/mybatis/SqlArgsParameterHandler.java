@@ -16,78 +16,75 @@
 package com.mybatisflex.core.mybatis;
 
 import com.mybatisflex.core.FlexConsts;
+import com.mybatisflex.core.exception.FlexExceptions;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
+import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.type.TypeHandlerRegistry;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Date;
+import java.sql.Types;
 import java.util.Map;
 
+/**
+ * 向 {@link PreparedStatement} 中的占位符设置值。
+ *
+ * @author michael
+ * @author 王帅
+ */
 public class SqlArgsParameterHandler extends DefaultParameterHandler {
 
-    private final Map parameterObject;
+    private final TypeHandlerRegistry typeHandlerRegistry;
 
-
-    public SqlArgsParameterHandler(MappedStatement mappedStatement, Map parameterObject, BoundSql boundSql) {
+    public SqlArgsParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         super(mappedStatement, parameterObject, boundSql);
-        this.parameterObject = parameterObject;
+        this.typeHandlerRegistry = mappedStatement.getConfiguration().getTypeHandlerRegistry();
     }
-
 
     @Override
     public void setParameters(PreparedStatement ps) {
         try {
             doSetParameters(ps);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw FlexExceptions.wrap(e);
         }
     }
 
-
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private void doSetParameters(PreparedStatement ps) throws SQLException {
-        Object[] sqlArgs = (Object[]) ((Map<?, ?>) parameterObject).get(FlexConsts.SQL_ARGS);
-        if (sqlArgs != null && sqlArgs.length > 0) {
-            int index = 1;
-            for (Object value : sqlArgs) {
-                //通过配置的 TypeHandler 去设置内容
-                if (value instanceof TypeHandlerObject) {
-                    ((TypeHandlerObject) value).setParameter(ps, index++);
-                }
-                //在 Oracle、SqlServer 中 TIMESTAMP、DATE 类型的数据是支持 java.util.Date 给值的
-                else if (value instanceof java.util.Date) {
-                    setDateParameter(ps, (Date) value, index++);
-                } else if (value instanceof byte[]) {
-                    ps.setBytes(index++, (byte[]) value);
-                } else {
-                    /** 在 MySql，Oracle 等驱动中，通过 PreparedStatement.setObject 后，驱动会自动根据 value 内容进行转换
-                     * 源码可参考： {{@link com.mysql.jdbc.PreparedStatement#setObject(int, Object)}
-                     **/
-                    ps.setObject(index++, value);
-                }
-            }
-        } else {
+        Object[] sqlArgs = (Object[]) ((Map) getParameterObject()).get(FlexConsts.SQL_ARGS);
+        if (sqlArgs == null || sqlArgs.length == 0) {
             super.setParameters(ps);
+            return;
         }
-    }
 
-    /**
-     * Oracle、SqlServer 需要主动设置下 date 类型
-     * MySql 通过 setObject 后会自动转换，具体查看 MySql 驱动源码
-     *
-     * @param ps    PreparedStatement
-     * @param value date value
-     * @param index set to index
-     * @throws SQLException
-     */
-    private void setDateParameter(PreparedStatement ps, Date value, int index) throws SQLException {
-        if (value instanceof java.sql.Date) {
-            ps.setDate(index, (java.sql.Date) value);
-        } else if (value instanceof java.sql.Timestamp) {
-            ps.setTimestamp(index, (java.sql.Timestamp) value);
-        } else {
-            ps.setTimestamp(index, new java.sql.Timestamp(value.getTime()));
+        int index = 1;
+        for (Object value : sqlArgs) {
+            // 设置 NULL 值
+            if (value == null) {
+                // ps.setNull(index++, Types.NULL);
+                // 此处不应该使用 setNull(index++, Types.NULL)，通过 setObject 传入 null 值，有 jdbc 驱动自行验证类型即可
+                // 使用 setNull 在 db2 等数据库下，Types.NULL 并非其需要类型
+                ps.setObject(index++, null);
+                continue;
+            }
+
+            // 通过配置的 TypeHandler 去设置值
+            if (value instanceof TypeHandlerObject) {
+                ((TypeHandlerObject) value).setParameter(ps, index++);
+                continue;
+            }
+
+            TypeHandler typeHandler = typeHandlerRegistry.getTypeHandler(value.getClass());
+            if (typeHandler == null) {
+                typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
+            }
+
+            // 此处的 jdbcType 可以为 null 的，原因是 value 不为 null，
+            // 只有 value 为 null 时， jdbcType 不允许为 null
+            typeHandler.setParameter(ps, index++, value, null);
         }
     }
 
