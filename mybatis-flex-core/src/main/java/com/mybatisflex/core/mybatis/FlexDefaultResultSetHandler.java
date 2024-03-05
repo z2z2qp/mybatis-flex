@@ -916,10 +916,15 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
 
     private Object prepareSimpleKeyParameter(ResultSet rs, ResultMapping resultMapping, Class<?> parameterType,
                                              String columnPrefix) throws SQLException {
-        final TypeHandler<?> typeHandler;
-        if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
-            typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
-        } else {
+//        final TypeHandler<?> typeHandler;
+//        if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
+//            typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
+//        } else {
+//            typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
+//        }
+
+        TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
+        if (typeHandler == null) {
             typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
         }
         return typeHandler.getResult(rs, prependPrefix(resultMapping.getColumn(), columnPrefix));

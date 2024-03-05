@@ -7,7 +7,7 @@
     <groupId>com.mybatis-flex</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.8.0</version>
+    <version>1.8.1</version>
 
     <name>mybatis-flex</name>
     <url>https://mybatis-flex.com</url>
@@ -49,7 +49,6 @@
         <module>mybatis-flex-solon-plugin</module>
         <module>mybatis-flex-test</module>
         <module>mybatis-flex-processor</module>
-        <module>mybatis-flex-dependencies</module>
     </modules>
 
     <properties>
@@ -58,7 +57,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.4.4</revision>
 
-        <mybatis-flex.version>1.8.0</mybatis-flex.version>
+        <mybatis-flex.version>1.8.1</mybatis-flex.version>
 
         <mybatis.version>3.5.15</mybatis.version>
         <mybatis-spring.version>2.1.2</mybatis-spring.version>
@@ -71,7 +70,7 @@
 
         <spring.version>6.1.4</spring.version>
         <spring-boot.version>3.2.3</spring-boot.version>
-        <solon.version>2.6.6</solon.version>
+        <solon.version>2.7.0</solon.version>
 
         <junit.version>4.13.2</junit.version>
         <testcontainers.version>1.19.3</testcontainers.version>
@@ -223,6 +222,19 @@
                     <source>21</source>
                     <target>21</target>
                     <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <doclint>none</doclint>
+                    <skippedModules>mybatis-flex-spring-boot3-starter,mybatis-flex-test</skippedModules>
                 </configuration>
             </plugin>
         </plugins>
