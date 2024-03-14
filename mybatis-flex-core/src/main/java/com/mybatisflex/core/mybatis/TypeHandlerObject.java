@@ -38,4 +38,8 @@ public class TypeHandlerObject implements Serializable {
         typeHandler.setParameter(ps, i, value, jdbcType);
     }
 
+    public Object getValue() {
+        return value;
+    }
+
 }

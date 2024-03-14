@@ -736,6 +736,22 @@ public interface BaseMapper<T> {
     Cursor<T> selectCursorByQuery(@Param(FlexConsts.QUERY) QueryWrapper queryWrapper);
 
     /**
+     * 根据查询条件查询游标数据，要求返回的数据为 asType 类型。该方法必须在事务中才能正常使用，非事务下无法获取数据。
+     *
+     * @param queryWrapper 条件
+     * @param asType       接收的数据类型
+     * @return 游标数据
+     */
+    default <R> Cursor<R> selectCursorByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        try {
+            MappedStatementTypes.setCurrentType(asType);
+            return (Cursor<R>) selectCursorByQuery(queryWrapper);
+        } finally {
+            MappedStatementTypes.clear();
+        }
+    }
+
+    /**
      * 根据查询条件查询 Row 数据。
      *
      * @param queryWrapper 条件

@@ -15,11 +15,7 @@
  */
 package com.mybatisflex.core.table;
 
-import com.mybatisflex.annotation.Column;
-import com.mybatisflex.annotation.InsertListener;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.SetListener;
-import com.mybatisflex.annotation.UpdateListener;
+import com.mybatisflex.annotation.*;
 import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.constant.SqlConsts;
@@ -29,30 +25,12 @@ import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.exception.locale.LocalizedFormats;
 import com.mybatisflex.core.logicdelete.LogicDeleteManager;
 import com.mybatisflex.core.mybatis.TypeHandlerObject;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.Join;
-import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryMethods;
-import com.mybatisflex.core.query.QueryTable;
-import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.SelectQueryColumn;
-import com.mybatisflex.core.query.SelectQueryTable;
-import com.mybatisflex.core.query.SqlOperators;
-import com.mybatisflex.core.query.UnionWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.core.update.RawValue;
 import com.mybatisflex.core.update.UpdateWrapper;
-import com.mybatisflex.core.util.ArrayUtil;
-import com.mybatisflex.core.util.ClassUtil;
-import com.mybatisflex.core.util.CollectionUtil;
-import com.mybatisflex.core.util.ConvertUtil;
-import com.mybatisflex.core.util.EnumWrapper;
-import com.mybatisflex.core.util.FieldWrapper;
-import com.mybatisflex.core.util.ObjectUtil;
-import com.mybatisflex.core.util.SqlUtil;
-import com.mybatisflex.core.util.StringUtil;
+import com.mybatisflex.core.util.*;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -61,32 +39,19 @@ import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.util.MapUtil;
+import com.mybatisflex.core.util.MapUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.mybatisflex.core.constant.SqlConsts.AND;
-import static com.mybatisflex.core.constant.SqlConsts.EQUALS_PLACEHOLDER;
-import static com.mybatisflex.core.constant.SqlConsts.IN;
+import static com.mybatisflex.core.constant.SqlConsts.*;
 
 public class TableInfo {
 
@@ -877,6 +842,14 @@ public class TableInfo {
 
         //逻辑删除
         if (StringUtil.isNotBlank(getLogicDeleteColumnOrSkip())) {
+            // 逻辑删除时 保证前面的条件被括号包裹
+            // fix:https://gitee.com/mybatis-flex/mybatis-flex/issues/I9163G
+            QueryCondition whereCondition = CPI.getWhereQueryCondition(queryWrapper);
+            if (whereCondition != null && !(whereCondition instanceof Brackets)) {
+                QueryCondition wrappedCondition = new Brackets(whereCondition);
+                CPI.setWhereQueryCondition(queryWrapper, wrappedCondition);
+            }
+
             String joinTableAlias = CPI.getContext(queryWrapper, "joinTableAlias");
             LogicDeleteManager.getProcessor().buildQueryCondition(queryWrapper, this, joinTableAlias);
         }
@@ -974,11 +947,21 @@ public class TableInfo {
             }
             Object value = metaObject.getValue(property);
             if (value != null && !"".equals(value)) {
-                QueryColumn queryColumn = buildQueryColumn(column);
+                QueryColumn queryColumn = Arrays.stream(queryColumns)
+                    .filter(e -> e.getName().equals(column))
+                    .findFirst()
+                    .orElse(QueryMethods.column(getTableNameWithSchema(), column));
                 if (operators != null && operators.containsKey(property)) {
                     SqlOperator operator = operators.get(property);
+                    if (operator == SqlOperator.IGNORE) {
+                        return;
+                    }
                     if (operator == SqlOperator.LIKE || operator == SqlOperator.NOT_LIKE) {
                         value = "%" + value + "%";
+                    } else if (operator == SqlOperator.LIKE_LEFT || operator == SqlOperator.NOT_LIKE_LEFT) {
+                        value = value + "%";
+                    } else if (operator == SqlOperator.LIKE_RIGHT || operator == SqlOperator.NOT_LIKE_RIGHT) {
+                        value = "%" + value;
                     }
                     queryWrapper.and(QueryCondition.create(queryColumn, operator, value));
                 } else {
@@ -988,17 +971,6 @@ public class TableInfo {
         });
         return queryWrapper;
     }
-
-
-    public QueryColumn buildQueryColumn(String column) {
-        String tableNameWithSchema = getTableNameWithSchema();
-        QueryColumn queryColumn = TableDefs.getQueryColumn(entityClass, tableNameWithSchema, column);
-        if (queryColumn == null) {
-            queryColumn = QueryMethods.column(tableNameWithSchema, column);
-        }
-        return queryColumn;
-    }
-
 
     public String getKeyProperties() {
         StringJoiner joiner = new StringJoiner(",");

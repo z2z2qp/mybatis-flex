@@ -33,7 +33,7 @@ import static com.mybatisflex.core.query.QueryColumnBehavior.getConditionCaster;
 import static com.mybatisflex.core.query.QueryMethods.bracket;
 import static com.mybatisflex.core.query.QueryMethods.raw;
 import static com.mybatisflex.coretest.table.AccountTableDef.ACCOUNT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * 动态条件测试。
@@ -101,7 +101,7 @@ public class DynamicConditionTest {
         boolean anyMatch = CPI.getQueryTables(queryWrapper)
             .stream()
             .map(QueryTable::getName)
-            .anyMatch(tableName -> tableName.equals(ACCOUNT.getTableName()));
+            .anyMatch(tableName -> tableName.equals(ACCOUNT.getName()));
 
         if (anyMatch) {
             CPI.addWhereQueryCondition(queryWrapper, ACCOUNT.AGE.ge(18), SqlConnector.AND);
@@ -172,7 +172,7 @@ public class DynamicConditionTest {
 
         QueryWrapper queryWrapper = QueryWrapper.create()
             .from(ACCOUNT)
-            .where(ACCOUNT.USER_NAME.in( ""));
+            .where(ACCOUNT.USER_NAME.in(""));
 
         System.out.println(queryWrapper.toSQL());
         assertEquals("SELECT * FROM `tb_account`", queryWrapper.toSQL());
@@ -219,7 +219,7 @@ public class DynamicConditionTest {
             .or(ACCOUNT.BIRTHDAY.le("2023-10-28 22:13:36"));
         System.out.println(queryWrapper2.toSQL());
 
-        assertEquals(printSql,queryWrapper2.toSQL());
+        assertEquals(printSql, queryWrapper2.toSQL());
     }
 
 
@@ -241,7 +241,7 @@ public class DynamicConditionTest {
 
     @Test
     public void testCastFunction1() {
-        QueryCondition condition = QueryCondition.create(new QueryColumn("id"), SqlOperator.IN, new Object[] {null});
+        QueryCondition condition = QueryCondition.create(new QueryColumn("id"), SqlOperator.IN, new Object[]{null});
         Assert.assertSame(condition, getConditionCaster().apply(condition));
     }
 
@@ -276,7 +276,7 @@ public class DynamicConditionTest {
         QueryColumnBehavior.setConditionCaster(CONVERT_EQUALS_TO_IS_NULL);
         QueryColumnBehavior.setSmartConvertInToEquals(true);
 
-        QueryCondition condition = QueryCondition.create(column, SqlOperator.IN, new Object[] { 1 });
+        QueryCondition condition = QueryCondition.create(column, SqlOperator.IN, new Object[]{1});
         QueryCondition expect = QueryCondition.create(column, SqlOperator.EQUALS, 1);
         QueryCondition actual = getConditionCaster().apply(condition);
 
@@ -289,7 +289,7 @@ public class DynamicConditionTest {
         QueryColumnBehavior.setConditionCaster(CONVERT_EQUALS_TO_IS_NULL);
         QueryColumnBehavior.setSmartConvertInToEquals(true);
 
-        QueryCondition condition = QueryCondition.create(column, SqlOperator.IN, new Object[] { null });
+        QueryCondition condition = QueryCondition.create(column, SqlOperator.IN, new Object[]{null});
         QueryCondition expect = column.isNull();
         QueryCondition actual = getConditionCaster().apply(condition);
 
@@ -308,4 +308,42 @@ public class DynamicConditionTest {
 
         assertConditionEquals(expect, actual);
     }
+
+    @Test
+    public void testHasCondition() {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        assertFalse(queryWrapper.hasCondition());
+
+        queryWrapper = QueryWrapper.create()
+            .where(ACCOUNT.ID.eq(1));
+        assertTrue(queryWrapper.hasCondition());
+
+        queryWrapper = QueryWrapper.create()
+            .where(ACCOUNT.ID.eq(1).and(ACCOUNT.AGE.eq(18)));
+        assertTrue(queryWrapper.hasCondition());
+
+        queryWrapper = QueryWrapper.create()
+            .where(ACCOUNT.ID.eq(1, false).and(ACCOUNT.AGE.eq(18)));
+        assertTrue(queryWrapper.hasCondition());
+
+        queryWrapper = QueryWrapper.create()
+            .where(ACCOUNT.ID.eq(1, false).and(ACCOUNT.AGE.eq(18, false)));
+        assertFalse(queryWrapper.hasCondition());
+
+        queryWrapper = QueryWrapper.create()
+            .where(ACCOUNT.ID.eq(1, false));
+        assertFalse(queryWrapper.hasCondition());
+
+        queryWrapper = QueryWrapper.create()
+            .where(ACCOUNT.ID.eq(1, false))
+            .and(ACCOUNT.AGE.eq(18, false));
+        assertFalse(queryWrapper.hasCondition());
+
+        queryWrapper = QueryWrapper.create()
+            .where(ACCOUNT.ID.eq(1, false))
+            .and(ACCOUNT.AGE.eq(18))
+            .or(ACCOUNT.IS_DELETE.eq(0, false));
+        assertTrue(queryWrapper.hasCondition());
+    }
+
 }

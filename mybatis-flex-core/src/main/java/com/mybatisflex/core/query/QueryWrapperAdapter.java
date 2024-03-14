@@ -16,7 +16,6 @@
 package com.mybatisflex.core.query;
 
 import com.mybatisflex.core.constant.SqlConnector;
-import com.mybatisflex.core.table.TableDef;
 import com.mybatisflex.core.util.LambdaGetter;
 import com.mybatisflex.core.util.LambdaUtil;
 
@@ -98,13 +97,6 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
         return (R) this;
     }
 
-    @Override
-    public R from(TableDef... tableDefs) {
-        super.from(tableDefs);
-        return (R) this;
-    }
-
-    @Override
     public R from(Class<?>... entityClasses) {
         super.from(entityClasses);
         return (R) this;
@@ -269,6 +261,13 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
+    public <Q extends QueryWrapper> Joiner<Q> leftJoin(QueryTable table) {
+        return super.leftJoin(table);
+    }
+
+
+
+    @Override
     public Joiner<R> leftJoin(String table) {
         return super.leftJoin(table);
     }
@@ -289,16 +288,6 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
-    public Joiner<R> leftJoin(TableDef table) {
-        return super.leftJoin(table);
-    }
-
-    @Override
-    public Joiner<R> leftJoin(TableDef table, boolean when) {
-        return super.leftJoin(table, when);
-    }
-
-    @Override
     public Joiner<R> leftJoin(QueryWrapper table) {
         return super.leftJoin(table);
     }
@@ -307,6 +296,12 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     public Joiner<R> leftJoin(QueryWrapper table, boolean when) {
         return super.leftJoin(table, when);
     }
+
+    @Override
+    public <Q extends QueryWrapper> Joiner<Q> rightJoin(QueryTable table) {
+        return super.rightJoin(table);
+    }
+
 
     @Override
     public Joiner<R> rightJoin(String table) {
@@ -329,16 +324,6 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
-    public Joiner<R> rightJoin(TableDef table) {
-        return super.rightJoin(table);
-    }
-
-    @Override
-    public Joiner<R> rightJoin(TableDef table, boolean when) {
-        return super.rightJoin(table, when);
-    }
-
-    @Override
     public Joiner<R> rightJoin(QueryWrapper table) {
         return super.rightJoin(table);
     }
@@ -346,6 +331,11 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     @Override
     public Joiner<R> rightJoin(QueryWrapper table, boolean when) {
         return super.rightJoin(table, when);
+    }
+
+    @Override
+    public <Q extends QueryWrapper> Joiner<Q> innerJoin(QueryTable table) {
+        return super.innerJoin(table);
     }
 
     @Override
@@ -369,16 +359,6 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
-    public Joiner<R> innerJoin(TableDef table) {
-        return super.innerJoin(table);
-    }
-
-    @Override
-    public Joiner<R> innerJoin(TableDef table, boolean when) {
-        return super.innerJoin(table, when);
-    }
-
-    @Override
     public Joiner<R> innerJoin(QueryWrapper table) {
         return super.innerJoin(table);
     }
@@ -386,6 +366,11 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     @Override
     public Joiner<R> innerJoin(QueryWrapper table, boolean when) {
         return super.innerJoin(table, when);
+    }
+
+    @Override
+    public <Q extends QueryWrapper> Joiner<Q> fullJoin(QueryTable table) {
+        return super.fullJoin(table);
     }
 
     @Override
@@ -409,16 +394,6 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
-    public Joiner<R> fullJoin(TableDef table) {
-        return super.fullJoin(table);
-    }
-
-    @Override
-    public Joiner<R> fullJoin(TableDef table, boolean when) {
-        return super.fullJoin(table, when);
-    }
-
-    @Override
     public Joiner<R> fullJoin(QueryWrapper table) {
         return super.fullJoin(table);
     }
@@ -426,6 +401,11 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     @Override
     public Joiner<R> fullJoin(QueryWrapper table, boolean when) {
         return super.fullJoin(table, when);
+    }
+
+    @Override
+    public <Q extends QueryWrapper> Joiner<Q> crossJoin(QueryTable table) {
+        return super.crossJoin(table);
     }
 
     @Override
@@ -449,16 +429,6 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
-    public Joiner<R> crossJoin(TableDef table) {
-        return super.crossJoin(table);
-    }
-
-    @Override
-    public Joiner<R> crossJoin(TableDef table, boolean when) {
-        return super.crossJoin(table, when);
-    }
-
-    @Override
     public Joiner<R> crossJoin(QueryWrapper table) {
         return super.crossJoin(table);
     }
@@ -466,6 +436,11 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     @Override
     public Joiner<R> crossJoin(QueryWrapper table, boolean when) {
         return super.crossJoin(table, when);
+    }
+
+    @Override
+    public <Q extends QueryWrapper> Joiner<Q> join(QueryTable table) {
+        return super.join(table);
     }
 
     @Override
@@ -486,16 +461,6 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     @Override
     public Joiner<R> join(Class entityClass, boolean when) {
         return super.join(entityClass, when);
-    }
-
-    @Override
-    public Joiner<R> join(TableDef table) {
-        return super.join(table);
-    }
-
-    @Override
-    public Joiner<R> join(TableDef table, boolean when) {
-        return super.join(table, when);
     }
 
     @Override

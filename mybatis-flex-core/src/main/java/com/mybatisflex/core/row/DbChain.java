@@ -19,10 +19,15 @@ package com.mybatisflex.core.row;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryTable;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.query.QueryWrapperAdapter;
-import com.mybatisflex.core.table.*;
+import com.mybatisflex.core.table.ColumnInfo;
+import com.mybatisflex.core.table.IdInfo;
+import com.mybatisflex.core.table.TableInfo;
+import com.mybatisflex.core.table.TableInfoFactory;
 import com.mybatisflex.core.update.PropertySetter;
+import com.mybatisflex.core.util.FieldWrapper;
 import com.mybatisflex.core.util.LambdaGetter;
 import com.mybatisflex.core.util.SqlUtil;
 
@@ -74,8 +79,8 @@ public class DbChain extends QueryWrapperAdapter<DbChain> implements PropertySet
         return table(tableInfo.getSchema(), tableInfo.getTableName());
     }
 
-    public static DbChain table(TableDef tableDef) {
-        return table(tableDef.getSchema(), tableDef.getTableName());
+    public static DbChain table(QueryTable queryTable) {
+        return table(queryTable.getSchema(), queryTable.getName());
     }
 
     private Row getRow() {
@@ -164,9 +169,8 @@ public class DbChain extends QueryWrapperAdapter<DbChain> implements PropertySet
         // 添加非主键列设置的值
         for (ColumnInfo columnInfo : tableInfo.getColumnInfoList()) {
             try {
-                Field declaredField = entityClass.getDeclaredField(columnInfo.getProperty());
-                declaredField.setAccessible(true);
-                Object value = declaredField.get(entity);
+                FieldWrapper fieldWrapper = FieldWrapper.of(entityClass, columnInfo.getProperty());
+                Object value = fieldWrapper.get(entity);
                 if (value != null) {
                     row.put(columnInfo.getColumn(), value);
                 }
@@ -178,9 +182,8 @@ public class DbChain extends QueryWrapperAdapter<DbChain> implements PropertySet
         // 添加主键列设置的值
         for (IdInfo idInfo : tableInfo.getPrimaryKeyList()) {
             try {
-                Field declaredField = entityClass.getDeclaredField(idInfo.getProperty());
-                declaredField.setAccessible(true);
-                Object value = declaredField.get(entity);
+                FieldWrapper fieldWrapper = FieldWrapper.of(entityClass, idInfo.getProperty());
+                Object value = fieldWrapper.get(entity);
                 if (value != null) {
                     RowKey rowKey = RowKey.of(idInfo.getColumn()
                         , idInfo.getKeyType()

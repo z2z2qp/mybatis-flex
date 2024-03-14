@@ -16,9 +16,7 @@
 package com.mybatisflex.core.logicdelete;
 
 import com.mybatisflex.core.dialect.IDialect;
-import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.query.QueryTable;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.table.TableInfo;
 
 import static com.mybatisflex.core.constant.SqlConsts.EQUALS;
