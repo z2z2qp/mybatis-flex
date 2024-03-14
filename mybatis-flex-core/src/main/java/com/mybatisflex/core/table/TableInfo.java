@@ -29,6 +29,7 @@ import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.exception.locale.LocalizedFormats;
 import com.mybatisflex.core.logicdelete.LogicDeleteManager;
 import com.mybatisflex.core.mybatis.TypeHandlerObject;
+import com.mybatisflex.core.query.Brackets;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.Join;
 import com.mybatisflex.core.query.QueryColumn;
@@ -878,6 +879,14 @@ public class TableInfo {
 
         //逻辑删除
         if (StringUtil.isNotBlank(getLogicDeleteColumnOrSkip())) {
+            // 逻辑删除时 保证前面的条件被括号包裹
+            // fix:https://gitee.com/mybatis-flex/mybatis-flex/issues/I9163G
+            QueryCondition whereCondition = CPI.getWhereQueryCondition(queryWrapper);
+            if (whereCondition != null && !(whereCondition instanceof Brackets)) {
+                QueryCondition wrappedCondition = new Brackets(whereCondition);
+                CPI.setWhereQueryCondition(queryWrapper, wrappedCondition);
+            }
+
             String joinTableAlias = CPI.getContext(queryWrapper, "joinTableAlias");
             LogicDeleteManager.getProcessor().buildQueryCondition(queryWrapper, this, joinTableAlias);
         }
@@ -978,8 +987,15 @@ public class TableInfo {
                 QueryColumn queryColumn = buildQueryColumn(column);
                 if (operators != null && operators.containsKey(property)) {
                     SqlOperator operator = operators.get(property);
+                    if (operator == SqlOperator.IGNORE) {
+                        return;
+                    }
                     if (operator == SqlOperator.LIKE || operator == SqlOperator.NOT_LIKE) {
                         value = "%" + value + "%";
+                    } else if (operator == SqlOperator.LIKE_LEFT || operator == SqlOperator.NOT_LIKE_LEFT) {
+                        value = value + "%";
+                    } else if (operator == SqlOperator.LIKE_RIGHT || operator == SqlOperator.NOT_LIKE_RIGHT) {
+                        value = "%" + value;
                     }
                     queryWrapper.and(QueryCondition.create(queryColumn, operator, value));
                 } else {
