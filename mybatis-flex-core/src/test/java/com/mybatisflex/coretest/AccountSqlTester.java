@@ -37,7 +37,22 @@ import org.junit.Test;
 
 import java.util.Date;
 
-import static com.mybatisflex.core.query.QueryMethods.*;
+import static com.mybatisflex.core.query.QueryMethods.avg;
+import static com.mybatisflex.core.query.QueryMethods.case_;
+import static com.mybatisflex.core.query.QueryMethods.column;
+import static com.mybatisflex.core.query.QueryMethods.convert;
+import static com.mybatisflex.core.query.QueryMethods.count;
+import static com.mybatisflex.core.query.QueryMethods.distinct;
+import static com.mybatisflex.core.query.QueryMethods.exists;
+import static com.mybatisflex.core.query.QueryMethods.left;
+import static com.mybatisflex.core.query.QueryMethods.max;
+import static com.mybatisflex.core.query.QueryMethods.noCondition;
+import static com.mybatisflex.core.query.QueryMethods.notExists;
+import static com.mybatisflex.core.query.QueryMethods.raw;
+import static com.mybatisflex.core.query.QueryMethods.select;
+import static com.mybatisflex.core.query.QueryMethods.selectCountOne;
+import static com.mybatisflex.core.query.QueryMethods.selectOne;
+import static com.mybatisflex.core.query.QueryMethods.year;
 import static com.mybatisflex.coretest.table.Account01TableDef.ACCOUNT01;
 import static com.mybatisflex.coretest.table.AccountTableDef.ACCOUNT;
 import static com.mybatisflex.coretest.table.ArticleTableDef.ARTICLE;
@@ -108,7 +123,10 @@ public class AccountSqlTester {
             .where(ACCOUNT01.ID.ge(100))
             .and(ACCOUNT.SEX.eq(1));
 
-        TableManager.setDynamicTableProcessor(tableName -> tableName + "_01");
+        TableManager.setDynamicTableProcessor((tableName,operateType) ->{
+            System.out.println(operateType);
+            return  tableName + "_01";
+        });
 
         Assert.assertEquals("SELECT * FROM `flex`.`tb_a01_01` " +
                 "LEFT JOIN `tb_account_01` ON `flex`.`tb_a01_01`.`id` = `tb_account_01`.`id` " +
@@ -129,7 +147,7 @@ public class AccountSqlTester {
             .where(ACCOUNT01.ID.ge(100))
             .and(ACCOUNT.SEX.eq(1));
 
-        TableManager.setDynamicTableProcessor(original -> original + "_01");
+        TableManager.setDynamicTableProcessor((original,operateType) -> original + "_01");
 
         Assert.assertEquals("SELECT * FROM `flex`.`tb_a01_01` AS `a1` " +
                 "LEFT JOIN `tb_account_01` ON `a1`.`id` = `tb_account_01`.`id` " +
@@ -360,7 +378,7 @@ public class AccountSqlTester {
 
         Assert.assertEquals("SELECT * FROM `tb_account` " +
                 "WHERE `id` >= 100 " +
-                "AND EXISTS (SELECT 1 FROM `tb_article` AS `a` WHERE `id` >= 100)"
+                "AND EXISTS (SELECT 1 AS `temp_one` FROM `tb_article` AS `a` WHERE `id` >= 100)"
             , query.toSQL());
 
         System.out.println(query.toSQL());
@@ -815,7 +833,7 @@ public class AccountSqlTester {
             "WHERE `a1`.`id` >= (SELECT `id` FROM `tb_article` AS `cc` WHERE `id` = 111) " +
             "AND `a1`.`user_name` LIKE '%michael%' " +
             "AND `b1`.`id` IN (SELECT `tb_article`.`id` FROM `aaa`) " +
-            "AND NOT EXISTS (SELECT 1 FROM `aaa` WHERE `tb_article`.`id` >= 333) " +
+            "AND NOT EXISTS (SELECT 1 AS `temp_one` FROM `aaa` WHERE `tb_article`.`id` >= 333) " +
             "GROUP BY `a1`.`id` HAVING `b1`.`id` >= 0 " +
             "ORDER BY `a1`.`id` DESC LIMIT 10, 10", queryWrapper.toSQL());
 

@@ -15,13 +15,14 @@
  */
 package com.mybatisflex.core.query;
 
+import java.util.ListIterator;
 import java.util.function.Consumer;
 
 /**
  * @author michael yang (fuhai999@gmail.com)
  * @Date: 2020/1/14
  */
-public class Joiner<M> {
+public class Joiner<M extends QueryWrapper> {
 
     private final M queryWrapper;
     private final Join join;
@@ -31,8 +32,27 @@ public class Joiner<M> {
         this.join = join;
     }
 
+    /**
+     * <p>推荐写法：
+     * <pre>
+     * {@code leftJoin(ACCOUNT.as("a")).on(...);}
+     * </pre>
+     * <p>或者：
+     * <pre>{@code
+     * AccountTableDef a = ACCOUNT.as("a");
+     * leftJoin(a).on(...);
+     * }</pre>
+     */
+    @Deprecated
     public Joiner<M> as(String alias) {
         join.queryTable = join.getQueryTable().as(alias);
+        ListIterator<QueryTable> itr = queryWrapper.joinTables.listIterator();
+        while (itr.hasNext()) {
+            if (itr.next().isSameTable(join.queryTable)) {
+                itr.set(join.queryTable);
+                break;
+            }
+        }
         return this;
     }
 
