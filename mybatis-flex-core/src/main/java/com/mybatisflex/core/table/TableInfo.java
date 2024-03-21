@@ -15,22 +15,47 @@
  */
 package com.mybatisflex.core.table;
 
-import com.mybatisflex.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.InsertListener;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.SetListener;
+import com.mybatisflex.annotation.UpdateListener;
 import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.constant.SqlConsts;
 import com.mybatisflex.core.constant.SqlOperator;
 import com.mybatisflex.core.dialect.IDialect;
+import com.mybatisflex.core.dialect.OperateType;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.exception.locale.LocalizedFormats;
 import com.mybatisflex.core.logicdelete.LogicDeleteManager;
 import com.mybatisflex.core.mybatis.TypeHandlerObject;
-import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.query.Brackets;
+import com.mybatisflex.core.query.CPI;
+import com.mybatisflex.core.query.Join;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
+import com.mybatisflex.core.query.QueryMethods;
+import com.mybatisflex.core.query.QueryTable;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.SelectQueryColumn;
+import com.mybatisflex.core.query.SelectQueryTable;
+import com.mybatisflex.core.query.SqlOperators;
+import com.mybatisflex.core.query.UnionWrapper;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.core.update.RawValue;
 import com.mybatisflex.core.update.UpdateWrapper;
-import com.mybatisflex.core.util.*;
+import com.mybatisflex.core.util.ArrayUtil;
+import com.mybatisflex.core.util.ClassUtil;
+import com.mybatisflex.core.util.CollectionUtil;
+import com.mybatisflex.core.util.ConvertUtil;
+import com.mybatisflex.core.util.EnumWrapper;
+import com.mybatisflex.core.util.FieldWrapper;
+import com.mybatisflex.core.util.MapUtil;
+import com.mybatisflex.core.util.ObjectUtil;
+import com.mybatisflex.core.util.SqlUtil;
+import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -39,19 +64,31 @@ import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
-import com.mybatisflex.core.util.MapUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.mybatisflex.core.constant.SqlConsts.*;
+import static com.mybatisflex.core.constant.SqlConsts.AND;
+import static com.mybatisflex.core.constant.SqlConsts.EQUALS_PLACEHOLDER;
+import static com.mybatisflex.core.constant.SqlConsts.IN;
 
 public class TableInfo {
 
@@ -143,12 +180,12 @@ public class TableInfo {
         return StringUtil.buildSchemaWithTable(schema, tableName);
     }
 
-    public String getWrapSchemaAndTableName(IDialect dialect) {
+    public String getWrapSchemaAndTableName(IDialect dialect, OperateType operateType) {
         if (StringUtil.isNotBlank(schema)) {
-            String table = dialect.getRealTable(tableName);
-            return dialect.wrap(dialect.getRealSchema(schema, table)) + "." + dialect.wrap(table);
+            String table = dialect.getRealTable(tableName, operateType);
+            return dialect.wrap(dialect.getRealSchema(schema, table, operateType)) + "." + dialect.wrap(table);
         } else {
-            return dialect.wrap(dialect.getRealTable(tableName));
+            return dialect.wrap(dialect.getRealTable(tableName, operateType));
         }
     }
 
@@ -642,6 +679,7 @@ public class TableInfo {
 
                 Object value = updates.get(property);
                 if (value instanceof RawValue) {
+                    values.addAll(Arrays.asList(((RawValue) value).getParams()));
                     continue;
                 }
 
@@ -759,7 +797,7 @@ public class TableInfo {
             return null;
         }
 
-        return TenantManager.getTenantIds();
+        return TenantManager.getTenantIds(tableName);
     }
 
 
@@ -1303,7 +1341,7 @@ public class TableInfo {
         }
 
         MetaObject metaObject = EntityMetaObject.forObject(entityObject, reflectorFactory);
-        Object[] tenantIds = TenantManager.getTenantIds();
+        Object[] tenantIds = TenantManager.getTenantIds(tableName);
         if (tenantIds == null || tenantIds.length == 0) {
             return;
         }
