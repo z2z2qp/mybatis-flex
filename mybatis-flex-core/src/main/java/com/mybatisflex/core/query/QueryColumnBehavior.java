@@ -39,6 +39,7 @@ public class QueryColumnBehavior {
      * 内置的可选的忽略规则
      */
     public static final Predicate<Object> IGNORE_NULL = Objects::isNull;
+    public static final Predicate<Object> IGNORE_NONE = o -> Boolean.FALSE;
     public static final Predicate<Object> IGNORE_EMPTY = o -> o == null || "".equals(o);
     public static final Predicate<Object> IGNORE_BLANK = o -> o == null || o.toString().trim().isEmpty();
 
@@ -126,4 +127,5 @@ public class QueryColumnBehavior {
     public static QueryCondition castCondition(QueryCondition condition) {
         return getConditionCaster().apply(condition);
     }
+
 }

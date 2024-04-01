@@ -29,6 +29,7 @@ import com.mybatisflex.codegen.config.GlobalConfig;
 import com.mybatisflex.codegen.config.TableConfig;
 import com.mybatisflex.codegen.config.TableDefConfig;
 import com.mybatisflex.codegen.constant.TemplateConst;
+import com.mybatisflex.core.mask.Masks;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class GeneratorTest {
@@ -64,7 +65,7 @@ public class GeneratorTest {
         // globalConfig.setGenerateTable("sys_user","tb_account");
 
         // 设置模板路径
-        // globalConfig.setEntityTemplatePath("D:\\Documents\\配置文件\\entity.tpl");
+//        globalConfig.setEntityTemplatePath("D:\\Documents\\配置文件\\entity.tpl");
 
         // 配置生成 entity
         globalConfig.setEntityGenerateEnable(true);
@@ -93,7 +94,7 @@ public class GeneratorTest {
         generator.generate();
     }
 
-    @Test
+    //    @Test
     public void testCodeGen2() throws IOException {
         // 配置数据源
         HikariDataSource dataSource = new HikariDataSource();
@@ -110,8 +111,6 @@ public class GeneratorTest {
         // 用户信息表，用于存放用户信息。 -> 用户信息
         UnaryOperator<String> tableFormat = (e) -> e.split("，")[0].replace("表", "");
 
-        // 设置只生成哪些表
-        // globalConfig.addGenerateTable("sys_user");
         // 设置注解生成配置
         globalConfig.getJavadocConfig()
                 .setAuthor("王帅")
@@ -130,10 +129,7 @@ public class GeneratorTest {
 
         // 设置模板路径
         // globalConfig.getTemplateConfig()
-        // .setEntity("D:\\Documents\\配置文件\\entity.tpl");
-        globalConfig.getTemplateConfig()
-                .setServiceImpl(
-                        "D:\\code\\mybatis-flex\\mybatis-flex-codegen\\src\\main\\resources\\templates\\enjoy\\myService.tpl");
+        //        .setEntity("D:\\Documents\\配置文件\\entity.tpl");
 
         // 配置生成 entity
         globalConfig.enableEntity()
@@ -145,12 +141,11 @@ public class GeneratorTest {
         // 配置生成 mapper
         globalConfig.enableMapper();
         // 配置生成 service
-        // globalConfig.enableService();
+        globalConfig.enableService();
         // 配置生成 serviceImpl
-        // globalConfig.enableServiceImpl();
         globalConfig.enableServiceImpl()
-                // .setSuperClass(CacheableServiceImpl.class)
-                .setCacheExample(true);
+//            .setSuperClass(CacheableServiceImpl.class)
+            .setCacheExample(true);
         // 配置生成 controller
         globalConfig.enableController();
         // 配置生成 tableDef
@@ -301,7 +296,7 @@ public class GeneratorTest {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?characterEncoding=utf-8");
         dataSource.setUsername("root");
-        dataSource.setPassword("123456");
+        dataSource.setPassword("12345678");
 
         GlobalConfig globalConfig = new GlobalConfig();
 
@@ -335,10 +330,15 @@ public class GeneratorTest {
                 .setColumnName("update_time")
                 .setOnUpdateValue("NOW()");
 
+        ColumnConfig userNameConfig = ColumnConfig.create()
+            .setColumnName("user_name")
+            .setMaskType(Masks.CHINESE_NAME);
+
         // sys_user 表单独配置
         TableConfig userTableConfig = TableConfig.create()
-                .setTableName("sys_user")
-                .setColumnConfig(userColumnConfig);
+            .setTableName("sys_user")
+            .setColumnConfig(userNameConfig)
+            .setColumnConfig(userColumnConfig);
 
         // 全局字段配置
         ColumnConfig columnConfig = ColumnConfig.builder()
@@ -353,8 +353,9 @@ public class GeneratorTest {
 
         // 配置生成 entity
         globalConfig.enableEntity()
-                .setOverwriteEnable(true)
-                .setWithLombok(true);
+            // .setAlwaysGenColumnAnnotation(true)
+            .setOverwriteEnable(true)
+            .setWithLombok(true);
 
         // 通过 datasource 和 globalConfig 创建代码生成器
         Generator generator = new Generator(dataSource, globalConfig);
