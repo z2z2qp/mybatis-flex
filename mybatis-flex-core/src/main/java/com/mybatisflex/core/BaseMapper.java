@@ -47,6 +47,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.provider.EntitySqlProvider;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.FunctionQueryColumn;
+import com.mybatisflex.core.query.Join;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -71,6 +72,7 @@ import com.mybatisflex.core.util.MapperUtil;
  * @author 王超
  */
 @SuppressWarnings({ "varargs", "unchecked", "unused" })
+
 public interface BaseMapper<T> {
 
     /**
@@ -484,7 +486,17 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default Optional<T> selectOneByQuery(QueryWrapper queryWrapper) {
-        return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        List<Join> joins = CPI.getJoins(queryWrapper);
+        if (CollectionUtil.isNotEmpty(joins)) {
+            return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        }
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return Optional.ofNullable(MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
@@ -508,7 +520,17 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default <R> R selectOneByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
-        return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        List<Join> joins = CPI.getJoins(queryWrapper);
+        if (CollectionUtil.isNotEmpty(joins)) {
+            return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        }
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
@@ -519,7 +541,7 @@ public interface BaseMapper<T> {
      */
     default T selectOneWithRelationsByMap(Map<String, Object> whereConditions) {
         FlexAssert.notEmpty(whereConditions, "whereConditions");
-        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions).limit(1L));
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions));
     }
 
     /**
@@ -530,7 +552,7 @@ public interface BaseMapper<T> {
      */
     default T selectOneWithRelationsByCondition(QueryCondition whereConditions) {
         FlexAssert.notNull(whereConditions, "whereConditions");
-        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions).limit(1L));
+        return selectOneWithRelationsByQuery(QueryWrapper.create().where(whereConditions));
     }
 
     /**
@@ -540,7 +562,17 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default T selectOneWithRelationsByQuery(QueryWrapper queryWrapper) {
-        return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        List<Join> joins = CPI.getJoins(queryWrapper);
+        if (CollectionUtil.isNotEmpty(joins)) {
+            return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        }
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return MapperUtil.queryRelations(this, MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper)));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
@@ -578,8 +610,19 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default <R> R selectOneWithRelationsByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
-        return MapperUtil.queryRelations(this,
-                MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType)));
+        List<Join> joins = CPI.getJoins(queryWrapper);
+        if (CollectionUtil.isNotEmpty(joins)) {
+            return MapperUtil.queryRelations(this,
+                    MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType)));
+        }
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return MapperUtil.queryRelations(this,
+                    MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType)));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
