@@ -23,6 +23,7 @@ import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.NoneListener;
 import com.mybatisflex.annotation.SetListener;
 import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.TableRef;
 import com.mybatisflex.annotation.UpdateListener;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.FlexGlobalConfig;
@@ -33,6 +34,7 @@ import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.CollectionUtil;
+import com.mybatisflex.core.util.MapUtil;
 import com.mybatisflex.core.util.Reflectors;
 import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.io.ResolverUtil;
@@ -43,7 +45,6 @@ import org.apache.ibatis.type.TypeException;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.type.UnknownTypeHandler;
-import com.mybatisflex.core.util.MapUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -139,7 +140,8 @@ public class TableInfoFactory {
     public static TableInfo ofEntityClass(Class<?> entityClass) {
         return MapUtil.computeIfAbsent(entityTableMap, entityClass, aClass -> {
             TableInfo tableInfo = createTableInfo(entityClass);
-            tableInfoMap.put(tableInfo.getTableNameWithSchema(), tableInfo);
+            // Entity 和 VO 有相同的表名，以第一次放入的 Entity 解析的 TableInfo 为主
+            tableInfoMap.putIfAbsent(tableInfo.getTableNameWithSchema(), tableInfo);
             return tableInfo;
         });
     }
@@ -220,11 +222,33 @@ public class TableInfoFactory {
 
         // 初始化表名
         Table table = entityClass.getAnnotation(Table.class);
-        if (table != null) {
+        if (table == null) {
+            TableRef vo = entityClass.getAnnotation(TableRef.class);
+            if (vo != null) {
+                TableInfo refTableInfo = ofEntityClass(vo.value());
+                // 设置 VO 类对应的真实的表名
+                tableInfo.setSchema(refTableInfo.getSchema());
+                tableInfo.setTableName(refTableInfo.getTableName());
+                // 将 @Table 注解的属性复制到 VO 类当中
+                if (vo.copyTableProps()) {
+                    tableInfo.setComment(refTableInfo.getComment());
+                    tableInfo.setCamelToUnderline(refTableInfo.isCamelToUnderline());
+                    tableInfo.setDataSource(refTableInfo.getDataSource());
+
+                    tableInfo.setOnSetListeners(refTableInfo.getOnSetListeners());
+                    tableInfo.setOnInsertColumns(refTableInfo.getOnInsertColumns());
+                    tableInfo.setOnUpdateListeners(refTableInfo.getOnUpdateListeners());
+                }
+            } else {
+                // 默认为类名转驼峰下划线
+                String tableName = StringUtil.camelToUnderline(entityClass.getSimpleName());
+                tableInfo.setTableName(tableName);
+            }
+        } else {
             tableInfo.setSchema(table.schema());
             tableInfo.setTableName(table.value());
             tableInfo.setCamelToUnderline(table.camelToUnderline());
-            tableInfo.setComment(tableInfo.getComment());
+            tableInfo.setComment(table.comment());
 
             if (table.onInsert().length > 0) {
                 List<InsertListener> insertListeners = Arrays.stream(table.onInsert())
@@ -253,10 +277,6 @@ public class TableInfoFactory {
             if (StringUtil.isNotBlank(table.dataSource())) {
                 tableInfo.setDataSource(table.dataSource());
             }
-        } else {
-            // 默认为类名转驼峰下划线
-            String tableName = StringUtil.camelToUnderline(entityClass.getSimpleName());
-            tableInfo.setTableName(tableName);
         }
 
         // 初始化字段相关

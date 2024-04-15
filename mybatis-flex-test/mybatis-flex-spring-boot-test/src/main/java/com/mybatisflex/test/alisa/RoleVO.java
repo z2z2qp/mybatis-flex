@@ -16,9 +16,7 @@
 
 package com.mybatisflex.test.alisa;
 
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.TableRef;
 
 /**
  * 角色。
@@ -26,10 +24,9 @@ import com.mybatisflex.annotation.Table;
  * @author 王帅
  * @since 2023-11-16
  */
-@Table("sys_role")
-public class SysRole extends BaseEntity {
+@TableRef(SysRole.class)
+public class RoleVO extends BaseEntity {
 
-    @Id(keyType = KeyType.Auto)
     private Integer id;
     private String roleKey;
     private String roleName;

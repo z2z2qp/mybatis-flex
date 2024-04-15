@@ -84,7 +84,6 @@ import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.mybatisflex.core.constant.SqlConsts.AND;
 import static com.mybatisflex.core.constant.SqlConsts.EQUALS_PLACEHOLDER;
@@ -990,9 +989,11 @@ public class TableInfo {
                     .filter(e -> e.getName().equals(column))
                     .findFirst()
                     .orElse(QueryMethods.column(getTableNameWithSchema(), column));
-                if (operators != null && operators.containsKey(property)) {
+                if (operators != null) {
                     SqlOperator operator = operators.get(property);
-                    if (operator == SqlOperator.IGNORE) {
+                    if (operator == null) {
+                        operator = SqlOperator.EQUALS;
+                    } else if (operator == SqlOperator.IGNORE) {
                         return;
                     }
                     if (operator == SqlOperator.LIKE || operator == SqlOperator.NOT_LIKE) {
@@ -1034,18 +1035,35 @@ public class TableInfo {
             .collect(Collectors.toList());
     }
 
+    private void getCombinedColumns(List<Class<?>> existedEntities, Class<?> entityClass, List<String> combinedColumns) {
+        if (existedEntities.contains(entityClass)) {
+            return;
+        }
+
+        existedEntities.add(entityClass);
+
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(entityClass);
+
+        combinedColumns.addAll(Arrays.asList(tableInfo.allColumns));
+
+        if (tableInfo.collectionType != null) {
+            tableInfo.collectionType.values()
+                .forEach(e -> getCombinedColumns(existedEntities, e, combinedColumns));
+        }
+
+        if (tableInfo.associationType != null) {
+            tableInfo.associationType.values()
+                .forEach(e -> getCombinedColumns(existedEntities, e, combinedColumns));
+        }
+    }
 
     public ResultMap buildResultMap(Configuration configuration) {
-        // 所有的嵌套类对象引用
-        Stream<Class<?>> ct = collectionType == null ? Stream.empty() : collectionType.values().stream();
-        Stream<Class<?>> at = associationType == null ? Stream.empty() : associationType.values().stream();
+        List<String> combinedColumns = new ArrayList<>();
 
-        Stream<String> nestedColumns = Stream.concat(at, ct)
-            .map(TableInfoFactory::ofEntityClass)
-            .flatMap(e -> Arrays.stream(e.allColumns));
+        getCombinedColumns(new ArrayList<>(), entityClass, combinedColumns);
 
         // 预加载所有重复列，用于判断重名属性
-        List<String> existedColumns = Stream.concat(Arrays.stream(allColumns), nestedColumns)
+        List<String> existedColumns = combinedColumns.stream()
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
             .entrySet()
             .stream()
