@@ -5,6 +5,7 @@ import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.datasource.DataSourceKey;
 import com.mybatisflex.core.keygen.KeyGeneratorFactory;
+import com.mybatisflex.mapper.Account7Mapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.assertj.core.api.WithAssertions;
