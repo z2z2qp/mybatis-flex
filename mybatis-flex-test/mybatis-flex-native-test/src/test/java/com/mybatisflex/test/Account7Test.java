@@ -100,7 +100,7 @@ public class Account7Test implements WithAssertions {
      */
     @Test
     public void testGiteeIssuI9DRC4(){
-        Account7 account7 = this.mapper.selectOneByQuery(QueryWrapper.create().select().where(Account7::getId).eq("1"));
+        Account7 account7 = this.mapper.selectOneByQuery(QueryWrapper.create().select().where(Account7::getId).eq("1")).orElse(null);
         Assert.assertNotNull(account7);
         System.out.println(account7);
     }
