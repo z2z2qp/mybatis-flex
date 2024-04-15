@@ -168,9 +168,9 @@ class AlisaTest {
 
     @Test
     void test08() throws JsonProcessingException {
-        SysUser user = userMapper.selectOneById(1);
+        var user = userMapper.selectOneById(1);
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
-        System.out.println(objectWriter.writeValueAsString(user));
+        System.out.println(objectWriter.writeValueAsString(user.orElse(null)));
     }
 
 }
