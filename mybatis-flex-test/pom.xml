@@ -5,7 +5,7 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>com.mybatis-flex</groupId>
-        <version>1.8.7</version>
+        <version>1.8.8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -24,7 +24,7 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <commons-io.version>2.15.1</commons-io.version>
+        <commons-io.version>2.16.0</commons-io.version>
         <org.projectlombok.version>1.18.32</org.projectlombok.version>
         <!-- 高版本基于 JDK17，勿动 -->
         <json-unit-assertj.version>3.2.7</json-unit-assertj.version>

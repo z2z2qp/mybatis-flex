@@ -6,14 +6,12 @@ import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.datasource.DataSourceKey;
 import com.mybatisflex.mapper.Account6Mapper;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.WithAssertions;
 import org.junit.*;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
