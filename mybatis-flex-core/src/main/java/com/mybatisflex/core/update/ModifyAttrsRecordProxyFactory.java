@@ -54,6 +54,7 @@ public class ModifyAttrsRecordProxyFactory {
 
         T proxyObject = null;
         try {
+            //noinspection unchecked
             proxyObject = (T) ClassUtil.newInstance(proxyClass);
             ((ProxyObject) proxyObject).setHandler(new ModifyAttrsRecordHandler());
         } catch (Exception e) {

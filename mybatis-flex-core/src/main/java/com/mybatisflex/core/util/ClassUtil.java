@@ -18,11 +18,7 @@ package com.mybatisflex.core.util;
 
 import org.apache.ibatis.javassist.util.proxy.ProxyObject;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -166,9 +162,10 @@ public class ClassUtil {
             // 没有任何构造函数的情况下，去查找 static 工厂方法，满足 lombok 注解的需求
             else {
                 Method factoryMethod = ClassUtil.getFirstMethod(clazz, m -> m.getParameterCount() == 0
-                    && clazz == m.getReturnType()
+                    && m.getReturnType().isAssignableFrom(clazz)
                     && Modifier.isPublic(m.getModifiers())
                     && Modifier.isStatic(m.getModifiers()));
+
                 if (factoryMethod != null) {
                     return (T) factoryMethod.invoke(null);
                 }
@@ -191,10 +188,8 @@ public class ClassUtil {
             }
             throw new IllegalArgumentException("Can not find constructor by paras: \"" + Arrays.toString(paras) + "\" in class[" + clazz.getName() + "]");
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.toString(), e);
         }
-
-        return null;
     }
 
 
