@@ -457,6 +457,14 @@ public class Table {
     }
 
     /**
+     * 构建访问路径的前缀
+     */
+    public String buildControllerRequestMappingPrefix() {
+        String mappingPrefix = globalConfig.getControllerConfig().getRequestMappingPrefix();
+        return mappingPrefix == null ? "" : mappingPrefix.trim();
+    }
+
+    /**
      * 构建 MapperXml 的文件名称。
      */
     public String buildMapperXmlFileName() {
