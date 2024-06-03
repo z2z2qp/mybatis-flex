@@ -68,7 +68,7 @@
 
         <spring.version>5.3.34</spring.version>
         <spring-boot.version>3.2.5</spring-boot.version>
-        <solon.version>2.7.5</solon.version>
+        <solon.version>2.7.6</solon.version>
 
         <junit.version>4.13.2</junit.version>
         <testcontainers.version>1.19.3</testcontainers.version>
