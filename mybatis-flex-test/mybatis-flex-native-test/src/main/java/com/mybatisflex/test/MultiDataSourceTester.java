@@ -59,9 +59,9 @@ public class MultiDataSourceTester {
         AuditManager.setMessageCollector(collector);
 
         Db.tx(() -> {
-            Db.selectAll(null, "tb_account");
+            Db.selectAll("tb_account");
             DataSourceKey.use("ds2");
-            Db.selectAll(null, "tb_account");
+            Db.selectAll("tb_account");
             return true;
         });
 

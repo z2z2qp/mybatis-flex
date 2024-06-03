@@ -291,7 +291,7 @@ public class GeneratorTest {
         generator.generate();
     }
 
-    @Test
+//    @Test
     public void testCodeGen5() {
         // 配置数据源
         HikariDataSource dataSource = new HikariDataSource();

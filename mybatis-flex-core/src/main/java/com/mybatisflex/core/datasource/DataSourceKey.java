@@ -45,20 +45,30 @@ public class DataSourceKey {
     }
 
     public static <T> T use(String dataSourceKey, Supplier<T> supplier) {
+        String prevKey = manualKeyThreadLocal.get();
         try {
-            use(dataSourceKey);
+            manualKeyThreadLocal.set(dataSourceKey);
             return supplier.get();
         } finally {
-            clear();
+            if (prevKey != null) {
+                manualKeyThreadLocal.set(prevKey);
+            } else {
+                clear();
+            }
         }
     }
 
     public static void use(String dataSourceKey, Runnable runnable) {
+        String prevKey = manualKeyThreadLocal.get();
         try {
-            use(dataSourceKey);
+            manualKeyThreadLocal.set(dataSourceKey);
             runnable.run();
         } finally {
-            clear();
+            if (prevKey != null) {
+                manualKeyThreadLocal.set(prevKey);
+            } else {
+                clear();
+            }
         }
     }
 
@@ -88,8 +98,8 @@ public class DataSourceKey {
         DataSourceKey.manualKeyThreadLocal = manualKeyThreadLocal;
     }
 
-    public static String getByShardingStrategy(String dataSource, Object mapper, Method method, Object[] args) {
-        String shardingDsKey = DataSourceManager.getByShardingStrategy(dataSource, mapper, method, args);
+    public static String getShardingDsKey(String dataSource, Object mapper, Method method, Object[] args) {
+        String shardingDsKey = DataSourceManager.getShardingDsKey(dataSource, mapper, method, args);
         return shardingDsKey != null ? shardingDsKey : dataSource;
     }
 }

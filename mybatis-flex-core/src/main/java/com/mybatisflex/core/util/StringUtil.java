@@ -88,14 +88,14 @@ public class StringUtil {
             return "";
         }
         var strLen = string.length();
-        StringBuilder sb = new StringBuilder(strLen);
+        var sb = new StringBuilder(strLen);
         for (var i = 0; i < strLen; i++) {
             var c = string.charAt(i);
-//            if (Character.isUpperCase(c) && i > 0) {
-//                sb.append('_');
-//            }
-            if (Character.isUpperCase(c) && i > 0 && !Character.isUpperCase(string.charAt(i - 1)) && string.charAt(i - 1) != '_') {
-                sb.append('_');
+            if (Character.isUpperCase(c) && i > 0) {
+                var prev = string.charAt(i - 1);
+                if (!Character.isUpperCase(prev) && prev != '_') {
+                    sb.append('_');
+                }
             }
             sb.append(Character.toLowerCase(c));
         }
