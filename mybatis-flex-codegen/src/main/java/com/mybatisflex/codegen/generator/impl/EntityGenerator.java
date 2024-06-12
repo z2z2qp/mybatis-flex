@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
+ *  Copyright (c) 2022-2024, Mybatis-Flex (fuhai999@gmail.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public class EntityGenerator implements IGenerator {
     protected String templatePath;
 
     protected String entityWithBaseTemplatePath = "/templates/enjoy/entityWithBase.tpl";
+    protected String ktEntityWithBaseTemplatePath = "/templates/enjoy/entityWithBase.kotlin.tpl";
 
 
     public EntityGenerator() {
@@ -55,10 +56,10 @@ public class EntityGenerator implements IGenerator {
             return;
         }
 
-        //生成 entity 类
+        // 生成 entity 类
         genEntityClass(table, globalConfig);
 
-        //生成 base 类
+        // 生成 base 类
         genBaseClass(table, globalConfig);
     }
 
@@ -72,12 +73,12 @@ public class EntityGenerator implements IGenerator {
         String entityPackagePath = packageConfig.getEntityPackage().replace(".", "/");
         String entityClassName = table.buildEntityClassName();
 
-        File entityJavaFile = new File(sourceDir, entityPackagePath + "/" + entityClassName + ".java");
+        File entityJavaFile = new File(sourceDir, entityPackagePath + "/" + entityClassName + globalConfig.getFileType());
 
         if (entityJavaFile.exists() && !entityConfig.isOverwriteEnable()) {
             return;
         }
-        //排除忽略列
+        // 排除忽略列
         if (globalConfig.getStrategyConfig().getIgnoreColumns() != null) {
             table.getColumns().removeIf(column -> globalConfig.getStrategyConfig().getIgnoreColumns().contains(column.getName().toLowerCase()));
         }
@@ -95,9 +96,13 @@ public class EntityGenerator implements IGenerator {
 
         String templatePath = this.templatePath;
 
-        //开启生成 baseClass
+        // 开启生成 baseClass
         if (entityConfig.isWithBaseClassEnable()) {
-            templatePath = this.entityWithBaseTemplatePath;
+            if (globalConfig.getFileType() == GlobalConfig.FileType.KOTLIN) {
+                templatePath = this.ktEntityWithBaseTemplatePath;
+            }else{
+                templatePath = this.entityWithBaseTemplatePath;
+            }
 
             String baseClassName = table.buildEntityClassName() + entityConfig.getWithBaseClassSuffix();
             params.put("baseClassName", baseClassName);
@@ -118,7 +123,7 @@ public class EntityGenerator implements IGenerator {
     protected void genBaseClass(Table table, GlobalConfig globalConfig) {
         EntityConfig entityConfig = globalConfig.getEntityConfig();
 
-        //不需要生成 baseClass
+        // 不需要生成 baseClass
         if (!entityConfig.isWithBaseClassEnable()) {
             return;
         }
@@ -132,10 +137,10 @@ public class EntityGenerator implements IGenerator {
 
         String baseEntityClassName = table.buildEntityClassName() + entityConfig.getWithBaseClassSuffix();
 
-        File baseEntityJavaFile = new File(sourceDir, baseEntityPackagePath + "/" + baseEntityClassName + ".java");
+        File baseEntityJavaFile = new File(sourceDir, baseEntityPackagePath + "/" + baseEntityClassName + globalConfig.getFileType());
 
 
-        //排除忽略列
+        // 排除忽略列
         if (globalConfig.getStrategyConfig().getIgnoreColumns() != null) {
             table.getColumns().removeIf(column -> globalConfig.getStrategyConfig().getIgnoreColumns().contains(column.getName().toLowerCase()));
         }
