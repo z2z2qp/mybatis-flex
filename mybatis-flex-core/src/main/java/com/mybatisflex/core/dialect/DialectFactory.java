@@ -15,6 +15,9 @@
  */
 package com.mybatisflex.core.dialect;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
 import com.mybatisflex.core.dialect.impl.DB2105Dialect;
@@ -22,9 +25,6 @@ import com.mybatisflex.core.dialect.impl.DmDialect;
 import com.mybatisflex.core.dialect.impl.OracleDialect;
 import com.mybatisflex.core.util.MapUtil;
 import com.mybatisflex.core.util.ObjectUtil;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
  * 方言工厂类，用于创建方言
@@ -75,7 +75,6 @@ public class DialectFactory {
         return dbTypeThreadLocal.get();
     }
 
-
     /**
      * 清除当前线程的 dbType
      */
@@ -108,9 +107,9 @@ public class DialectFactory {
             case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
             case FIREBIRD, DB2 -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.DERBY);
             case DB2_1005 -> new DB2105Dialect(KeywordWrap.NONE, DB2105Dialect.DB2105LimitOffsetProcessor.DB2105);
-            case SQLSERVER -> new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER);
+            case SQLSERVER -> new CommonsDialectImpl(KeywordWrap.NONE_CASE_SENSITIVE, LimitOffsetProcessor.SQLSERVER);
             case SQLSERVER_2005 ->
-                new CommonsDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
+                new CommonsDialectImpl(KeywordWrap.NONE_CASE_SENSITIVE, LimitOffsetProcessor.SQLSERVER_2005);
             case INFORMIX -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.INFORMIX);
             case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
             case SYBASE -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
