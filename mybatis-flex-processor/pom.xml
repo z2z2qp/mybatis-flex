@@ -11,7 +11,9 @@
 
     <artifactId>mybatis-flex-processor</artifactId>
     <packaging>jar</packaging>
-    <name>${project.artifactId}</name>
+    <version>1.9.3-fix3</version>
+
+
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
