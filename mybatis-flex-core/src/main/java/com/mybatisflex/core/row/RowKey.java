@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
+ *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -45,6 +45,11 @@ public class RowKey implements Serializable {
      * snowFlakeId
      */
     public static final RowKey SNOW_FLAKE_ID = RowKey.of("id", KeyType.Generator, KeyGenerators.snowFlakeId, true);
+
+    /**
+     * ulid
+     */
+    public static final RowKey ULID = RowKey.of("id", KeyType.Generator, KeyGenerators.ulid, true);
 
 
     public static RowKey of(String keyColumn) {

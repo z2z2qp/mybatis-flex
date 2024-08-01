@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
+ *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package com.mybatisflex.core.query;
 
 
 import com.mybatisflex.core.dialect.IDialect;
-import com.mybatisflex.core.util.SqlUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +35,6 @@ public class RawQueryColumn extends QueryColumn implements HasParamsColumn {
     public RawQueryColumn(Object content, Object... params) {
         this.content = String.valueOf(content);
         this.params = params;
-
-        SqlUtil.keepColumnSafely(this.content);
     }
 
     @Override
