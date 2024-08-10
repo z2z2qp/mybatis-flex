@@ -70,7 +70,7 @@
 
         <spring-boot.version>3.3.1</spring-boot.version>
         <spring.version>6.1.4</spring.version>
-        <solon.version>2.8.4</solon.version>
+        <solon.version>2.8.5</solon.version>
 
         <junit.version>4.13.2</junit.version>
         <testcontainers.version>1.19.3</testcontainers.version>

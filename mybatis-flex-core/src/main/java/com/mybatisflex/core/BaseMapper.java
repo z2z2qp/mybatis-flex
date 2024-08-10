@@ -25,28 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.mybatisflex.core.constant.FuncName;
-import com.mybatisflex.core.exception.FlexAssert;
-import com.mybatisflex.core.field.FieldQueryBuilder;
-import com.mybatisflex.core.mybatis.MappedStatementTypes;
-import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.provider.EntitySqlProvider;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.FunctionQueryColumn;
-import com.mybatisflex.core.query.Join;
-import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.row.Row;
-import com.mybatisflex.core.table.TableInfo;
-import com.mybatisflex.core.table.TableInfoFactory;
-import com.mybatisflex.core.util.ClassUtil;
-import com.mybatisflex.core.util.CollectionUtil;
-import com.mybatisflex.core.util.ConvertUtil;
-import com.mybatisflex.core.util.MapperUtil;
 import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Param;
@@ -70,6 +52,7 @@ import com.mybatisflex.core.query.Join;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
@@ -176,7 +159,7 @@ public interface BaseMapper<T> {
      * @see com.mybatisflex.core.FlexConsts#METHOD_INSERT_BATCH
      */
     @InsertProvider(type = EntitySqlProvider.class, method = FlexConsts.METHOD_INSERT_BATCH)
-    int insertBatch(@Param(FlexConsts.ENTITIES) List<T> entities);
+    int insertBatch(@Param(FlexConsts.ENTITIES) Collection<T> entities);
 
     /**
      * 批量插入实体类数据，按 size 切分。
@@ -185,23 +168,64 @@ public interface BaseMapper<T> {
      * @param size     切分大小
      * @return 受影响的行数
      */
-    default int insertBatch(List<T> entities, int size) {
+    default int insertBatch(Collection<T> entities, int size) {
 
-        // 让 insertBatch(List<T> entities, int size) 和 insertBatch(List<T> entities) 保持一样的验证行为
+        // 让 insertBatch(List<T> entities, int size) 和 insertBatch(List<T> entities)
+        // 保持一样的验证行为
         // https://gitee.com/mybatis-flex/mybatis-flex/issues/I9EGWA
         FlexAssert.notEmpty(entities, "entities");
 
         if (size <= 0) {
             size = DEFAULT_BATCH_SIZE;
         }
+
+        List<T> entityList = entities instanceof List ? (List<T>) entities : new ArrayList<>(entities);
+
         int sum = 0;
         int entitiesSize = entities.size();
         int maxIndex = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
         for (int i = 0; i < maxIndex; i++) {
-            List<T> list = entities.subList(i * size, Math.min(i * size + size, entitiesSize));
+            List<T> list = entityList.subList(i * size, Math.min(i * size + size, entitiesSize));
             sum += insertBatch(list);
         }
         return sum;
+    }
+
+    /**
+     * 批量插入实体类数据，并自动忽略 null 值
+     *
+     * @param entities 插入的数据列表
+     * @return 受影响的行数
+     */
+    default int insertBatchSelective(Collection<T> entities) {
+        return insertBatchSelective(entities, DEFAULT_BATCH_SIZE);
+    }
+
+    /**
+     * 批量插入实体类数据，按 size 切分，并自动忽略 null 值
+     *
+     * @param entities 插入的数据列表
+     * @param size     切分大小
+     * @return 受影响的行数
+     */
+    @SuppressWarnings("rawtypes")
+    default int insertBatchSelective(Collection<T> entities, int size) {
+
+        FlexAssert.notEmpty(entities, "entities");
+
+        if (size <= 0) {
+            size = DEFAULT_BATCH_SIZE;
+        }
+
+        Class aClass = this.getClass();
+        int[] batchResults = Db.executeBatch(entities, size, aClass,
+                (BiConsumer<BaseMapper, T>) BaseMapper::insertSelective);
+        int result = 0;
+        for (int anInt : batchResults) {
+            if (anInt > 0)
+                result += anInt;
+        }
+        return result;
     }
 
     /**
@@ -287,15 +311,17 @@ public interface BaseMapper<T> {
      * @see com.mybatisflex.core.provider.EntitySqlProvider#deleteBatchByIds(Map,
      *      ProviderContext)
      */
-    default int deleteBatchByIds(List<? extends Serializable> ids, int size) {
+    default int deleteBatchByIds(Collection<? extends Serializable> ids, int size) {
         if (size <= 0) {
             size = DEFAULT_BATCH_SIZE;
         }
         int sum = 0;
         int entitiesSize = ids.size();
         int maxIndex = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
+        List<? extends Serializable> idList = ids instanceof List ? (List<? extends Serializable>) ids
+                : new ArrayList<>(ids);
         for (int i = 0; i < maxIndex; i++) {
-            List<? extends Serializable> list = ids.subList(i * size, Math.min(i * size + size, entitiesSize));
+            List<? extends Serializable> list = idList.subList(i * size, Math.min(i * size + size, entitiesSize));
             sum += deleteBatchByIds(list);
         }
         return sum;
