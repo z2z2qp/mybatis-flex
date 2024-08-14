@@ -26,10 +26,7 @@ import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.SqlUtil;
 import com.mybatisflex.core.util.StringUtil;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 
 import static com.mybatisflex.core.constant.SqlConsts.*;
 
@@ -100,8 +97,8 @@ public class OracleDialect extends CommonsDialectImpl {
     }
 
     @Override
-    public String forInsertEntityBatch(TableInfo tableInfo, List<?> entities) {
-        /*
+    public String forInsertEntityBatch(TableInfo tableInfo, Collection<?> entities) {
+        /**
          * INSERT ALL
          *    INTO t (col1, col2, col3) VALUES ('val1_1', 'val1_2', 'val1_3')
          *    INTO t (col1, col2, col3) VALUES ('val2_1', 'val2_2', 'val2_3')
