@@ -217,9 +217,8 @@ public interface BaseMapper<T> {
             size = DEFAULT_BATCH_SIZE;
         }
 
-        Class aClass = this.getClass();
-        int[] batchResults = Db.executeBatch(entities, size, aClass,
-                (BiConsumer<BaseMapper, T>) BaseMapper::insertSelective);
+        Class aClass = ClassUtil.getUsefulClass(this.getClass());
+        int[] batchResults = Db.executeBatch(entities, size, aClass, (BiConsumer<BaseMapper, T>) BaseMapper::insertSelective);
         int result = 0;
         for (int anInt : batchResults) {
             if (anInt > 0)
@@ -644,12 +643,14 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default <R> R selectOneWithRelationsByIdAs(Serializable id, Class<R> asType) {
+        R result;
         try {
             MappedStatementTypes.setCurrentType(asType);
-            return (R) selectOneWithRelationsById(id);
+            result = (R) selectOneById(id);
         } finally {
             MappedStatementTypes.clear();
         }
+        return MapperUtil.queryRelations(this, result);
     }
 
     /**
