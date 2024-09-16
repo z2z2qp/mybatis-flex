@@ -13,23 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.mybatisflex.core.mybatis;
 
-package com.mybatisflex.solon.integration;
-
-import org.apache.ibatis.solon.integration.MybatisAdapterManager;
-import org.noear.solon.core.AppContext;
-import org.noear.solon.core.Plugin;
+import org.apache.ibatis.reflection.MetaObject;
 
 /**
- * 配置 MyBatis-Flex 插件。
- *
- * @author noear
- * @since 2.2
- */
-public class XPluginImpl implements Plugin {
-    @Override
-    public void start(AppContext context) throws Throwable {
-        // 此插件的 solon.plugin.priority 会大于 mybatis-solon-plugin 的值
-        MybatisAdapterManager.setAdapterFactory(new MybatisAdapterFactoryFlex());
-    }
+ * UnMappedColumnHandler
+ * 自定义未匹配列处理
+ * @author ArthurWang
+ * @version 1.0
+ * @date 2024/9/12 9:16
+ **/
+public interface UnMappedColumnHandler {
+
+    void handleUnMappedColumn(MetaObject metaObject, String unmappedColumnName, Object value);
 }

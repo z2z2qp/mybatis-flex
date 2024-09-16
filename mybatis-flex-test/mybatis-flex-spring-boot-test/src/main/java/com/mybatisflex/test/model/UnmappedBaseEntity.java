@@ -13,23 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.mybatisflex.test.model;
 
-package com.mybatisflex.solon.integration;
+import lombok.Getter;
+import lombok.Setter;
 
-import org.apache.ibatis.solon.integration.MybatisAdapterManager;
-import org.noear.solon.core.AppContext;
-import org.noear.solon.core.Plugin;
+import java.util.Map;
 
 /**
- * 配置 MyBatis-Flex 插件。
+ * UnMappedBaseEntity
  *
- * @author noear
- * @since 2.2
- */
-public class XPluginImpl implements Plugin {
-    @Override
-    public void start(AppContext context) throws Throwable {
-        // 此插件的 solon.plugin.priority 会大于 mybatis-solon-plugin 的值
-        MybatisAdapterManager.setAdapterFactory(new MybatisAdapterFactoryFlex());
-    }
+ * @author wy
+ * @version 1.0
+ * @date 2024/9/12 11:36
+ **/
+@Getter
+@Setter
+public class UnmappedBaseEntity {
+
+    protected Map<String, Object> unmappedMap;
 }

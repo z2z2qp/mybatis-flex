@@ -56,7 +56,11 @@
 微信群：
 ![](./docs/assets/images/wechat-group.png)
 
-或 QQ群： 532992631
+QQ 群
+
+- 群1：~~532992631~~（已满）
+- 群2：850176767（空位不多）
+- 群3：131665923（空位不多）
 
 
 
@@ -450,6 +454,40 @@ QueryWrapper queryWrapper = QueryWrapper.create()
 ![](./docs/assets/images/build_idea.png)
 
 > 更多关于 MyBatis-Flex APT 的配置，请点击 [这里](./docs/zh/others/apt.md)。
+
+## 乐观锁
+
+### 乐观锁配置
+
+```java
+@Table(value = "tb_account", dataSource = "ds2", onSet = AccountOnSetListener.class)
+public class Account extends BaseEntity implements Serializable, AgeAware {
+
+    ......
+
+    @Column(version = true)
+    private Integer version;
+
+}
+```
+
+### 跳过乐观锁的使用
+
+```java
+        AccountMapper accountMapper = bootstrap.getMapper(AccountMapper.class);
+        accountMapper.selectAll().forEach(System.out::println);
+
+        System.out.println(">>>>>>>>>>>>>>>update id=1 user_name from 张三 to 张三1");
+
+        Account account = new Account();
+        account.setId(1L);
+        account.setUserName("张三1");
+        // 跳过乐观锁
+        OptimisticLockManager.execWithoutOptimisticLock(() -> accountMapper.update(account));
+        accountMapper.selectAll().forEach(System.out::println);
+```
+
+
 
 ## Db + Row 工具类
 
