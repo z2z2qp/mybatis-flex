@@ -96,24 +96,27 @@ public class DialectFactory {
 
     private static IDialect createDialect(DbType dbType) {
         return switch (dbType) {
-            case MYSQL,H2,MARIADB,GBASE,OSCAR,XUGU,OCEAN_BASE,CUBRID,GOLDILOCKS,CSIIDB,HIVE,DORIS ->
-                 new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
+            case MYSQL, H2, MARIADB, GBASE, OSCAR, XUGU, OCEAN_BASE, CUBRID, GOLDILOCKS, CSIIDB, HIVE, DORIS ->
+                new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
             case CLICK_HOUSE -> new ClickhouseDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
             case GBASE_8S -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
-            case DM ->  new DmDialect();
-            case ORACLE ->  new OracleDialect();
+            case DM -> new DmDialect();
+            case ORACLE -> new OracleDialect();
             case GAUSS -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
-            case POSTGRE_SQL,SQLITE,HSQL,KINGBASE_ES, PHOENIX,SAP_HANA,IMPALA,HIGH_GO,VERTICA,REDSHIFT,OPENGAUSS,UXDB,LEALONE ->
+            case POSTGRE_SQL, SQLITE, HSQL, KINGBASE_ES, PHOENIX, SAP_HANA, IMPALA, HIGH_GO, VERTICA, REDSHIFT,
+                    OPENGAUSS, UXDB, LEALONE ->
                 new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
             case TDENGINE -> new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
             case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
-            case FIREBIRD,DB2 -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.DERBY);
+            case FIREBIRD, DB2 -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.DERBY);
             case DB2_1005 -> new DB2105Dialect(KeywordWrap.NONE, DB2105Dialect.DB2105LimitOffsetProcessor.DB2105);
             case SQLSERVER -> new SqlserverDialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER);
-            case SQLSERVER_2005 -> new Sqlserver2005DialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
+            case SQLSERVER_2005 ->
+                new Sqlserver2005DialectImpl(KeywordWrap.SQUARE_BRACKETS, LimitOffsetProcessor.SQLSERVER_2005);
             case INFORMIX -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.INFORMIX);
             case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
             case SYBASE -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
+            case TRINO -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.SQLSERVER);
             default -> new CommonsDialectImpl();
         };
     }

@@ -22,6 +22,7 @@ import com.mybatisflex.core.datasource.DataSourceManager;
 import com.mybatisflex.core.mybatis.FlexConfiguration;
 import com.mybatisflex.spring.boot.ConfigurationCustomizer;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
+import com.mybatisflex.test.unmapped.MyUnMappedColumnHandler;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,6 +55,7 @@ public class MyConfigurationCustomizer implements ConfigurationCustomizer, MyBat
             return value;
         };
         DataSourceManager.setDecipher(decipher);
+        globalConfig.setUnMappedColumnHandler(new MyUnMappedColumnHandler());
 
     }
 }
