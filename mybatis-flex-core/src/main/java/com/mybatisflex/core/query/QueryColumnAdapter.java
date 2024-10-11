@@ -16,41 +16,43 @@
 
 package com.mybatisflex.core.query;
 
-import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.dialect.IDialect;
+import com.mybatisflex.core.exception.FlexAssert;
 
 import java.util.List;
 
 /**
- * 取相反数（{@code -column}）。
+ * {@link QueryColumn} 适配器，用于将 {@link QueryCondition} 转换为 {@link QueryColumn}。
  *
  * @author 王帅
- * @since 2023-11-09
+ * @since 2024-09-29
  */
-public class NegativeQueryColumn extends QueryColumn implements HasParamsColumn {
+public class QueryColumnAdapter extends QueryColumn implements HasParamsColumn {
 
-    private final QueryColumn queryColumn;
+    private final QueryCondition condition;
 
-    public NegativeQueryColumn(QueryColumn queryColumn) {
-        this.queryColumn = queryColumn;
+    public QueryColumnAdapter(QueryCondition condition) {
+        FlexAssert.notNull(condition, "condition");
+        this.condition = condition;
+    }
+
+    public QueryCondition getCondition() {
+        return condition;
     }
 
     @Override
     public Object[] getParamValues() {
-        if (queryColumn instanceof HasParamsColumn) {
-            return ((HasParamsColumn) queryColumn).getParamValues();
-        }
-        return FlexConsts.EMPTY_ARRAY;
+        return WrapperUtil.getValues(condition);
     }
 
     @Override
     protected String toSelectSql(List<QueryTable> queryTables, IDialect dialect) {
-        return toConditionSql(queryTables, dialect) + WrapperUtil.buildColumnAlias(alias, dialect);
+        return condition.toSql(queryTables, dialect) + WrapperUtil.buildColumnAlias(alias, dialect);
     }
 
     @Override
     protected String toConditionSql(List<QueryTable> queryTables, IDialect dialect) {
-        return "-" + queryColumn.toConditionSql(queryTables, dialect);
+        return condition.toSql(queryTables, dialect);
     }
 
 }

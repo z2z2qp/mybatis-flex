@@ -593,9 +593,8 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
                     metaObject.setValue(mapping.property, value);
                 }
             }
-        }
-        else {
-            if (FlexGlobalConfig.getUnMappedColumnHandler() != null){
+        } else {
+            if (FlexGlobalConfig.getUnMappedColumnHandler() != null) {
                 // 增加未匹配列自定义处理
                 final List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(resultMap, columnPrefix);
                 for (String unmappedColumnName : unmappedColumnNames) {
@@ -794,18 +793,19 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
     private boolean applyColumnOrderBasedConstructorAutomapping(ResultSetWrapper rsw, List<Class<?>> constructorArgTypes,
                                                                 List<Object> constructorArgs, Constructor<?> constructor, boolean foundValues) throws SQLException {
 
-        // fixed IndexOutOfBoundsException
-        // https://gitee.com/mybatis-flex/mybatis-flex/issues/I98ZO9
-        if (rsw.getColumnNames().size() < constructor.getParameterCount()) {
+        // fixed IndexOutOfBoundsException https://gitee.com/mybatis-flex/mybatis-flex/issues/I98ZO9
+        List<String> columnNames = rsw.getColumnNames();
+        if (columnNames.size() < constructor.getParameterCount()) {
             throw new IllegalArgumentException("Can not invoke the constructor[" + buildMethodString(constructor) + "] with value names: "
-                + Arrays.toString(rsw.getColumnNames().toArray()) + ",\n"
+                + Arrays.toString(columnNames.toArray()) + ",\n"
                 + "Perhaps you can add a default (no parameters) constructor to fix it."
             );
         }
 
-        for (int i = 0; i < constructor.getParameterTypes().length; i++) {
-            Class<?> parameterType = constructor.getParameterTypes()[i];
-            String columnName = rsw.getColumnNames().get(i);
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> parameterType = parameterTypes[i];
+            String columnName = columnNames.get(i);
             TypeHandler<?> typeHandler = rsw.getTypeHandler(parameterType, columnName);
             Object value = typeHandler.getResult(rsw.getResultSet(), columnName);
             constructorArgTypes.add(parameterType);
@@ -967,15 +967,10 @@ public class FlexDefaultResultSetHandler extends DefaultResultSetHandler {
 
     private Object prepareSimpleKeyParameter(ResultSet rs, ResultMapping resultMapping, Class<?> parameterType,
                                              String columnPrefix) throws SQLException {
-//        final TypeHandler<?> typeHandler;
-//        if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
-//            typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
-//        } else {
-//            typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
-//        }
-
-        TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
-        if (typeHandler == null) {
+        final TypeHandler<?> typeHandler;
+        if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
+            typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
+        } else {
             typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
         }
         return typeHandler.getResult(rs, prependPrefix(resultMapping.getColumn(), columnPrefix));
