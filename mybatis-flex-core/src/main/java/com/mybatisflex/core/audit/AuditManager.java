@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
+ *  Copyright (c) 2022-2024, Mybatis-Flex (fuhai999@gmail.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.mybatisflex.core.audit;
 import com.mybatisflex.core.FlexConsts;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.datasource.DataSourceKey;
+import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -122,39 +123,45 @@ public class AuditManager {
         } finally {
             auditMessage.setElapsedTime(clock.getTick() - auditMessage.getQueryTime());
             auditMessage.setQuery(boundSql.getSql());
+
+            TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+            List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
             Object parameter = boundSql.getParameterObject();
 
-            /* parameter 的组装请查看 getNamedParams 方法
-             * @see ParamNameResolver#getNamedParams(Object[])
-             */
-            if (parameter instanceof Map map) {
-                TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
-                if (map.containsKey(FlexConsts.SQL_ARGS)) {
-                    auditMessage.addParams(statement, map.get(FlexConsts.SQL_ARGS));
-                } else if (map.containsKey("collection")) {
-                    Collection collection = (Collection) map.get("collection");
-                    auditMessage.addParams(statement, collection.toArray());
-                } else if (map.containsKey("array")) {
-                    auditMessage.addParams(statement, map.get("array"));
-                } else {
-                    List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-                    for (ParameterMapping parameterMapping : parameterMappings) {
-                        if (parameterMapping.getMode() != ParameterMode.OUT) {
-                            Object value;
-                            String propertyName = parameterMapping.getProperty();
-                            if (boundSql.hasAdditionalParameter(propertyName)) {
-                                value = boundSql.getAdditionalParameter(propertyName);
-                            } else if (typeHandlerRegistry.hasTypeHandler(parameter.getClass())) {
-                                value = parameter;
-                            } else {
-                                MetaObject metaObject = configuration.newMetaObject(parameter);
-                                value = metaObject.getValue(propertyName);
-                            }
-                            auditMessage.addParams(statement, value);
+            // 实现 XML 与 QueryWrapper 参数解析互不干涉
+
+            if (CollectionUtil.isNotEmpty(parameterMappings)) {
+                // 组装 XML 中的 #{user.age} 参数
+                for (ParameterMapping parameterMapping : parameterMappings) {
+                    if (parameterMapping.getMode() != ParameterMode.OUT) {
+                        Object value;
+                        String propertyName = parameterMapping.getProperty();
+                        if (boundSql.hasAdditionalParameter(propertyName)) {
+                            value = boundSql.getAdditionalParameter(propertyName);
+                        } else if (typeHandlerRegistry.hasTypeHandler(parameter.getClass())) {
+                            value = parameter;
+                        } else {
+                            MetaObject metaObject = configuration.newMetaObject(parameter);
+                            value = metaObject.getValue(propertyName);
                         }
+                        auditMessage.addParams(statement, value);
+                    }
+                }
+            } else {
+                // 组装 QueryWrapper 里面的 age = ? 参数
+                // parameter 的组装请查看 ParamNameResolver#getNamedParams(Object[]) 方法
+                if (parameter instanceof Map map) {
+                    if (map.containsKey(FlexConsts.SQL_ARGS)) {
+                        auditMessage.addParams(statement, map.get(FlexConsts.SQL_ARGS));
+                    } else if (map.containsKey("collection")) {
+                        Collection collection = (Collection) map.get("collection");
+                        auditMessage.addParams(statement, collection.toArray());
+                    } else if (map.containsKey("array")) {
+                        auditMessage.addParams(statement, map.get("array"));
                     }
                 }
             }
+
             messageCollector.collect(auditMessage);
         }
     }

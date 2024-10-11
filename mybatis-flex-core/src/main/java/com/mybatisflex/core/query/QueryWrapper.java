@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
+ *  Copyright (c) 2022-2024, Mybatis-Flex (fuhai999@gmail.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,9 +22,20 @@ import com.mybatisflex.core.constant.SqlOperator;
 import com.mybatisflex.core.dialect.DialectFactory;
 import com.mybatisflex.core.table.TableInfo;
 import com.mybatisflex.core.table.TableInfoFactory;
-import com.mybatisflex.core.util.*;
+import com.mybatisflex.core.util.ArrayUtil;
+import com.mybatisflex.core.util.ClassUtil;
+import com.mybatisflex.core.util.CollectionUtil;
+import com.mybatisflex.core.util.LambdaGetter;
+import com.mybatisflex.core.util.LambdaUtil;
+import com.mybatisflex.core.util.SqlUtil;
+import com.mybatisflex.core.util.StringUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -231,6 +242,35 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         return from(new SelectQueryTable(queryWrapper));
     }
 
+    /**
+     * <p>为 FROM 语句后的第一个表起别名，而不是为整个 SELECT 语句起别名。
+     *
+     * <p>例如：以下示例，
+     *
+     * <p><pre>{@code
+     * QueryWrapper.create().from(ACCOUNT).as("a");
+     * }</pre>
+     *
+     * <p>等价于，
+     *
+     * <p><pre>{@code
+     * QueryWrapper.create().from(ACCOUNT.as("a"));
+     * }</pre>
+     *
+     * <p>最终生成的 SQL 为，
+     * <p><pre>{@code
+     * SELECT a.* FROM tb_account a
+     * }</pre>
+     *
+     * <p>而不是，
+     *
+     * <p><pre>{@code
+     * (SELECT * FROM tb_account) AS "a"
+     * }</pre>
+     *
+     * @param alias 别名
+     * @return 当前查询包装器
+     */
     public QueryWrapper as(String alias) {
         if (CollectionUtil.isEmpty(queryTables)) {
             throw new IllegalArgumentException("query table must not be empty.");
@@ -372,6 +412,11 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
             operators = SqlOperators.empty();
         }
         if (mapConditions != null) {
+            QueryTable table = null;
+            // 默认就是第一个表，可能为 null
+            if (CollectionUtil.isNotEmpty(queryTables)) {
+                table = queryTables.get(0);
+            }
             QueryCondition condition = null;
             for (Map.Entry<String, Object> entry : mapConditions.entrySet()) {
                 SqlOperator operator = operators.get(entry.getKey());
@@ -388,7 +433,7 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
                 } else if (operator == SqlOperator.LIKE_RIGHT || operator == SqlOperator.NOT_LIKE_RIGHT) {
                     value = "%" + value;
                 }
-                QueryCondition cond = QueryCondition.create(new QueryColumn(entry.getKey()), operator, value);
+                QueryCondition cond = QueryCondition.create(new QueryColumn(table, entry.getKey()), operator, value);
                 if (condition == null) {
                     condition = cond;
                 } else {

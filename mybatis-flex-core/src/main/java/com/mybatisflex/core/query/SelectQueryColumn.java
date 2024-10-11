@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
+ *  Copyright (c) 2022-2024, Mybatis-Flex (fuhai999@gmail.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,6 +21,12 @@ import com.mybatisflex.core.util.StringUtil;
 
 import java.util.List;
 
+/**
+ * 子查询列。
+ *
+ * @author michael
+ * @author 王帅
+ */
 public class SelectQueryColumn extends QueryColumn implements HasParamsColumn {
 
     private QueryWrapper queryWrapper;
@@ -29,13 +35,17 @@ public class SelectQueryColumn extends QueryColumn implements HasParamsColumn {
         this.queryWrapper = queryWrapper;
     }
 
-
-    QueryWrapper getQueryWrapper() {
+    public QueryWrapper getQueryWrapper() {
         return queryWrapper;
     }
 
     @Override
-    String toSelectSql(List<QueryTable> queryTables, IDialect dialect) {
+    protected String toConditionSql(List<QueryTable> queryTables, IDialect dialect) {
+        return dialect.forSelectByQuery(queryWrapper);
+    }
+
+    @Override
+    protected String toSelectSql(List<QueryTable> queryTables, IDialect dialect) {
         String selectSql = dialect.forSelectByQuery(queryWrapper);
         if (StringUtil.isNotBlank(selectSql) && StringUtil.isNotBlank(alias)) {
             selectSql = WrapperUtil.withAlias(selectSql, alias, dialect);
@@ -49,11 +59,6 @@ public class SelectQueryColumn extends QueryColumn implements HasParamsColumn {
         // deep clone ...
         clone.queryWrapper = ObjectUtil.clone(this.queryWrapper);
         return clone;
-    }
-
-    @Override
-    String toConditionSql(List<QueryTable> queryTables, IDialect dialect) {
-        return super.toConditionSql(queryTables, dialect);
     }
 
     @Override

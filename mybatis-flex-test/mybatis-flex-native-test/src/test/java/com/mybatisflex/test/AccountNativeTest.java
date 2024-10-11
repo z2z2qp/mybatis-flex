@@ -20,6 +20,7 @@ import com.mybatisflex.core.MybatisFlexBootstrap;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.audit.ConsoleMessageCollector;
 import com.mybatisflex.core.datasource.DataSourceKey;
+import com.mybatisflex.core.logicdelete.LogicDeleteManager;
 import com.mybatisflex.core.mybatis.Mappers;
 import com.mybatisflex.core.query.If;
 import com.mybatisflex.core.query.QueryColumnBehavior;
@@ -30,6 +31,7 @@ import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.update.UpdateWrapper;
 import com.mybatisflex.core.util.UpdateEntity;
 import com.mybatisflex.mapper.ArticleMapper;
+import com.mybatisflex.test.table.ArticleTableDef;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.assertj.core.api.WithAssertions;
 import org.assertj.core.data.Index;
@@ -38,11 +40,16 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 import static com.mybatisflex.test.table.AccountTableDef.ACCOUNT;
 import static com.mybatisflex.test.table.ArticleTableDef.ARTICLE;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 public class AccountNativeTest implements WithAssertions {
@@ -85,6 +92,59 @@ public class AccountNativeTest implements WithAssertions {
     public void destroy() {
         this.dataSource.shutdown();
         DataSourceKey.clear();
+    }
+
+    @Test
+    public void testWhereIn() {
+        QueryWrapper queryWrapper;
+        // IN null 数组会先执行 QueryColumnBehavior.setIgnoreFunction 判断是否忽略这个条件
+        // 默认会忽略掉 null 值的条件，所以结果 IN 语句不会被拼接到 SQL 中，会查出所有数据！
+        assertFalse(accountMapper.selectAll().isEmpty());
+        queryWrapper = QueryWrapper.create()
+            .select()
+            .from(ACCOUNT)
+            .where(ACCOUNT.ID.in((Object[]) null));
+        assertFalse(accountMapper.selectListByQuery(queryWrapper).isEmpty());
+        // IN 空数组直接拼接到 SQL 语句：WHERE id IN ()
+        // 这样应该不会查出所有数据，具体要看各家数据库如何处理的了
+        queryWrapper = QueryWrapper.create()
+            .select()
+            .from(ACCOUNT)
+            .where(ACCOUNT.ID.in());
+        assertTrue(accountMapper.selectListByQuery(queryWrapper).isEmpty());
+        // 对于空数组/集合的处理，统一放到 QueryColumnBehavior.setIgnoreFunction 中
+        // 默认是数据库处理 WHERE id IN () 的情况，也可以放到代码当中，比如抛出异常
+        QueryColumnBehavior.setIgnoreFunction(value -> {
+            if (value == null) {
+                return true;
+            }
+            if (value.getClass().isArray() && Array.getLength(value) == 0) {
+                throw new IllegalArgumentException("EMPTY ARRAY!");
+            }
+            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+                throw new IllegalArgumentException("EMPTY COLLECTION!");
+            }
+            return false;
+        });
+        try {
+            QueryWrapper.create()
+                .select()
+                .from(ACCOUNT)
+                .where(ACCOUNT.ID.in());
+        } catch (IllegalArgumentException e) {
+            // ...
+        } finally {
+            QueryColumnBehavior.setIgnoreFunction(QueryColumnBehavior.IGNORE_NULL);
+        }
+
+        // 条件忽略测试
+        queryWrapper = QueryWrapper.create()
+            .select()
+            .from(ACCOUNT)
+            .where(ACCOUNT.ID.in(1, 2, 3))
+            .and(ACCOUNT.ID.in(new Object[]{4, 5, 6}, false))
+            .and(ACCOUNT.ID.in(Arrays.asList(7, 8, 9), () -> Boolean.FALSE));
+        assertFalse(accountMapper.selectListByQuery(queryWrapper).isEmpty());
     }
 
     @Test
@@ -174,29 +234,36 @@ public class AccountNativeTest implements WithAssertions {
      */
     @Test
     public void testGiteeIssue_I7QD29() {
+        LogicDeleteManager.execWithoutLogicDelete(()->{
+
+
         QueryWrapper queryWrapper = QueryWrapper.create();
+        ArticleTableDef a1 = ARTICLE.as("a1");
+        ArticleTableDef a2 = ARTICLE.as("a2");
         queryWrapper.from(ACCOUNT)
-            .leftJoin(ARTICLE).as("a1").on(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID))
-            .leftJoin(ARTICLE).as("a2").on(ACCOUNT.ID.eq(ARTICLE.ACCOUNT_ID))
+            .leftJoin(a1).on(ACCOUNT.ID.eq(a1.ACCOUNT_ID))
+            .leftJoin(a2).on(ACCOUNT.ID.eq(a2.ACCOUNT_ID))
             .where(ACCOUNT.ID.ge(1));
         List<Article> accounts = articleMapper.selectListByQuery(queryWrapper);
         accounts = articleMapper.selectListByQuery(queryWrapper);
         String expectSql = "SELECT * FROM `tb_account` " +
-            "LEFT JOIN `tb_article` AS `a1` ON (`tb_account`.`id` = `a1`.`account_id`) AND `a1`.`is_delete` = 0 " +
-            "LEFT JOIN `tb_article` AS `a2` ON (`tb_account`.`id` = `a1`.`account_id`) AND `a2`.`is_delete` = 0 " +
-            "WHERE (`tb_account`.`id` >= 1) AND `tb_account`.`is_delete` = 0";
+            "LEFT JOIN `tb_article` AS `a1` ON `tb_account`.`id` = `a1`.`account_id` " +
+            "LEFT JOIN `tb_article` AS `a2` ON `tb_account`.`id` = `a2`.`account_id` " +
+            "WHERE `tb_account`.`id` >= 1";
 //            "WHERE `tb_account`.`id` >= 1";
         //SELECT * FROM `tb_account`
         // LEFT JOIN `tb_article` AS `a1` ON (`tb_account`.`id` = `a1`.`account_id`) AND `a1`.`is_delete` = 0
         // LEFT JOIN `tb_article` AS `a2` ON (`tb_account`.`id` = `a1`.`account_id`) AND `a2`.`is_delete` = 0
         // WHERE `tb_account`.`id` >= 1
         System.out.println("aa>>11:  \"" + queryWrapper.toSQL()+"\"");
+        System.out.println("aa>>22:  \"" + expectSql+"\"");
         // SELECT * FROM `tb_account`
         // LEFT JOIN `tb_article` AS `a1` ON (`tb_account`.`id` = `a1`.`account_id`) AND `a1`.`is_delete` = 0
         // LEFT JOIN `tb_article` AS `a2` ON (`tb_account`.`id` = `a1`.`account_id`) AND `a2`.`is_delete` = 0
         // WHERE `tb_account`.`id` >= 1
-//        assertThat(queryWrapper.toSQL()).isEqualTo(expectSql);
-        assertThat(accounts).hasSize(9);
+        assertThat(queryWrapper.toSQL()).isEqualTo(expectSql);
+//        assertThat(accounts).hasSize(9);
+        });
     }
 
     /**
