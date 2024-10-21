@@ -44,21 +44,23 @@ class OuterMapperTest {
         Outer outer = new Outer();
         outer.setName("outer 01");
         int result = outerMapper.insertSelective(outer);
-        Assertions.assertEquals(result, 1);
+        Assertions.assertEquals(result,1);
     }
 
     @Test
     void testSelect() {
+        OuterTableDef outer = OUTER.as("o");
+        InnerTableDef inner = INNER.as("i");
         QueryWrapper queryWrapper = QueryWrapper.create()
-            .select(OUTER.ID,
-                OUTER.NAME,
-                INNER.ID,
-                INNER.TYPE)
-            .from(OUTER.as("o"))
-            .leftJoin(INNER).as("i").on(INNER.ID.eq(2))
+            .select(outer.ID,
+                outer.NAME,
+                inner.ID,
+                inner.TYPE)
+            .from(outer)
+            .leftJoin(inner).on(inner.ID.eq(2))
             .limit(1);
-        var outer = outerMapper.selectOneByQuery(queryWrapper);
-        System.out.println(outer);
+        Outer outer1 = outerMapper.selectOneByQuery(queryWrapper);
+        System.out.println(outer1);
     }
 
 }
