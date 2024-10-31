@@ -39,7 +39,7 @@ public class FlexTransactionManager extends AbstractPlatformTransactionManager {
     @Override
     protected boolean isExistingTransaction(Object transaction) throws TransactionException {
         TransactionObject transactionObject = (TransactionObject) transaction;
-        return StringUtil.isNotBlank(transactionObject.prevXid);
+        return StringUtil.hasText(transactionObject.prevXid);
     }
 
     @Override
@@ -59,6 +59,8 @@ public class FlexTransactionManager extends AbstractPlatformTransactionManager {
     protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
         TransactionObject transactionObject = (TransactionObject) transaction;
         transactionObject.currentXid = TransactionalManager.startTransactional();
+
+        TimeoutHolder.hold(definition);
     }
 
     @Override
@@ -84,6 +86,10 @@ public class FlexTransactionManager extends AbstractPlatformTransactionManager {
         transactionObject.setRollbackOnly();
     }
 
+    @Override
+    protected void doCleanupAfterCompletion(Object transaction) {
+        TimeoutHolder.clear();
+    }
 
     static class TransactionObject extends JdbcTransactionObjectSupport {
 

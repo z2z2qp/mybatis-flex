@@ -60,6 +60,7 @@ import com.mybatisflex.core.util.ClassUtil;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.ConvertUtil;
 import com.mybatisflex.core.util.MapperUtil;
+import com.mybatisflex.core.util.StringUtil;
 
 /**
  * 通用 Mapper 接口。
@@ -257,7 +258,7 @@ public interface BaseMapper<T> {
     default int insertOrUpdate(T entity, boolean ignoreNulls) {
         TableInfo tableInfo = TableInfoFactory.ofEntityClass(entity.getClass());
         Object[] pkArgs = tableInfo.buildPkSqlArgs(entity);
-        if (pkArgs.length == 0 || pkArgs[0] == null) {
+        if (pkArgs.length == 0 || pkArgs[0] == null || (pkArgs[0] instanceof String && StringUtil.noText((String) pkArgs[0]))) {
             return insert(entity, ignoreNulls);
         } else {
             return update(entity, ignoreNulls);

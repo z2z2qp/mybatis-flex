@@ -81,8 +81,8 @@ public class ContributorsDocGen {
 
             markdown.append("|");
 
-            if (StringUtil.isNotBlank(src)) {
-                markdown.append("![](").append(src).append(")");
+            if (StringUtil.hasText(src)) {
+                markdown.append("![](" + src + ")");
             }
 
             markdown.append(userName);
