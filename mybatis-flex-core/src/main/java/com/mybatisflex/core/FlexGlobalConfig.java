@@ -113,7 +113,7 @@ public class FlexGlobalConfig {
     /**
      * 未匹配列处理器
      */
-    private static UnMappedColumnHandler unMappedColumnHandler;
+    private UnMappedColumnHandler unMappedColumnHandler;
 
     public boolean isPrintBanner() {
         return printBanner;
@@ -329,7 +329,7 @@ public class FlexGlobalConfig {
         this.versionColumn = versionColumn;
     }
 
-    public static UnMappedColumnHandler getUnMappedColumnHandler() {
+    public UnMappedColumnHandler getUnMappedColumnHandler() {
         return unMappedColumnHandler;
     }
 
