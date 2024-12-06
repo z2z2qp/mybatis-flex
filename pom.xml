@@ -74,7 +74,7 @@
         <mysql.version>8.4.0</mysql.version>
         <HikariCP.version>4.0.3</HikariCP.version>
 
-        <spring.version>6.1.14</spring.version>
+        <spring.version>6.2.0</spring.version>
         <spring-boot.version>3.3.5</spring-boot.version>
         <solon.version>2.9.4</solon.version>
 
