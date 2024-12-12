@@ -117,6 +117,7 @@ public class DialectFactory {
             case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
             case SYBASE -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
             case TRINO -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.SQLSERVER);
+            case DUCKDB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.MYSQL);
             default -> new CommonsDialectImpl();
         };
     }
