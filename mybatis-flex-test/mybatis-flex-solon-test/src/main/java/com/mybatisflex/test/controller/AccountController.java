@@ -127,7 +127,7 @@ public class AccountController {
         }
 
 
-        return accountMapper.selectOneById(id);
+        return accountMapper.selectOneById(id).orElse(null);
     }
 
 
