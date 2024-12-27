@@ -25,11 +25,12 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import com.mybatisflex.core.util.MapUtil;
 
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.exception.FlexExceptions;
+import com.mybatisflex.core.util.MapUtil;
+import com.mybatisflex.core.util.StringUtil;
 
 /**
  * 获取 {@link BaseMapper} 对象。
@@ -85,6 +86,13 @@ public class Mappers {
         return (M) mapperObject;
     }
 
+    public static <M> M ofMapperClass(String environmentId, Class<M> mapperClass) {
+        Object mapperObject = MapUtil.computeIfAbsent(MAPPER_OBJECTS, mapperClass,
+                clazz -> Proxy.newProxyInstance(mapperClass.getClassLoader(), new Class[] { mapperClass },
+                        new MapperHandler(environmentId, mapperClass)));
+        return (M) mapperObject;
+    }
+
     private static class MapperHandler implements InvocationHandler {
 
         private final Class<?> mapperClass;
@@ -92,12 +100,24 @@ public class Mappers {
         private final SqlSessionFactory sqlSessionFactory;
 
         public MapperHandler(Class<?> mapperClass) {
+            this(null, mapperClass);
+        }
+
+        public MapperHandler(String environmentId, Class<?> mapperClass) {
             this.mapperClass = mapperClass;
-            this.executorType = FlexGlobalConfig.getDefaultConfig()
-                    .getConfiguration()
-                    .getDefaultExecutorType();
-            this.sqlSessionFactory = FlexGlobalConfig.getDefaultConfig()
-                    .getSqlSessionFactory();
+            if (StringUtil.noText(environmentId)) {
+                this.executorType = FlexGlobalConfig.getDefaultConfig()
+                        .getConfiguration()
+                        .getDefaultExecutorType();
+                this.sqlSessionFactory = FlexGlobalConfig.getDefaultConfig()
+                        .getSqlSessionFactory();
+            } else {
+                this.executorType = FlexGlobalConfig.getConfig(environmentId)
+                        .getConfiguration()
+                        .getDefaultExecutorType();
+                this.sqlSessionFactory = FlexGlobalConfig.getConfig(environmentId)
+                        .getSqlSessionFactory();
+            }
         }
 
         private SqlSession openSession() {
