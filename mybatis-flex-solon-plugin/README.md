@@ -7,24 +7,25 @@
 </dependency>
 ```
 
-#### 1、描述
+### 1、描述
 
 数据扩展插件，为 Solon Data 提供基于 mybatis-flex（[代码仓库](https://gitee.com/mybatis-flex/mybatis-flex)）的框架适配，以提供ORM支持。
 
 
 可注入类型：
 
-| 支持类型 | 说明                                                                   |
-| -------- |----------------------------------------------------------------------|
-| Mapper.class     | 注入 Mapper。例：`@Inject UserMapper userMapper`                          |
-| FlexConfiguration     | 注入 FlexConfiguration，一般仅用于配置。例：`@Inject FlexConfiguration db1Cfg` |
-| FlexGlobalConfig     | 注入 FlexGlobalConfig，一般仅用于配置。例：`@Inject FlexGlobalConfig db1Gc`    |
-| SqlSessionFactory     | 注入 SqlSessionFactory。例：`@Inject SqlSessionFactory db1` （不推荐直接使用）  |
-| RowMapperInvoker | 注入 RowMapperInvoker。例：`@Inject RowMapperInvoker rowMapper`        |
+| 支持类型 | 说明                                                                           |
+| -------- |------------------------------------------------------------------------------|
+| Mapper.class     | 注入 Mapper。例：`@Inject UserMapper userMapper`                                  |
+| FlexConfiguration     | 注入 FlexConfiguration，一般仅用于配置。例：`@Inject FlexConfiguration flexConfiguration` |
+| FlexGlobalConfig     | 注入 FlexGlobalConfig，一般仅用于配置。例：`@Inject FlexGlobalConfig flexGlobalConfig`    |
+| SqlSessionFactory     | 注入 SqlSessionFactory。例：`@Inject SqlSessionFactory sessionFactory` （不推荐直接使用）  |
+| RowMapperInvoker | 注入 RowMapperInvoker。例：`@Inject RowMapperInvoker rowMapper`                   |
 
 
-#### 3、数据源配置
+### 3、数据源配置
 
+`mybatis-flex` 配置对应在的实体为： MybatisFlexProperties
 
 ```yml
 # 配置数据源（或者使用 solon.dataSources 配置数据源，效果一样）
@@ -63,20 +64,7 @@ mybatis-flex:
 #
 ```
 
-主要支持的属性说明：
-
-| 支持属性                    | 别名（保持与之前的兼容）               | 说明                               |
-|-------------------------|----------------------------|----------------------------------|
-| type-aliases-package    | typeAliases                | 类型别名                             |
-| type-aliases-super-type | typeAliasesSuperType       | 类型别名的父类（用于过滤）                    |
-| type-handlers-package   | typeHandlers               | 类型处理器                            |
-| mapper-locations        | mappers                    | mapper 类或xml文件                   |
-| configuration           | configuration              | mybatis 配置。对应类：FlexConfiguration |
-| global-config           | globalConfig               | 全局部置。对应类：FlexGlobalConfig        |
-
-
-
-##### Mapper 配置注意事项：
+#### Mapper 配置注意事项：
 
 * 通过 mapper 类包名配置。 xml 与 mapper 需同包同名
 
@@ -91,17 +79,19 @@ mybatis-flex.mapper-locations: "classpath:mybatis/db1/*.xml"
 ```
 
 
-#### 4、代码应用
+### 4、代码应用
 
 ```java
 //配置 mf （如果配置不能满足需求，可以进一步代助代码）
-@Configuration
-public class Config {
-    @Bean
-    public void ormConfig(@Inject FlexConfiguration cfg,
-                          @Inject FlexGlobalConfig globalConfig) {
+@Component
+public class MyBatisFlexCustomizerImpl implements MyBatisFlexCustomizer, ConfigurationCustomizer {
+    @Override
+    public void customize(FlexGlobalConfig globalConfig) {
 
-        cfg.setCacheEnabled(false);
+    }
+
+    @Override
+    public void customize(FlexConfiguration configuration) {
 
     }
 }
