@@ -44,9 +44,9 @@ public class FlexDataSource extends AbstractDataSource {
     private final Map<String, DataSource> dataSourceMap = new HashMap<>();
     private final Map<String, DbType> dbTypeHashMap = new HashMap<>();
 
-    private final DbType defaultDbType;
-    private final String defaultDataSourceKey;
-    private final DataSource defaultDataSource;
+    private DbType defaultDbType;
+    private String defaultDataSourceKey;
+    private DataSource defaultDataSource;
 
     public FlexDataSource(String dataSourceKey, DataSource dataSource) {
         this(dataSourceKey, dataSource, true);
@@ -63,6 +63,21 @@ public class FlexDataSource extends AbstractDataSource {
 
         dataSourceMap.put(dataSourceKey, dataSource);
         dbTypeHashMap.put(dataSourceKey, defaultDbType);
+    }
+
+    /**
+     * 设置默认数据源（提供动态可控性）
+     */
+    public void setDefaultDataSource(String dataSourceKey) {
+        DataSource ds = dataSourceMap.get(dataSourceKey);
+
+        if (ds != null) {
+            this.defaultDataSourceKey = dataSourceKey;
+            this.defaultDataSource = ds;
+            this.defaultDbType = DbTypeUtil.getDbType(ds);
+        } else {
+            throw new IllegalStateException("DataSource not found by key: \"" + dataSourceKey + "\"");
+        }
     }
 
     public void addDataSource(String dataSourceKey, DataSource dataSource) {
@@ -269,6 +284,4 @@ public class FlexDataSource extends AbstractDataSource {
         }
 
     }
-
-
 }
