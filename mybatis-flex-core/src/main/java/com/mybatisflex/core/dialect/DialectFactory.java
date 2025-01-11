@@ -104,7 +104,7 @@ public class DialectFactory {
             case ORACLE -> new OracleDialect();
             case GAUSS -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
             case POSTGRE_SQL, SQLITE, HSQL, KINGBASE_ES, PHOENIX, SAP_HANA, IMPALA, HIGH_GO, VERTICA, REDSHIFT,
-                    OPENGAUSS, UXDB, LEALONE ->
+                    OPENGAUSS, UXDB, LEALONE, DUCKDB ->
                 new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
             case TDENGINE -> new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
             case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
@@ -117,7 +117,6 @@ public class DialectFactory {
             case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
             case SYBASE -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
             case TRINO -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.SQLSERVER);
-            case DUCKDB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.MYSQL);
             default -> new CommonsDialectImpl();
         };
     }

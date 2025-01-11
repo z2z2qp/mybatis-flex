@@ -65,8 +65,9 @@ public class DataSourceBuilder {
         }
 
         try {
-            Class<?> dataSourceClass = Class.forName(dataSourceClassName);
-            Object dataSourceObject = dataSourceClass.getConstructor().newInstance();
+            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+            Class<?> dataSourceClass = Class.forName(dataSourceClassName, false, contextClassLoader);
+            Object dataSourceObject = dataSourceClass.newInstance();
             setDataSourceProperties(dataSourceObject);
             return (DataSource) dataSourceObject;
         } catch (Exception e) {
@@ -132,8 +133,9 @@ public class DataSourceBuilder {
 
 
     private String doDetectDataSourceClass(String className) {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            Class.forName(className);
+            Class.forName(className, false, contextClassLoader);
             return className;
         } catch (ClassNotFoundException e) {
             return null;
