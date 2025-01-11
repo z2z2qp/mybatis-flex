@@ -10,7 +10,7 @@
 
 ```kotlin
 dependencies {
-    implementation("com.mybatis-flex:mybatis-flex-core:1.10.4")
+    implementation("com.mybatis-flex:mybatis-flex-core:1.10.5")
 }
 ```
 
@@ -18,7 +18,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.mybatis-flex:mybatis-flex-core:1.10.4'
+    implementation 'com.mybatis-flex:mybatis-flex-core:1.10.5'
 }
 ```
 
@@ -28,7 +28,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.mybatis-flex:mybatis-flex-spring:1.10.4")
+    implementation("com.mybatis-flex:mybatis-flex-spring:1.10.5")
 }
 ```
 
@@ -36,7 +36,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.mybatis-flex:mybatis-flex-spring:1.10.4'
+    implementation 'com.mybatis-flex:mybatis-flex-spring:1.10.5'
 }
 ```
 
@@ -46,7 +46,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.mybatis-flex:mybatis-flex-spring-boot-starter:1.10.4")
+    implementation("com.mybatis-flex:mybatis-flex-spring-boot-starter:1.10.5")
 }
 ```
 
@@ -54,11 +54,32 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.mybatis-flex:mybatis-flex-spring-boot-starter:1.10.4'
+    implementation 'com.mybatis-flex:mybatis-flex-spring-boot-starter:1.10.5'
 }
 ```
 
-4、配置 annotationProcessor
+
+4、用到了 Solon 的场景
+
+**【Kotlin】**
+
+```kotlin
+dependencies {
+    implementation("com.mybatis-flex:mybatis-flex-solon-plugin:1.10.5")
+}
+```
+
+**【Groovy】**
+
+```groovy
+dependencies {
+    implementation 'com.mybatis-flex:mybatis-flex-solon-plugin:1.10.5'
+}
+```
+
+
+
+5、配置 annotationProcessor
 
 由 `mybatis-flex-processor` 提供APT服务。
 
@@ -70,7 +91,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    annotationProcessor("com.mybatis-flex:mybatis-flex-processor:1.10.4")
+    annotationProcessor("com.mybatis-flex:mybatis-flex-processor:1.10.5")
 }
 ```
 
@@ -78,6 +99,6 @@ dependencies {
 
 ```groovy
 dependencies {
-    annotationProcessor 'com.mybatis-flex:mybatis-flex-processor:1.10.4'
+    annotationProcessor 'com.mybatis-flex:mybatis-flex-processor:1.10.5'
 }
 ```
