@@ -20,10 +20,13 @@ import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.exception.locale.LocalizedFormats;
 import com.mybatisflex.core.util.StringUtil;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
+import org.apache.ibatis.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.regex.Pattern;
 
 /**
@@ -39,12 +42,50 @@ public class DbTypeUtil {
      */
     public static DbType getDbType(DataSource dataSource) {
         String jdbcUrl = getJdbcUrl(dataSource);
-
         if (StringUtil.hasText(jdbcUrl)) {
+            //FIX [Bug]: sqlserver2022下方言识别不对，手动set也无效  https://gitee.com/mybatis-flex/mybatis-flex/issues/IBIHW3
+            if (jdbcUrl.contains(":sqlserver:")) {
+                DbType sqlserverDbType = getSqlserverDbType(dataSource);
+                if (sqlserverDbType != null) {
+                    return sqlserverDbType;
+                }
+            }
             return parseDbType(jdbcUrl);
         }
 
         throw new IllegalStateException("Can not get dataSource jdbcUrl: " + dataSource.getClass().getName());
+    }
+
+    /**
+     * 通过数据源获取 SQLserver 版本
+     *
+     * @return DbType
+     */
+    private static DbType getSqlserverDbType(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("SELECT @@VERSION");
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+            //SELECT @@VERSION 查询返回信息：
+            /*
+             Microsoft SQL Server 2019 (RTM) - 15.0.2000.5 (X64)
+             Sep 24 2019 13:48:23
+             Copyright (C) 2019 Microsoft Corporation
+             Enterprise Edition (64-bit) on Windows Server 2019 Datacenter 10.0 <X64> (Build 17763: ) (Hypervisor)
+             */
+            if (resultSet.next()) {
+                String version = resultSet.getString(1);
+                if (StringUtil.hasText(version)) {
+                    String year = version.substring(21, 25);
+                    if (StringUtil.hasText(year) && year.compareTo("2005") <= 0) {
+                        return DbType.SQLSERVER_2005;
+                    }
+                }
+            }
+            return DbType.SQLSERVER;
+        } catch (Exception e) {
+            LogFactory.getLog(DbTypeUtil.class).warn("Failed to get SQLServer version. parse by url. " + e);
+            return null;
+        }
     }
 
     /**
@@ -159,9 +200,9 @@ public class DbTypeUtil {
             return DbType.GREENPLUM;
         } else if (jdbcUrl.contains(":lealone:")) {
             return DbType.LEALONE;
-        }  else if (jdbcUrl.contains(":hive2:")) {
+        } else if (jdbcUrl.contains(":hive2:")) {
             return DbType.HIVE;
-        }  else if (jdbcUrl.contains(":duckdb:")) {
+        } else if (jdbcUrl.contains(":duckdb:")) {
             return DbType.DUCKDB;
         } else {
             return DbType.OTHER;

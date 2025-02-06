@@ -71,7 +71,7 @@ public class TransactionalManager {
                 case SUPPORTS -> supplier.get();
 
 
-                //若存在当前事务，则加入当前事务，若不存在当前事务，则已非事务的方式运行
+                //若存在当前事务，则加入当前事务，若不存在当前事务，则抛出异常
                 case MANDATORY -> {
                     if (currentXID != null) {
                         yield supplier.get();
