@@ -889,6 +889,20 @@ public class GlobalConfig implements Serializable {
     }
 
     /**
+     * @see EntityConfig#isBaseOverwriteEnable()
+     */
+    public boolean isEntityBaseOverwriteEnable() {
+        return getEntityConfig().isBaseOverwriteEnable();
+    }
+
+    /**
+     * @see EntityConfig#setBaseOverwriteEnable(boolean)
+     */
+    public void setEntityBaseOverwriteEnable(boolean entityBaseOverwriteEnable) {
+        getEntityConfig().setBaseOverwriteEnable(entityBaseOverwriteEnable);
+    }
+
+    /**
      * @see EntityConfig#getClassPrefix()
      */
     public String getEntityClassPrefix() {
@@ -973,6 +987,34 @@ public class GlobalConfig implements Serializable {
     }
 
     /**
+     * @see EntityConfig#isLombokNoArgsConstructorEnable()
+     */
+    public boolean isEntityLombokNoArgsConstructorEnable() {
+        return getEntityConfig().isLombokNoArgsConstructorEnable();
+    }
+
+    /**
+     * @see EntityConfig#setLombokNoArgsConstructorEnable(boolean)
+     */
+    public EntityConfig setEntityLombokNoArgsConstructorEnable(boolean entityLombokNoArgsConstructorEnable) {
+        return getEntityConfig().setLombokNoArgsConstructorEnable(entityLombokNoArgsConstructorEnable);
+    }
+
+    /**
+     * @see EntityConfig#isLombokAllArgsConstructorEnable()
+     */
+    public boolean isEntityLombokAllArgsConstructorEnable() {
+        return getEntityConfig().isLombokAllArgsConstructorEnable();
+    }
+
+    /**
+     * @see EntityConfig#setLombokAllArgsConstructorEnable(boolean)
+     */
+    public EntityConfig setEntityLombokAllArgsConstructorEnable(boolean entityLombokAllArgsConstructorEnable) {
+        return getEntityConfig().setLombokAllArgsConstructorEnable(entityLombokAllArgsConstructorEnable);
+    }
+
+    /**
      * @see EntityConfig#isWithSwagger()
      */
     public boolean isEntityWithSwagger() {
@@ -1033,6 +1075,20 @@ public class GlobalConfig implements Serializable {
      */
     public void setEntityJdkVersion(int jdkVersion) {
         getEntityConfig().setJdkVersion(jdkVersion);
+    }
+
+    /**
+     * @see EntityConfig#isWithBaseClassEnable()
+     */
+    public boolean isEntityWithBaseClassEnable() {
+        return getEntityConfig().isWithBaseClassEnable();
+    }
+
+    /**
+     * @see EntityConfig#setWithBaseClassEnable(boolean)
+     */
+    public void setEntityWithBaseClassEnable(boolean withBaseClassEnable) {
+        getEntityConfig().setWithBaseClassEnable(withBaseClassEnable);
     }
 
     public boolean isMapperGenerateEnable() {

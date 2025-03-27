@@ -30,10 +30,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 #else
+#if(entityConfig.isLombokAllArgsConstructorEnable())
 import lombok.AllArgsConstructor;
+#end
 import lombok.Builder;
 import lombok.Data;
+#if(entityConfig.isLombokNoArgsConstructorEnable())
 import lombok.NoArgsConstructor;
+#end
 #if(entityConfig.getSuperClass(table))
 import lombok.EqualsAndHashCode;
 #end
@@ -43,8 +47,12 @@ import lombok.EqualsAndHashCode;
 /**
  * #(table.getComment()) 实体类。
  *
+#if(javadocConfig.getAuthor())
  * @author #(javadocConfig.getAuthor())
+#end
+#if(javadocConfig.getSince())
  * @since #(javadocConfig.getSince())
+#end
  */
 #if(withLombok)
 #if(withActiveRecord)
@@ -54,8 +62,12 @@ import lombok.EqualsAndHashCode;
 #else
 @Data
 @Builder
+#if(entityConfig.isLombokNoArgsConstructorEnable())
 @NoArgsConstructor
+#end
+#if(entityConfig.isLombokAllArgsConstructorEnable())
 @AllArgsConstructor
+#end
 #if(entityConfig.getSuperClass(table))
 @EqualsAndHashCode(callSuper = true)
 #end

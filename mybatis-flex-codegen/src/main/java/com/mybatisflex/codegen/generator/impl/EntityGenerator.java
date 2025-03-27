@@ -83,7 +83,7 @@ public class EntityGenerator implements IGenerator {
             table.getColumns().removeIf(column -> globalConfig.getStrategyConfig().getIgnoreColumns().contains(column.getName().toLowerCase()));
         }
 
-        Map<String, Object> params = new HashMap<>(6);
+        Map<String, Object> params = new HashMap<>(7);
         params.put("table", table);
         params.put("entityPackageName", packageConfig.getEntityPackage());
         params.put("entityConfig", entityConfig);
@@ -139,13 +139,15 @@ public class EntityGenerator implements IGenerator {
 
         File baseEntityJavaFile = new File(sourceDir, baseEntityPackagePath + "/" + baseEntityClassName + globalConfig.getFileType());
 
-
+        if (baseEntityJavaFile.exists() && !entityConfig.isBaseOverwriteEnable()) {
+            return;
+        }
         // 排除忽略列
         if (globalConfig.getStrategyConfig().getIgnoreColumns() != null) {
             table.getColumns().removeIf(column -> globalConfig.getStrategyConfig().getIgnoreColumns().contains(column.getName().toLowerCase()));
         }
 
-        Map<String, Object> params = new HashMap<>(6);
+        Map<String, Object> params = new HashMap<>();
         params.put("table", table);
         params.put("entityPackageName", baseEntityPackagePath.replace("/", "."));
         params.put("entityClassName", baseEntityClassName);
