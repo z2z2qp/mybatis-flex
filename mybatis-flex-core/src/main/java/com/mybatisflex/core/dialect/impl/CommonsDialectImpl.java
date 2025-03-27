@@ -58,6 +58,7 @@ import static com.mybatisflex.core.constant.SqlConsts.BRACKET_RIGHT;
 import static com.mybatisflex.core.constant.SqlConsts.DELETE;
 import static com.mybatisflex.core.constant.SqlConsts.DELETE_FROM;
 import static com.mybatisflex.core.constant.SqlConsts.DELIMITER;
+import static com.mybatisflex.core.constant.SqlConsts.DUAL;
 import static com.mybatisflex.core.constant.SqlConsts.EMPTY;
 import static com.mybatisflex.core.constant.SqlConsts.EQUALS;
 import static com.mybatisflex.core.constant.SqlConsts.EQUALS_PLACEHOLDER;
@@ -102,7 +103,8 @@ public class CommonsDialectImpl implements IDialect {
 
     @Override
     public String wrap(String keyword) {
-        return ASTERISK.equals(keyword) ? keyword : keywordWrap.wrap(keyword);
+        return ASTERISK.equals(keyword) || DUAL.equalsIgnoreCase(StringUtil.tryTrim(keyword)) ?
+            keyword : keywordWrap.wrap(keyword);
     }
 
     @Override
@@ -393,10 +395,16 @@ public class CommonsDialectImpl implements IDialect {
     ////////////build query sql///////
     @Override
     public String buildSelectSql(QueryWrapper queryWrapper) {
+        return buildSelectSql(queryWrapper, Collections.emptyList());
+    }
+
+    @Override
+    public String buildSelectSql(QueryWrapper queryWrapper, List<QueryTable> contextTables) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
 
         List<QueryTable> joinTables = CPI.getJoinTables(queryWrapper);
         List<QueryTable> allTables = CollectionUtil.merge(queryTables, joinTables);
+        allTables = CollectionUtil.merge(allTables, contextTables);
 
         List<QueryColumn> selectColumns = CPI.getSelectColumns(queryWrapper);
 
@@ -438,7 +446,9 @@ public class CommonsDialectImpl implements IDialect {
         buildSelectColumnSql(sqlBuilder, allTables, selectColumns, CPI.getHint(queryWrapper));
 
 
-        sqlBuilder.append(FROM).append(StringUtil.join(DELIMITER, queryTables, queryTable -> queryTable.toSql(this, OperateType.SELECT)));
+        if(CollectionUtil.isNotEmpty(queryTables)) {
+            sqlBuilder.append(FROM).append(StringUtil.join(DELIMITER, queryTables, queryTable -> queryTable.toSql(this, OperateType.SELECT)));
+        }
 
         buildJoinSql(sqlBuilder, queryWrapper, allTables, OperateType.SELECT);
         buildWhereSql(sqlBuilder, queryWrapper, allTables, true);

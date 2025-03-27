@@ -39,8 +39,12 @@ import java.util.List;
 /**
  * #(tableComment) 控制层。
  *
+#if(javadocConfig.getAuthor())
  * @author #(javadocConfig.getAuthor())
+#end
+#if(javadocConfig.getSince())
  * @since #(javadocConfig.getSince())
+#end
  */
 #if(controllerConfig.restStyle)
 @RestController
@@ -89,7 +93,7 @@ public class #(table.buildControllerClassName()) #if(controllerConfig.superClass
     #if(withSwagger && swaggerVersion.getName() == "DOC")
     @Operation(description="根据主键#(tableComment)")
     #end
-    public boolean remove(@PathVariable #if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("#(tableComment)主键") #end #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="#(tableComment)主键")#end #(primaryKeyType) id) {
+    public boolean remove(@PathVariable #if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("#(tableComment)主键") #end #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="#(tableComment)主键") #end #(primaryKeyType) id) {
         return #(serviceVarName).removeById(id);
     }
 
@@ -106,7 +110,7 @@ public class #(table.buildControllerClassName()) #if(controllerConfig.superClass
     #if(withSwagger && swaggerVersion.getName() == "DOC")
     @Operation(description="根据主键更新#(tableComment)")
     #end
-    public boolean update(@RequestBody #if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("#(tableComment)主键") #end #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="#(tableComment)主键")#end#(entityClassName) #(entityVarName)) {
+    public boolean update(@RequestBody #if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("#(tableComment)主键") #end #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="#(tableComment)主键") #end #(entityClassName) #(entityVarName)) {
         return #(serviceVarName).updateById(#(entityVarName));
     }
 
@@ -139,7 +143,7 @@ public class #(table.buildControllerClassName()) #if(controllerConfig.superClass
     #if(withSwagger && swaggerVersion.getName() == "DOC")
     @Operation(description="根据主键获取#(tableComment)")
     #end
-    public #(entityClassName) getInfo(@PathVariable #if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("#(tableComment)主键") #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="#(tableComment)主键")#end#end #(primaryKeyType) id) {
+    public #(entityClassName) getInfo(@PathVariable #if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("#(tableComment)主键") #end #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="#(tableComment)主键") #end #(primaryKeyType) id) {
         return #(serviceVarName).getById(id);
     }
 
@@ -156,7 +160,7 @@ public class #(table.buildControllerClassName()) #if(controllerConfig.superClass
     #if(withSwagger && swaggerVersion.getName() == "DOC")
     @Operation(description="分页查询#(tableComment)")
     #end
-    public Page<#(entityClassName)> page(#if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("分页信息") #end #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="分页信息")#end Page<#(entityClassName)> page) {
+    public Page<#(entityClassName)> page(#if(withSwagger && swaggerVersion.getName() == "FOX")@ApiParam("分页信息") #end #if(withSwagger && swaggerVersion.getName() == "DOC")@Parameter(description="分页信息") #end Page<#(entityClassName)> page) {
         return #(serviceVarName).page(page);
     }
 

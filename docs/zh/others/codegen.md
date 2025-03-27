@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.mybatis-flex</groupId>
     <artifactId>mybatis-flex-codegen</artifactId>
-    <version>1.10.1</version>
+    <version>1.10.9</version>
 </dependency>
 ```
 
@@ -213,8 +213,8 @@ globalConfig.enableEntity()
 
 | 配置                               | 描述              | 默认值                             |
 |----------------------------------|-----------------|---------------------------------|
-| setAuthor(String)                | 作者              | System.getProperty("user.name") |
-| setSince(String)                 | 自               | 日期（yyyy-MM-dd）                  |
+| setAuthor(String)                | 作者（可填写日期、版本号等，设置为 `""` 则不添加 `@author`）  | System.getProperty("user.name") |
+| setSince(String)                 | 自（可填写日期、版本号等，设置为 `""` 则不添加 `@since`） | `yyyy-MM-dd` 格式的日期              |
 | setTableCommentFormat(Function)  | 表注释格式化          | 原表注释                            |
 | setColumnCommentFormat(Function) | 字段注释格式化         | 原字段注释                           |
 | setEntityPackage(String)         | Entity 包注释      | "实体类层（Entity）软件包。"              |
@@ -297,13 +297,17 @@ globalConfig.getTemplateConfig()
 
 | 配置                                           | 描述                                                | 默认值                |
 |----------------------------------------------|---------------------------------------------------|--------------------|
+| setEntityWithBaseClassEnable(boolean)          | 当开启这个配置后，Entity 会生成两个类，自动生成的 getter setter 字段等都在 Base 类里，而开发者可以在 Account.java 中添加自己的业务代码  | false                 |
 | setClassPrefix(String)                       | Entity 类的前缀                                       | ""                 |
 | setClassSuffix(String)                       | Entity 类的后缀                                       | ""                 |
 | setSuperClass(Class)                         | Entity 类的父类，可以自定义一些 BaseEntity 类                  | null               |
 | setSuperClassFactory(Function<Table, Class>) | Entity 类的父类工厂，可以用于对特定的 Class 设置父类，而非全部 Entity 的父类 | null               |
 | setOverwriteEnable(boolean)                  | 是否覆盖之前生成的文件                                       | false              |
+| setEntityBaseOverwriteEnable(boolean)        | 生成Base类时是否覆盖之前生成的文件                           | false              |
 | setImplInterfaces(Class[])                   | Entity 默认实现的接口                                    | Serializable.class |
 | setWithLombok(boolean)                       | Entity 是否使用 Lombok 注解                             | false              |
+| lombokNoArgsConstructorEnable(boolean)       | 当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @NoArgsConstructor 注解 | true              |
+| lombokAllArgsConstructorEnable(boolean)      | 当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @AllArgsConstructor 注解 | true              |
 | setWithSwagger(boolean)                      | Entity 是否使用 Swagger 注解                            | false              |
 | setSwaggerVersion(EntityConfig.SwaggerVersion) | Swagger 注解版本                                      | SwaggerVersion.FOX |
 | setWithActiveRecord(boolean)                 | 是否生成 Active Record 模式的 Entity                     | false              |

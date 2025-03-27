@@ -61,6 +61,11 @@ public class EntityConfig implements Serializable {
     private boolean overwriteEnable;
 
     /**
+     * 生成Base类时是否覆盖之前生成的文件。
+     */
+    private boolean baseOverwriteEnable;
+
+    /**
      * Entity 默认实现的接口。
      */
     private Class<?>[] implInterfaces = {Serializable.class};
@@ -69,6 +74,16 @@ public class EntityConfig implements Serializable {
      * Entity 是否使用 Lombok 注解。
      */
     private boolean withLombok;
+
+    /**
+     * 当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @NoArgsConstructor 注解。
+     */
+    private boolean lombokNoArgsConstructorEnable = true;
+
+    /**
+     * 当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @AllArgsConstructor 注解。
+     */
+    private boolean lombokAllArgsConstructorEnable = true;
 
     /**
      * Entity 是否使用 Swagger 注解。
@@ -229,6 +244,21 @@ public class EntityConfig implements Serializable {
     }
 
     /**
+     * 生成Base类时是否覆盖原有文件。
+     */
+    public boolean isBaseOverwriteEnable() {
+        return baseOverwriteEnable;
+    }
+
+    /**
+     * 设置生成Base类时是否覆盖原有文件。
+     */
+    public EntityConfig setBaseOverwriteEnable(boolean baseOverwriteEnable) {
+        this.baseOverwriteEnable = baseOverwriteEnable;
+        return this;
+    }
+
+    /**
      * 获取实现接口。
      */
     public Class<?>[] getImplInterfaces() {
@@ -255,6 +285,36 @@ public class EntityConfig implements Serializable {
      */
     public EntityConfig setWithLombok(boolean withLombok) {
         this.withLombok = withLombok;
+        return this;
+    }
+
+    /**
+     * 当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @NoArgsConstructor 注解。
+     */
+    public boolean isLombokNoArgsConstructorEnable() {
+        return lombokNoArgsConstructorEnable;
+    }
+
+    /**
+     * 设置当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @NoArgsConstructor 注解。
+     */
+    public EntityConfig setLombokNoArgsConstructorEnable(boolean lombokNoArgsConstructorEnable) {
+        this.lombokNoArgsConstructorEnable = lombokNoArgsConstructorEnable;
+        return this;
+    }
+
+    /**
+     * 当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @AllArgsConstructor 注解。
+     */
+    public boolean isLombokAllArgsConstructorEnable() {
+        return lombokAllArgsConstructorEnable;
+    }
+
+    /**
+     * 设置当开启 Lombok 注解且不使用 Active Record 时，是否生成 Entity @AllArgsConstructor 注解。
+     */
+    public EntityConfig setLombokAllArgsConstructorEnable(boolean lombokAllArgsConstructorEnable) {
+        this.lombokAllArgsConstructorEnable = lombokAllArgsConstructorEnable;
         return this;
     }
 
