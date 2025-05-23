@@ -55,6 +55,7 @@
         <module>mybatis-flex-spring-boot-starter</module>
         <module>mybatis-flex-spring-boot3-starter</module>
         <module>mybatis-flex-solon-plugin</module>
+        <module>mybatis-flex-loveqq-starter</module>
         <module>mybatis-flex-test</module>
         <module>mybatis-flex-processor</module>
     </modules>
@@ -73,13 +74,15 @@
         <mybatis-velocity.version>2.3.0</mybatis-velocity.version>
         <mybatis-thymeleaf.version>1.1.0</mybatis-thymeleaf.version>
 
-        <mysql.version>9.2.0</mysql.version>
+        <mysql.version>9.3.0</mysql.version>
         <HikariCP.version>4.0.3</HikariCP.version>
 
-        <spring.version>6.2.2</spring.version>
+        <spring.version>6.2.7</spring.version>
         <spring-boot.version>3.4.1</spring-boot.version>
-        <solon.version>3.0.6</solon.version>
+        <solon.version>3.1.0</solon.version>
+        <loveqq.version>1.1.0-java8</loveqq.version>
 
+        <lombok.version>1.18.30</lombok.version>
         <junit.version>4.13.2</junit.version>
         <testcontainers.version>1.19.3</testcontainers.version>
         <maven-flatten.version>1.5.0</maven-flatten.version>

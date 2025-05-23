@@ -15,19 +15,14 @@
  */
 package com.mybatisflex.core.dialect;
 
-import java.util.EnumMap;
-import java.util.Map;
 
 import com.mybatisflex.core.FlexGlobalConfig;
-import com.mybatisflex.core.dialect.impl.ClickhouseDialectImpl;
-import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
-import com.mybatisflex.core.dialect.impl.DB2105Dialect;
-import com.mybatisflex.core.dialect.impl.DmDialect;
-import com.mybatisflex.core.dialect.impl.OracleDialect;
-import com.mybatisflex.core.dialect.impl.Sqlserver2005DialectImpl;
-import com.mybatisflex.core.dialect.impl.SqlserverDialectImpl;
+import com.mybatisflex.core.dialect.impl.*;
 import com.mybatisflex.core.util.MapUtil;
 import com.mybatisflex.core.util.ObjectUtil;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * 方言工厂类，用于创建方言
@@ -55,7 +50,7 @@ public class DialectFactory {
      */
     public static IDialect getDialect() {
         DbType dbType = ObjectUtil.requireNonNullElse(dbTypeThreadLocal.get(),
-                FlexGlobalConfig.getDefaultConfig().getDbType());
+            FlexGlobalConfig.getDefaultConfig().getDbType());
         return MapUtil.computeIfAbsent(dialectMap, dbType, DialectFactory::createDialect);
     }
 
@@ -77,12 +72,14 @@ public class DialectFactory {
         return dbTypeThreadLocal.get();
     }
 
+
     /**
      * 清除当前线程的 dbType
      */
     public static void clearHintDbType() {
         dbTypeThreadLocal.remove();
     }
+
 
     /**
      * 可以为某个 dbType 注册（新增或覆盖）自己的方言
@@ -94,9 +91,10 @@ public class DialectFactory {
         dialectMap.put(dbType, dialect);
     }
 
+
     private static IDialect createDialect(DbType dbType) {
         return switch (dbType) {
-            case MYSQL, H2, MARIADB, GBASE, OSCAR, XUGU, OCEAN_BASE, CUBRID, GOLDILOCKS, CSIIDB, HIVE, DORIS ->
+            case MYSQL, H2, MARIADB, GBASE, OSCAR, XUGU, OCEAN_BASE, CUBRID, GOLDILOCKS, CSIIDB, HIVE, DORIS, GOLDENDB, SUNDB, YASDB ->
                 new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
             case CLICK_HOUSE -> new ClickhouseDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
             case GBASE_8S -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.MYSQL);
@@ -104,7 +102,7 @@ public class DialectFactory {
             case ORACLE -> new OracleDialect();
             case GAUSS -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.ORACLE);
             case POSTGRE_SQL, SQLITE, HSQL, KINGBASE_ES, PHOENIX, SAP_HANA, IMPALA, HIGH_GO, VERTICA, REDSHIFT,
-                    OPENGAUSS, UXDB, LEALONE, DUCKDB ->
+                    OPENGAUSS, UXDB, LEALONE, DUCKDB, GBASE_8C, GBASE_8S_PG, VASTBASE, TRINO, PRESTO ->
                 new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
             case TDENGINE -> new CommonsDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.POSTGRESQL);
             case ORACLE_12C -> new OracleDialect(LimitOffsetProcessor.DERBY);
@@ -116,7 +114,6 @@ public class DialectFactory {
             case INFORMIX -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.INFORMIX);
             case SINODB -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SINODB);
             case SYBASE -> new CommonsDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.SYBASE);
-            case TRINO -> new CommonsDialectImpl(KeywordWrap.NONE, LimitOffsetProcessor.SQLSERVER);
             default -> new CommonsDialectImpl();
         };
     }
