@@ -77,7 +77,7 @@
         <mysql.version>9.3.0</mysql.version>
         <HikariCP.version>4.0.3</HikariCP.version>
 
-        <spring.version>6.2.7</spring.version>
+        <spring.version>6.2.10</spring.version>
         <spring-boot.version>3.4.1</spring-boot.version>
         <solon.version>3.1.0</solon.version>
         <loveqq.version>1.1.0-java8</loveqq.version>
