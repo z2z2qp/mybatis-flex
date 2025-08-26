@@ -44,7 +44,7 @@ public class Mappers {
     private Mappers() {
     }
 
-    private static final Map<Class<?>, Object> MAPPER_OBJECTS = new ConcurrentHashMap<>();
+    private static final Map<String, Map<Class<?>, Object>> MAPPER_OBJECTS_OF_ENV = new ConcurrentHashMap<>();
 
     private static final Map<Class<?>, Class<?>> ENTITY_MAPPER_MAP = new ConcurrentHashMap<>();
 
@@ -80,16 +80,20 @@ public class Mappers {
      * @return {@link BaseMapper} 对象
      */
     public static <M> M ofMapperClass(Class<M> mapperClass) {
-        Object mapperObject = MapUtil.computeIfAbsent(MAPPER_OBJECTS, mapperClass,
-                clazz -> Proxy.newProxyInstance(mapperClass.getClassLoader(), new Class[] { mapperClass },
-                        new MapperHandler(mapperClass)));
+        Map<Class<?>, Object> mapperObjects = MapUtil.computeIfAbsent(MAPPER_OBJECTS_OF_ENV, "default", envId -> new ConcurrentHashMap<>());
+        Object mapperObject = MapUtil.computeIfAbsent(mapperObjects, mapperClass, clazz ->
+            Proxy.newProxyInstance(mapperClass.getClassLoader()
+                , new Class[]{mapperClass}
+                , new MapperHandler(mapperClass)));
         return (M) mapperObject;
     }
 
     public static <M> M ofMapperClass(String environmentId, Class<M> mapperClass) {
-        Object mapperObject = MapUtil.computeIfAbsent(MAPPER_OBJECTS, mapperClass,
-                clazz -> Proxy.newProxyInstance(mapperClass.getClassLoader(), new Class[] { mapperClass },
-                        new MapperHandler(environmentId, mapperClass)));
+        Map<Class<?>, Object> mapperObjects = MapUtil.computeIfAbsent(MAPPER_OBJECTS_OF_ENV, environmentId, envId -> new ConcurrentHashMap<>());
+        Object mapperObject = MapUtil.computeIfAbsent(mapperObjects, mapperClass, clazz ->
+            Proxy.newProxyInstance(mapperClass.getClassLoader()
+                , new Class[]{mapperClass}
+                , new MapperHandler(environmentId, mapperClass)));
         return (M) mapperObject;
     }
 
