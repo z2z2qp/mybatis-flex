@@ -21,7 +21,7 @@ import com.mybatisflex.loveqq.test.mapper.AccountMapper;
 import com.mybatisflex.loveqq.test.model.Account;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 @Service

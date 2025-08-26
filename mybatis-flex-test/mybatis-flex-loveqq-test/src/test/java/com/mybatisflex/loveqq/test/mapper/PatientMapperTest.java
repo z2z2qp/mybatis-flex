@@ -5,7 +5,7 @@ import com.mybatisflex.loveqq.test.LoveqqExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 患者相关测试
