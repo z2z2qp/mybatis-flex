@@ -5,10 +5,12 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>com.mybatis-flex</groupId>
-        <version>1.10.9</version>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>mybatis-flex-test</name>
     <artifactId>mybatis-flex-test</artifactId>
     <packaging>pom</packaging>
 
@@ -20,7 +22,7 @@
         <module>mybatis-flex-spring-boot-test</module>
         <module>mybatis-flex-spring-cloud-test</module>
 <!--        <module>mybatis-flex-solon-test</module>-->
-        <module>mybatis-flex-loveqq-test</module>
+<!--        <module>mybatis-flex-loveqq-test</module>-->
     </modules>
 
     <properties>
@@ -75,7 +77,7 @@
                         <path>
                             <groupId>com.mybatis-flex</groupId>
                             <artifactId>mybatis-flex-processor</artifactId>
-                            <version>${mybatis-flex.version}</version>
+                            <version>${revision}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
