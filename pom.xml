@@ -67,7 +67,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Mybatis-Flex 版本 -->
-        <revision>1.11.1</revision>
+        <revision>1.11.2</revision>
 
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
         <xml-maven-plugin.version>1.1.0</xml-maven-plugin.version>
