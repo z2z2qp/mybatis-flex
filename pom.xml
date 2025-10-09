@@ -62,12 +62,14 @@
     </modules>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Mybatis-Flex 版本 -->
-        <revision>1.11.1</revision>
+        <revision>1.11.3</revision>
 
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
         <xml-maven-plugin.version>1.1.0</xml-maven-plugin.version>
@@ -242,6 +244,7 @@
         </resources>
 
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -252,6 +255,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
