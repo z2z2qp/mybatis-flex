@@ -70,15 +70,4 @@ public class MybatisFlexPagingItemReader<T> extends AbstractPagingItemReader<T> 
         Page<T> paginate = mapper.paginate(getPage() + 1, getPageSize(), queryWrapper);
         results.addAll(paginate.getRecords());
     }
-
-    @Override
-    protected void doJumpToPage(int itemIndex) {
-        if (results == null) {
-            results = new CopyOnWriteArrayList<>();
-        } else {
-            results.clear();
-        }
-        Page<T> paginate = mapper.paginate(itemIndex + 1, getPageSize(), queryWrapper);
-        results.addAll(paginate.getRecords());
-    }
 }

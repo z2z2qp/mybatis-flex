@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class BatchController {
             JobParameters jobParameters = parameters.toJobParameters();
 
             JobExecution run1 = jobLauncher.run(testImportJob, jobParameters);
-            run1.setStartTime(new Date());
+            run1.setStartTime(LocalDateTime.now());
             while (run1.isRunning()) {
                 Thread.sleep(500);
             }
