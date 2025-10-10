@@ -3,6 +3,7 @@ package com.mybatisflex.spring.batch;
 import com.mybatisflex.core.BaseMapper;
 import org.mybatis.logging.Logger;
 import org.mybatis.logging.LoggerFactory;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -58,8 +59,9 @@ public class MybatisFlexBatchItemWriter<T> implements ItemWriter<T>, Initializin
      * {@inheritDoc}
      */
     @Override
-    public void write(final List<? extends T> items) {
-
+    public void write(final Chunk<? extends T> chunk) {
+        // 将 Chunk 转换为 List
+        List<? extends T> items = chunk.getItems();
         if (!items.isEmpty()) {
             LOGGER.debug(() -> "Executing batch with " + items.size() + " items.");
             int results = this.mapper.insertBatch((List<T>) items);

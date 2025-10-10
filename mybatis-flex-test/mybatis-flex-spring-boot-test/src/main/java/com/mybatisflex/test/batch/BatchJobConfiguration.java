@@ -9,17 +9,19 @@ import com.mybatisflex.test.mapper.MyAccountMapper;
 import com.mybatisflex.test.model.Account;
 import com.mybatisflex.test.model.table.AccountTableDef;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.step.tasklet.TaskletStep;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * 生成batch demo
@@ -34,45 +36,87 @@ public class BatchJobConfiguration implements StepExecutionListener, JobExecutio
     @Lazy
     private MyAccountMapper accountMapper;
 
+    // Spring Boot 会自动注入这些 Bean
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+
+    public BatchJobConfiguration(JobRepository jobRepository,
+                                 PlatformTransactionManager transactionManager) {
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+    }
+
 
     /**
      * 帐户导入信息
      *
-     * @param jobBuilders
      * @return
      */
     @Bean(name = "testImportJob")
-    public Job testImportJob(JobBuilderFactory jobBuilders,
-                             @Qualifier("accountStep") Step accountStep) {
-        return jobBuilders.get("testImportJob")
-            .start(accountStep).listener(this)
+    public Job testImportJob() {
+        return new JobBuilder("sampleJob", jobRepository)
+            .start(step1())
             .build();
     }
 
-    /**
-     * 帐户执行阶段
-     *
-     * @param stepBuilders
-     * @return
-     */
     @Bean
-    public Step accountStep(StepBuilderFactory stepBuilders,
-                            @Qualifier("accountReader") MybatisFlexPagingItemReader accountReader,
-                            @Qualifier("accountProcessor") ItemProcessor accountProcessor,
-                            @Qualifier("accountWriter") MybatisFlexBatchItemWriter<Account> accountWriter) {
-        TaskletStep step = stepBuilders.get("创建帐户")
-            .<Account, Account>chunk(10)
-            .reader(accountReader)
-            .processor(accountProcessor)
-            .writer(accountWriter)
+    public Step step1() {
+        return new StepBuilder("step1", jobRepository)
+            .<String, String>chunk(10, transactionManager)
+            .reader(itemReader())
+            .processor(itemProcessor())
+            .writer(itemWriter())
             .build();
-
-        step.registerStepExecutionListener(this);
-        return step;
     }
+
+    @Bean
+    public ItemReader<String> itemReader() {
+        // 返回你的 Reader 实现
+        return new MybatisFlexPagingItemReader<>();
+    }
+
+    @Bean
+    public ItemProcessor<String, String> itemProcessor() {
+        return item -> {
+            // 处理逻辑
+            return "Processed: " + item;
+        };
+    }
+
+    @Bean
+    public ItemWriter<String> itemWriter() {
+        return items -> {
+            for (String item : items) {
+                System.out.println("Writing: " + item);
+            }
+        };
+    }
+//
+//    /**
+//     * 帐户执行阶段
+//     *
+//     * @param stepBuilders
+//     * @return
+//     */
+//    @Bean
+//    public Step accountStep(StepBuilderFactory stepBuilders,
+//                            @Qualifier("accountReader") MybatisFlexPagingItemReader accountReader,
+//                            @Qualifier("accountProcessor") ItemProcessor accountProcessor,
+//                            @Qualifier("accountWriter") MybatisFlexBatchItemWriter<Account> accountWriter) {
+//        TaskletStep step = stepBuilders.get("创建帐户")
+//            .<Account, Account>chunk(10)
+//            .reader(accountReader)
+//            .processor(accountProcessor)
+//            .writer(accountWriter)
+//            .build();
+//
+//        step.registerStepExecutionListener(this);
+//        return step;
+//    }
 
     /**
      * 帐户读取
+     *
      * @return
      */
     @Bean
@@ -93,12 +137,13 @@ public class BatchJobConfiguration implements StepExecutionListener, JobExecutio
 
     /**
      * 数据转换
+     *
      * @return
      */
     @Bean
     @StepScope
-    public ItemProcessor<Account,Account> accountProcessor() {
-        ItemProcessor<Account,Account> processor = new ItemProcessor<Account, Account>() {
+    public ItemProcessor<Account, Account> accountProcessor() {
+        ItemProcessor<Account, Account> processor = new ItemProcessor<Account, Account>() {
             @Override
             public Account process(Account account) throws Exception {
                 Account entity = new Account();
@@ -149,6 +194,7 @@ public class BatchJobConfiguration implements StepExecutionListener, JobExecutio
      * logged.
      *
      * @param stepExecution {@link StepExecution} instance.
+     *
      * @return an {@link ExitStatus} to combine with the normal value. Return
      * {@code null} to leave the old value unchanged.
      */
