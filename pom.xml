@@ -85,7 +85,7 @@
 
         <spring.version>6.2.11</spring.version>
         <spring-batch.version>5.2.3</spring-batch.version>
-        <spring-boot.version>3.4.10</spring-boot.version>
+        <spring-boot.version>3.4.11</spring-boot.version>
         <solon.version>3.2.1</solon.version>
         <loveqq.version>1.1.5</loveqq.version>
 
