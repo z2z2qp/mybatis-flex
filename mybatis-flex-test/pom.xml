@@ -28,10 +28,10 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <commons-io.version>2.18.0</commons-io.version>
+        <commons-io.version>2.20.0</commons-io.version>
         <org.projectlombok.version>1.18.36</org.projectlombok.version>
         <!-- 高版本基于 JDK17，勿动 -->
-        <json-unit-assertj.version>3.5.0</json-unit-assertj.version>
+        <json-unit-assertj.version>5.1.0</json-unit-assertj.version>
     </properties>
 
     <dependencies>
