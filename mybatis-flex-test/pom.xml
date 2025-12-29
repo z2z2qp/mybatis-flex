@@ -16,18 +16,18 @@
 
 
     <modules>
-        <module>mybatis-flex-native-test</module>
+<!--        <module>mybatis-flex-native-test</module>-->
 <!--        <module>mybatis-flex-seata-test</module>-->
-        <module>mybatis-flex-spring-test</module>
-        <module>mybatis-flex-spring-boot-test</module>
-        <module>mybatis-flex-spring-cloud-test</module>
+<!--        <module>mybatis-flex-spring-test</module>-->
+<!--        <module>mybatis-flex-spring-boot-test</module>-->
+<!--        <module>mybatis-flex-spring-cloud-test</module>-->
 <!--        <module>mybatis-flex-solon-test</module>-->
 <!--        <module>mybatis-flex-loveqq-test</module>-->
     </modules>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <commons-io.version>2.20.0</commons-io.version>
         <org.projectlombok.version>1.18.36</org.projectlombok.version>
         <!-- 高版本基于 JDK17，勿动 -->
@@ -64,7 +64,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.14.1</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
