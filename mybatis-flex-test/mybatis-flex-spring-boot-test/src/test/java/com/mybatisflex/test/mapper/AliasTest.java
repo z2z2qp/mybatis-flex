@@ -168,7 +168,7 @@ class AliasTest {
 
     @Test
     void test08() throws JsonProcessingException {
-        var user = userMapper.selectOneById(1);
+        var user = userMapper.selectOneById(1).orElse(null);
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         System.out.println(objectWriter.writeValueAsString(user));
         Assertions.assertTrue(true);

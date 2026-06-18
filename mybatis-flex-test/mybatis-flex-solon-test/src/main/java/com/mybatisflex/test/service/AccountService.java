@@ -48,6 +48,6 @@ public class AccountService {
         account.setUserName("aliothmoon");
         accountMapper.insert(account);
         TimeUnit.SECONDS.sleep(5);
-        accountMapper.selectOneById(account.getId());
+        accountMapper.selectOneById(account.getId()).orElse(null);
     }
 }

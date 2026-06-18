@@ -53,13 +53,13 @@ public class TestService {
         LOGGER.warn(() -> "xid:" + RootContext.getXID());
         QueryWrapper account = new QueryWrapper();
         account.where(AccountTblTableDef.ACCOUNT_TBL.USER_ID.eq("1001"));
-        AccountTbl accountTbl = accountTblMapper.selectOneByQuery(account).get();
+        AccountTbl accountTbl = accountTblMapper.selectOneByQuery(account).orElse(null);
         accountTbl.setMoney(accountTbl.getMoney() - 5);
         accountTblMapper.update(accountTbl);
         DataSourceKey.use("stockdb");
         QueryWrapper stock = new QueryWrapper();
         stock.where("id=1");
-        StockTbl stockTbl = stockTblMapper.selectOneByQuery(stock).get();
+        StockTbl stockTbl = stockTblMapper.selectOneByQuery(stock).orElse(null);
         stockTbl.setCount(stockTbl.getCount() - 1);
         stockTblMapper.update(stockTbl);
         DataSourceKey.use("orderdb");
