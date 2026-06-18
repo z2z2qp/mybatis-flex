@@ -219,7 +219,7 @@ pom.xml 添加 `annotationProcessorPaths` 配置，
             <path>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>${org.projectlombok.version}</version>
+                <version>${lombok.version}</version>
             </path>
             <path>
                 <groupId>org.projectlombok</groupId>
@@ -248,7 +248,7 @@ pom.xml 添加 `annotationProcessorPaths` 配置，
 ```
 dependencies {
     ...
-    annotationProcessor 'com.mybatis-flex:mybatis-flex-processor:1.11.5'
+    annotationProcessor 'com.mybatis-flex:mybatis-flex-processor:1.11.7'
 }
 ```
 

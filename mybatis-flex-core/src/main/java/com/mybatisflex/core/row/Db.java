@@ -23,10 +23,13 @@ import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryTable;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.transaction.Propagation;
+import com.mybatisflex.core.transaction.RollbackDecider;
 import com.mybatisflex.core.transaction.TransactionalManager;
 import com.mybatisflex.core.util.CollectionUtil;
-import org.apache.ibatis.session.SqlSessionFactory;
 import com.mybatisflex.core.util.MapUtil;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,7 +74,7 @@ public class Db {
      * @param tableName 表名
      * @param row       数据
      */
-    public static int insert(String schema, String tableName, Row row) {
+    public static int insert(String schema, @NonNull String tableName, @NonNull Row row) {
         return invoker().insert(schema, tableName, row);
     }
 
@@ -81,7 +84,7 @@ public class Db {
      * @param tableName 表名
      * @param row       数据
      */
-    public static int insert(String tableName, Row row) {
+    public static int insert(@NonNull String tableName, @NonNull Row row) {
         return invoker().insert(null, tableName, row);
     }
 
@@ -92,7 +95,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static int insertBySql(String sql, Object... args) {
+    public static int insertBySql(@NonNull String sql, Object... args) {
         return invoker().insertBySql(sql, args);
     }
 
@@ -104,7 +107,7 @@ public class Db {
      * @param tableName 表名
      * @param rows      数据
      */
-    public static int[] insertBatch(String schema, String tableName, Collection<Row> rows) {
+    public static int[] insertBatch(String schema, @NonNull String tableName, @NonNull Collection<Row> rows) {
         return insertBatch(schema, tableName, rows, rows.size());
     }
 
@@ -114,7 +117,7 @@ public class Db {
      * @param tableName 表名
      * @param rows      数据
      */
-    public static int[] insertBatch(String tableName, Collection<Row> rows) {
+    public static int[] insertBatch(@NonNull String tableName, @NonNull Collection<Row> rows) {
         return insertBatch(null, tableName, rows, rows.size());
     }
 
@@ -126,7 +129,7 @@ public class Db {
      * @param rows      数据
      * @param batchSize 每次提交的数据量
      */
-    public static int[] insertBatch(String schema, String tableName, Collection<Row> rows, int batchSize) {
+    public static int[] insertBatch(String schema, @NonNull String tableName, @NonNull Collection<Row> rows, int batchSize) {
         return executeBatch(rows, batchSize, RowMapper.class, (mapper, row) -> mapper.insert(schema, tableName, row));
     }
 
@@ -137,7 +140,7 @@ public class Db {
      * @param rows      数据
      * @param batchSize 每次提交的数据量
      */
-    public static int[] insertBatch(String tableName, Collection<Row> rows, int batchSize) {
+    public static int[] insertBatch(@NonNull String tableName, @NonNull Collection<Row> rows, int batchSize) {
         return executeBatch(rows, batchSize, RowMapper.class, (mapper, row) -> mapper.insert(null, tableName, row));
     }
 
@@ -148,7 +151,7 @@ public class Db {
      * @param tableName 表名
      * @param rows      数据
      */
-    public static int insertBatchWithFirstRowColumns(String schema, String tableName, List<Row> rows) {
+    public static int insertBatchWithFirstRowColumns(String schema, @NonNull String tableName, @NonNull List<Row> rows) {
         return invoker().insertBatchWithFirstRowColumns(schema, tableName, rows);
     }
 
@@ -158,7 +161,7 @@ public class Db {
      * @param tableName 表名
      * @param rows      数据
      */
-    public static int insertBatchWithFirstRowColumns(String tableName, List<Row> rows) {
+    public static int insertBatchWithFirstRowColumns(@NonNull String tableName, @NonNull List<Row> rows) {
         return invoker().insertBatchWithFirstRowColumns(null, tableName, rows);
     }
 
@@ -168,7 +171,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args 参数
      */
-    public static int deleteBySql(String sql, Object... args) {
+    public static int deleteBySql(@NonNull String sql, Object... args) {
         return invoker().deleteBySql(sql, args);
     }
 
@@ -179,7 +182,7 @@ public class Db {
      * @param tableName 表名
      * @param row       主键 和 id值
      */
-    public static int deleteById(String schema, String tableName, Row row) {
+    public static int deleteById(String schema, @NonNull String tableName, @NonNull Row row) {
         return invoker().deleteById(schema, tableName, row);
     }
 
@@ -189,7 +192,7 @@ public class Db {
      * @param tableName 表名
      * @param row       主键 和 id值
      */
-    public static int deleteById(String tableName, Row row) {
+    public static int deleteById(@NonNull String tableName, @NonNull Row row) {
         return invoker().deleteById(null, tableName, row);
     }
 
@@ -202,7 +205,7 @@ public class Db {
      * @param primaryKey 主键字段名称
      * @param id         主键值
      */
-    public static int deleteById(String schema, String tableName, String primaryKey, Object id) {
+    public static int deleteById(String schema, @NonNull String tableName, @NonNull String primaryKey, @NonNull Object id) {
         return invoker().deleteById(schema, tableName, primaryKey, id);
     }
 
@@ -213,7 +216,7 @@ public class Db {
      * @param primaryKey 主键字段名称
      * @param id         主键值
      */
-    public static int deleteById(String tableName, String primaryKey, Object id) {
+    public static int deleteById(@NonNull String tableName, @NonNull String primaryKey, @NonNull Object id) {
         return invoker().deleteById(null, tableName, primaryKey, id);
     }
 
@@ -226,7 +229,7 @@ public class Db {
      * @param primaryKey 主键字段名称
      * @param ids        id 集合
      */
-    public static int deleteBatchByIds(String schema, String tableName, String primaryKey, Collection<?> ids) {
+    public static int deleteBatchByIds(String schema, @NonNull String tableName, @NonNull String primaryKey, @NonNull Collection<?> ids) {
         return invoker().deleteBatchByIds(schema, tableName, primaryKey, ids);
     }
 
@@ -237,7 +240,7 @@ public class Db {
      * @param primaryKey 主键字段名称
      * @param ids        id 集合
      */
-    public static int deleteBatchByIds(String tableName, String primaryKey, Collection<?> ids) {
+    public static int deleteBatchByIds(@NonNull String tableName, @NonNull String primaryKey, @NonNull Collection<?> ids) {
         return invoker().deleteBatchByIds(null, tableName, primaryKey, ids);
     }
 
@@ -248,8 +251,8 @@ public class Db {
      * @param tableName    表名
      * @param whereColumns where 条件
      */
-    public static int deleteByMap(String schema,String tableName, Map<String, Object> whereColumns) {
-        return invoker().deleteByQuery(schema,tableName, QueryWrapper.create().where(whereColumns));
+    public static int deleteByMap(String schema, @NonNull String tableName, @NonNull Map<String, Object> whereColumns) {
+        return invoker().deleteByQuery(schema, tableName, new QueryWrapper().where(whereColumns));
     }
 
     /**
@@ -258,8 +261,8 @@ public class Db {
      * @param tableName    表名
      * @param whereColumns where 条件
      */
-    public static int deleteByMap(String tableName, Map<String, Object> whereColumns) {
-        return invoker().deleteByQuery(null,tableName, QueryWrapper.create().where(whereColumns));
+    public static int deleteByMap(@NonNull String tableName, @NonNull Map<String, Object> whereColumns) {
+        return invoker().deleteByQuery(null, tableName, new QueryWrapper().where(whereColumns));
     }
 
     /**
@@ -269,8 +272,8 @@ public class Db {
      * @param tableName 表名
      * @param condition 条件内容
      */
-    public static int deleteByCondition(String schema,String tableName, QueryCondition condition) {
-        return invoker().deleteByQuery(schema,tableName, QueryWrapper.create().where(condition));
+    public static int deleteByCondition(String schema, @NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().deleteByQuery(schema, tableName, new QueryWrapper().where(condition));
     }
 
     /**
@@ -279,8 +282,8 @@ public class Db {
      * @param tableName 表名
      * @param condition 条件内容
      */
-    public static int deleteByCondition(String tableName, QueryCondition condition) {
-        return invoker().deleteByQuery(null,tableName, QueryWrapper.create().where(condition));
+    public static int deleteByCondition(@NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().deleteByQuery(null, tableName, new QueryWrapper().where(condition));
     }
 
 
@@ -291,7 +294,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper query
      */
-    public static int deleteByQuery(String schema, String tableName, QueryWrapper queryWrapper) {
+    public static int deleteByQuery(String schema, @NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().deleteByQuery(schema, tableName, queryWrapper);
     }
 
@@ -301,7 +304,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper query
      */
-    public static int deleteByQuery(String tableName, QueryWrapper queryWrapper) {
+    public static int deleteByQuery(@NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().deleteByQuery(null, tableName, queryWrapper);
     }
 
@@ -311,7 +314,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static int updateBySql(String sql, Object... args) {
+    public static int updateBySql(@NonNull String sql, Object... args) {
         return invoker().updateBySql(sql, args);
     }
 
@@ -469,7 +472,6 @@ public class Db {
     }
 
 
-
     /**
      * 批量执行工具方法
      *
@@ -521,7 +523,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static Row selectOneBySql(String sql, Object... args) {
+    public static @Nullable Row selectOneBySql(@NonNull String sql, Object... args) {
         return invoker().selectOneBySql(sql, args);
     }
 
@@ -533,7 +535,7 @@ public class Db {
      * @param tableName 表名
      * @param row       主键和 id 值
      */
-    public static Row selectOneById(String schema, String tableName, Row row) {
+    public static @Nullable Row selectOneById(String schema, @NonNull String tableName, @NonNull Row row) {
         return invoker().selectOneById(schema, tableName, row);
     }
 
@@ -543,7 +545,7 @@ public class Db {
      * @param tableName 表名
      * @param row       主键和 id 值
      */
-    public static Row selectOneById(String tableName, Row row) {
+    public static @Nullable Row selectOneById(@NonNull String tableName, @NonNull Row row) {
         return invoker().selectOneById(null, tableName, row);
     }
 
@@ -556,7 +558,7 @@ public class Db {
      * @param primaryKey 主键字段名称
      * @param id         主键值
      */
-    public static Row selectOneById(String schema, String tableName, String primaryKey, Object id) {
+    public static @Nullable Row selectOneById(String schema, @NonNull String tableName, @NonNull String primaryKey, @NonNull Object id) {
         return invoker().selectOneById(schema, tableName, primaryKey, id);
     }
 
@@ -567,7 +569,7 @@ public class Db {
      * @param primaryKey 主键字段名称
      * @param id         主键值
      */
-    public static Row selectOneById(String tableName, String primaryKey, Object id) {
+    public static @Nullable Row selectOneById(@NonNull String tableName, @NonNull String primaryKey, @NonNull Object id) {
         return invoker().selectOneById(null, tableName, primaryKey, id);
     }
 
@@ -578,8 +580,8 @@ public class Db {
      * @param tableName    表名
      * @param whereColumns where条件
      */
-    public static Row selectOneByMap(String schema,String tableName, Map whereColumns) {
-        return invoker().selectOneByQuery(schema,tableName, QueryWrapper.create().where(whereColumns).limit(1L));
+    public static @Nullable Row selectOneByMap(String schema, @NonNull String tableName, @NonNull Map whereColumns) {
+        return invoker().selectOneByQuery(schema, tableName, new QueryWrapper().where(whereColumns).limit(1L));
     }
 
 
@@ -589,8 +591,8 @@ public class Db {
      * @param tableName    表名
      * @param whereColumns where条件
      */
-    public static Row selectOneByMap(String tableName, Map whereColumns) {
-        return invoker().selectOneByQuery(null,tableName, QueryWrapper.create().where(whereColumns).limit(1L));
+    public static @Nullable Row selectOneByMap(@NonNull String tableName, @NonNull Map whereColumns) {
+        return invoker().selectOneByQuery(null, tableName, new QueryWrapper().where(whereColumns).limit(1L));
     }
 
     /**
@@ -600,8 +602,8 @@ public class Db {
      * @param tableName 表名
      * @param condition 条件
      */
-    public static Row selectOneByCondition(String schema,String tableName, QueryCondition condition) {
-        return invoker().selectOneByQuery(schema,tableName, QueryWrapper.create().where(condition).limit(1L));
+    public static @Nullable Row selectOneByCondition(String schema, @NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().selectOneByQuery(schema, tableName, new QueryWrapper().where(condition).limit(1L));
     }
 
     /**
@@ -610,8 +612,8 @@ public class Db {
      * @param tableName 表名
      * @param condition 条件
      */
-    public static Row selectOneByCondition(String tableName, QueryCondition condition) {
-        return invoker().selectOneByQuery(null,tableName, QueryWrapper.create().where(condition).limit(1L));
+    public static @Nullable Row selectOneByCondition(@NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().selectOneByQuery(null, tableName, new QueryWrapper().where(condition).limit(1L));
     }
 
 
@@ -622,7 +624,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper queryWrapper
      */
-    public static Row selectOneByQuery(String schema, String tableName, QueryWrapper queryWrapper) {
+    public static @Nullable Row selectOneByQuery(String schema, @NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectOneByQuery(schema, tableName, queryWrapper);
     }
 
@@ -632,7 +634,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper queryWrapper
      */
-    public static Row selectOneByQuery(String tableName, QueryWrapper queryWrapper) {
+    public static @Nullable Row selectOneByQuery(@NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectOneByQuery(null, tableName, queryWrapper);
     }
 
@@ -642,7 +644,7 @@ public class Db {
      *
      * @param queryWrapper 必须带有 from 的 queryWrapper
      */
-    public static Row selectOneByQuery(QueryWrapper queryWrapper) {
+    public static @Nullable Row selectOneByQuery(@NonNull QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables == null || queryTables.isEmpty()) {
             throw FlexExceptions.wrap("table must not be null or empty in Db.selectOneByQuery");
@@ -657,7 +659,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static List<Row> selectListBySql(String sql, Object... args) {
+    public static List<Row> selectListBySql(@NonNull String sql, Object... args) {
         return invoker().selectListBySql(sql, args);
     }
 
@@ -669,8 +671,8 @@ public class Db {
      * @param tableName    表名
      * @param whereColumns where 条件
      */
-    public static List<Row> selectListByMap(String schema,String tableName, Map<String, Object> whereColumns) {
-        return invoker().selectListByQuery(schema,tableName, QueryWrapper.create().where(whereColumns));
+    public static List<Row> selectListByMap(String schema, @NonNull String tableName, @NonNull Map<String, Object> whereColumns) {
+        return invoker().selectListByQuery(schema, tableName, new QueryWrapper().where(whereColumns));
     }
 
     /**
@@ -679,8 +681,8 @@ public class Db {
      * @param tableName    表名
      * @param whereColumns where 条件
      */
-    public static List<Row> selectListByMap(String tableName, Map<String, Object> whereColumns) {
-        return invoker().selectListByQuery(null,tableName, QueryWrapper.create().where(whereColumns));
+    public static List<Row> selectListByMap(@NonNull String tableName, @NonNull Map<String, Object> whereColumns) {
+        return invoker().selectListByQuery(null, tableName, new QueryWrapper().where(whereColumns));
     }
 
 
@@ -692,8 +694,8 @@ public class Db {
      * @param whereColumns 条件
      * @param count        数据量
      */
-    public static List<Row> selectListByMap(String schema, String tableName, Map<String, Object> whereColumns, Long count) {
-        return invoker().selectListByQuery(schema, tableName, QueryWrapper.create().where(whereColumns).limit(count));
+    public static List<Row> selectListByMap(String schema, @NonNull String tableName, @NonNull Map<String, Object> whereColumns, Long count) {
+        return invoker().selectListByQuery(schema, tableName, new QueryWrapper().where(whereColumns).limit(count));
     }
 
     /**
@@ -703,8 +705,8 @@ public class Db {
      * @param whereColumns 条件
      * @param count        数据量
      */
-    public static List<Row> selectListByMap(String tableName, Map<String, Object> whereColumns, Long count) {
-        return invoker().selectListByQuery(null, tableName, QueryWrapper.create().where(whereColumns).limit(count));
+    public static List<Row> selectListByMap(@NonNull String tableName, @NonNull Map<String, Object> whereColumns, Long count) {
+        return invoker().selectListByQuery(null, tableName, new QueryWrapper().where(whereColumns).limit(count));
     }
 
 
@@ -715,8 +717,8 @@ public class Db {
      * @param tableName 表名
      * @param condition where 条件
      */
-    public static List<Row> selectListByCondition(String schema,String tableName, QueryCondition condition) {
-        return invoker().selectListByQuery(schema,tableName, QueryWrapper.create().where(condition));
+    public static List<Row> selectListByCondition(String schema, @NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().selectListByQuery(schema, tableName, new QueryWrapper().where(condition));
     }
 
 
@@ -726,8 +728,8 @@ public class Db {
      * @param tableName 表名
      * @param condition where 条件
      */
-    public static List<Row> selectListByCondition(String tableName, QueryCondition condition) {
-        return invoker().selectListByQuery(null,tableName, QueryWrapper.create().where(condition));
+    public static List<Row> selectListByCondition(@NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().selectListByQuery(null, tableName, new QueryWrapper().where(condition));
     }
 
     /**
@@ -738,8 +740,8 @@ public class Db {
      * @param condition 条件
      * @param count     数据量
      */
-    public static List<Row> selectListByCondition(String schema,String tableName, QueryCondition condition, long count) {
-        return invoker().selectListByQuery(schema,tableName, QueryWrapper.create().where(condition).limit(count));
+    public static List<Row> selectListByCondition(String schema, @NonNull String tableName, @NonNull QueryCondition condition, Long count) {
+        return invoker().selectListByQuery(schema, tableName, new QueryWrapper().where(condition).limit(count));
     }
 
     /**
@@ -749,8 +751,8 @@ public class Db {
      * @param condition 条件
      * @param count     数据量
      */
-    public static List<Row> selectListByCondition(String tableName, QueryCondition condition, long count) {
-        return invoker().selectListByQuery(null,tableName, QueryWrapper.create().where(condition).limit(count));
+    public static List<Row> selectListByCondition(@NonNull String tableName, @NonNull QueryCondition condition, Long count) {
+        return invoker().selectListByQuery(null, tableName, new QueryWrapper().where(condition).limit(count));
     }
 
 
@@ -761,7 +763,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper query 条件
      */
-    public static List<Row> selectListByQuery(String schema, String tableName, QueryWrapper queryWrapper) {
+    public static List<Row> selectListByQuery(String schema, @NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectListByQuery(schema, tableName, queryWrapper);
     }
 
@@ -772,7 +774,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper query 条件
      */
-    public static List<Row> selectListByQuery(String tableName, QueryWrapper queryWrapper) {
+    public static List<Row> selectListByQuery(@NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectListByQuery(null, tableName, queryWrapper);
     }
 
@@ -782,7 +784,7 @@ public class Db {
      *
      * @param queryWrapper 必须带有 from 的 queryWrapper
      */
-    public static List<Row> selectListByQuery(QueryWrapper queryWrapper) {
+    public static List<Row> selectListByQuery(@NonNull QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables == null || queryTables.isEmpty()) {
             throw FlexExceptions.wrap("table must not be null or empty in Db.selectListByQuery");
@@ -796,7 +798,7 @@ public class Db {
      * @param schema    模式
      * @param tableName 表名
      */
-    public static List<Row> selectAll(String schema, String tableName) {
+    public static List<Row> selectAll(String schema, @NonNull String tableName) {
         return invoker().selectAll(schema, tableName);
     }
 
@@ -805,7 +807,7 @@ public class Db {
      *
      * @param tableName 表名
      */
-    public static List<Row> selectAll(String tableName) {
+    public static List<Row> selectAll(@NonNull String tableName) {
         return invoker().selectAll(null, tableName);
     }
 
@@ -815,7 +817,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static Object selectObject(String sql, Object... args) {
+    public static @Nullable Object selectObject(@NonNull String sql, Object... args) {
         return invoker().selectObject(sql, args);
     }
 
@@ -828,7 +830,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static Object selectObject(String schema, String tableName, QueryWrapper queryWrapper) {
+    public static @Nullable Object selectObject(String schema, @NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectObjectByQuery(schema, tableName, queryWrapper);
     }
 
@@ -839,7 +841,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static Object selectObject(String tableName, QueryWrapper queryWrapper) {
+    public static @Nullable Object selectObject(@NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectObjectByQuery(null, tableName, queryWrapper);
     }
 
@@ -850,7 +852,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static Object selectObject(QueryWrapper queryWrapper) {
+    public static @Nullable Object selectObject(@NonNull QueryWrapper queryWrapper) {
         return invoker().selectObjectByQuery(null, null, queryWrapper);
     }
 
@@ -860,7 +862,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static Map selectFirstAndSecondColumnsAsMap(QueryWrapper queryWrapper) {
+    public static @Nullable Map selectFirstAndSecondColumnsAsMap(@NonNull QueryWrapper queryWrapper) {
         return invoker().selectFirstAndSecondColumnsAsMapByQuery(null, null, queryWrapper);
     }
 
@@ -870,7 +872,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static Map selectFirstAndSecondColumnsAsMap(String sql, Object... args) {
+    public static @Nullable Map selectFirstAndSecondColumnsAsMap(@NonNull String sql, Object... args) {
         return invoker().selectFirstAndSecondColumnsAsMap(sql, args);
     }
 
@@ -882,7 +884,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static Map selectFirstAndSecondColumnsAsMap(String schema, String tableName, QueryWrapper queryWrapper) {
+    public static @Nullable Map selectFirstAndSecondColumnsAsMap(String schema, @NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectFirstAndSecondColumnsAsMapByQuery(schema, tableName, queryWrapper);
     }
 
@@ -893,7 +895,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static Map selectFirstAndSecondColumnsAsMap(String tableName, QueryWrapper queryWrapper) {
+    public static @Nullable Map selectFirstAndSecondColumnsAsMap(@NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectFirstAndSecondColumnsAsMapByQuery(null, tableName, queryWrapper);
     }
 
@@ -903,7 +905,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static List<Object> selectObjectList(String sql, Object... args) {
+    public static List<Object> selectObjectList(@NonNull String sql, Object... args) {
         return invoker().selectObjectList(sql, args);
     }
 
@@ -916,7 +918,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static List<Object> selectObjectList(String schema, String tableName, QueryWrapper queryWrapper) {
+    public static List<Object> selectObjectList(String schema, @NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectObjectListByQuery(schema, tableName, queryWrapper);
     }
 
@@ -927,7 +929,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static List<Object> selectObjectList(String tableName, QueryWrapper queryWrapper) {
+    public static List<Object> selectObjectList(@NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectObjectListByQuery(null, tableName, queryWrapper);
     }
 
@@ -938,7 +940,7 @@ public class Db {
      * @param queryWrapper query 封装
      * @return 数据内容
      */
-    public static List<Object> selectObjectList(QueryWrapper queryWrapper) {
+    public static List<Object> selectObjectList(@NonNull QueryWrapper queryWrapper) {
         return invoker().selectObjectListByQuery(null, null, queryWrapper);
     }
 
@@ -950,7 +952,7 @@ public class Db {
      * @param sql  sql 内容
      * @param args sql 参数
      */
-    public static long selectCount(String sql, Object... args) {
+    public static long selectCount(@NonNull String sql, Object... args) {
         return invoker().selectCount(sql, args);
     }
 
@@ -962,8 +964,8 @@ public class Db {
      * @param tableName 表名
      * @param condition 条件
      */
-    public static long selectCountByCondition(String schema,String tableName, QueryCondition condition) {
-        return invoker().selectCountByQuery(schema,tableName, QueryWrapper.create().where(condition));
+    public static long selectCountByCondition(String schema, @NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().selectCountByQuery(schema, tableName, new QueryWrapper().where(condition));
     }
 
     /**
@@ -972,8 +974,8 @@ public class Db {
      * @param tableName 表名
      * @param condition 条件
      */
-    public static long selectCountByCondition(String tableName, QueryCondition condition) {
-        return invoker().selectCountByQuery(null,tableName, QueryWrapper.create().where(condition));
+    public static long selectCountByCondition(@NonNull String tableName, @NonNull QueryCondition condition) {
+        return invoker().selectCountByQuery(null, tableName, new QueryWrapper().where(condition));
     }
 
 
@@ -984,7 +986,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper query 条件
      */
-    public static long selectCountByQuery(String schema, String tableName, QueryWrapper queryWrapper) {
+    public static long selectCountByQuery(String schema, @NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectCountByQuery(schema, tableName, queryWrapper);
     }
 
@@ -994,7 +996,7 @@ public class Db {
      * @param tableName    表名
      * @param queryWrapper query 条件
      */
-    public static long selectCountByQuery(String tableName, QueryWrapper queryWrapper) {
+    public static long selectCountByQuery(@NonNull String tableName, @NonNull QueryWrapper queryWrapper) {
         return invoker().selectCountByQuery(null, tableName, queryWrapper);
     }
 
@@ -1005,7 +1007,7 @@ public class Db {
      * @param queryWrapper 必须带有表名的 queryWrapper
      * @return 数据量
      */
-    public static long selectCountByQuery(QueryWrapper queryWrapper) {
+    public static long selectCountByQuery(@NonNull QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables == null || queryTables.isEmpty()) {
             throw FlexExceptions.wrap("Query tables must not be null or empty in Db.selectCountByQuery");
@@ -1158,22 +1160,37 @@ public class Db {
      * 进行事务操作，返回 null 或者 false 或者 抛出异常， 事务回滚
      */
     public static boolean tx(Supplier<Boolean> supplier, Propagation propagation) {
-        Boolean result = TransactionalManager.exec(supplier, propagation, false);
+        Boolean result = TransactionalManager.exec(supplier, propagation, (r, throwable) -> throwable != null || r == null || !r);
         return result != null && result;
     }
 
     /**
      * 进行事务操作，和返回结果无关，只有抛出异常时，事务回滚
      */
-    public static <T> T txWithResult(Supplier<T> supplier) {
+    public static <T> @Nullable T txWithResult(Supplier<T> supplier) {
         return txWithResult(supplier, Propagation.REQUIRED);
     }
 
     /**
      * 进行事务操作，和返回结果无关，只有抛出异常时，事务回滚
      */
-    public static <T> T txWithResult(Supplier<T> supplier, Propagation propagation) {
-        return TransactionalManager.exec(supplier, propagation, true);
+    public static <T> @Nullable T txWithResult(Supplier<T> supplier, Propagation propagation) {
+        return TransactionalManager.exec(supplier, propagation, (result, throwable) -> throwable != null);
     }
+
+    /**
+     * 进行事务操作，返回结果，根据 RollbackDecider 判断是否回滚
+     */
+    public static <T> @Nullable T txWithDecider(Supplier<T> supplier, RollbackDecider<T> decider) {
+        return TransactionalManager.exec(supplier, Propagation.REQUIRED, decider);
+    }
+
+    /**
+     * 进行事务操作，返回结果，根据 RollbackDecider 判断是否回滚
+     */
+    public static <T> @Nullable T txWithDecider(Supplier<T> supplier, Propagation propagation, RollbackDecider<T> decider) {
+        return TransactionalManager.exec(supplier, propagation, decider);
+    }
+
 
 }

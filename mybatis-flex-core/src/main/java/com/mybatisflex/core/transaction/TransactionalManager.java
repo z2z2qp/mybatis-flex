@@ -52,7 +52,8 @@ public class TransactionalManager {
     }
 
 
-    public static <T> T exec(Supplier<T> supplier, Propagation propagation, boolean withResult) {
+    //    public static <T> T exec(Supplier<T> supplier, Propagation propagation, boolean withResult) {
+    public static <T> T exec(Supplier<T> supplier, Propagation propagation, RollbackDecider<T> decider) {
         //上一级事务的id，支持事务嵌套
         String currentXID = TransactionContext.getXID();
         try {
@@ -62,7 +63,7 @@ public class TransactionalManager {
                     if (currentXID != null) {
                         yield supplier.get();
                     } else {
-                        yield execNewTransactional(supplier, withResult);
+                        yield execNewTransactional(supplier, decider);
                     }
                 }
 
@@ -82,7 +83,7 @@ public class TransactionalManager {
 
 
                     //始终以新事务的方式运行，若存在当前事务，则暂停（挂起）当前事务。
-                case REQUIRES_NEW -> execNewTransactional(supplier, withResult);
+                case REQUIRES_NEW -> execNewTransactional(supplier, decider);
 
 
                 //以非事务的方式运行，若存在当前事务，则暂停（挂起）当前事务。
@@ -115,31 +116,70 @@ public class TransactionalManager {
         }
     }
 
-    private static <T> T execNewTransactional(Supplier<T> supplier, boolean withResult) {
+//    private static <T> T execNewTransactional(Supplier<T> supplier, boolean withResult) {
+//        String xid = startTransactional();
+//        T result = null;
+//        boolean isRollback = false;
+//        try {
+//            result = supplier.get();
+//        } catch (Throwable e) {
+//            isRollback = true;
+//            rollback(xid);
+//            throw new TransactionException(e.getMessage(), e);
+//        } finally {
+//            if (!isRollback) {
+//                if (!withResult) {
+//                    if (result instanceof Boolean && (Boolean) result) {
+//                        commit(xid);
+//                    }
+//                    //null or false
+//                    else {
+//                        rollback(xid);
+//                    }
+//                } else {
+//                    commit(xid);
+//                }
+//            }
+//        }
+//        return result;
+//    }
+
+    private static <T> T execNewTransactional(Supplier<T> supplier, RollbackDecider<T> decider) {
         String xid = startTransactional();
         T result = null;
-        boolean isRollback = false;
+        Throwable error = null;
+
         try {
             result = supplier.get();
         } catch (Throwable e) {
-            isRollback = true;
-            rollback(xid);
-            throw new TransactionException(e.getMessage(), e);
-        } finally {
-            if (!isRollback) {
-                if (!withResult) {
-                    if (result instanceof Boolean r && r) {
-                        commit(xid);
-                    }
-                    //null or false
-                    else {
-                        rollback(xid);
-                    }
-                } else {
-                    commit(xid);
-                }
-            }
+            error = e;
         }
+
+        boolean rollback;
+        try {
+            if (decider != null) {
+                rollback = decider.shouldRollback(result, error);
+            } else {
+                // 默认行为（兼容旧逻辑）
+                rollback = error != null;
+            }
+        } catch (Throwable deciderEx) {
+            // 判官自己出问题 -> 强制回滚
+            rollback = true;
+            log.error("Transaction decider error", deciderEx);
+        }
+
+        if (rollback) {
+            rollback(xid);
+        } else {
+            commit(xid);
+        }
+
+        // 异常继续抛
+        if (error != null) {
+            throw new TransactionException(error.getMessage(), error);
+        }
+
         return result;
     }
 
