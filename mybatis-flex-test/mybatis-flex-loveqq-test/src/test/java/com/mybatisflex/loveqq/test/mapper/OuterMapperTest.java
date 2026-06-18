@@ -64,7 +64,7 @@ class OuterMapperTest {
             .from(outer)
             .leftJoin(inner).on(inner.ID.eq(2))
             .limit(1);
-        Outer outer1 = outerMapper.selectOneByQuery(queryWrapper);
+        Outer outer1 = outerMapper.selectOneByQuery(queryWrapper).orElse(null);
         System.out.println(outer1);
     }
 

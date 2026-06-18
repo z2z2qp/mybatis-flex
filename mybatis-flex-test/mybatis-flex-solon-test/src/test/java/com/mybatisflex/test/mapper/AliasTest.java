@@ -162,7 +162,7 @@ public class AliasTest {
 
     @Test
     void test08() {
-        SysUser user = userMapper.selectOneById(1);
+        SysUser user = userMapper.selectOneById(1).orElse(null);
 
         System.out.println(ONode.stringify(user));
         Assertions.assertTrue(true);
