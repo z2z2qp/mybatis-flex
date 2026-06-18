@@ -661,8 +661,10 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default Optional<T> selectOneWithRelationsById(@NonNull Serializable id) {
-        var optional = MapperUtil.queryRelations(this, selectOneById(id));
-        return optional.map(it -> MapperUtil.queryRelations(this, it));
+        return selectOneById(id).map(it -> {
+            T result = MapperUtil.queryRelations(this, it);
+            return MapperUtil.queryRelations(this, result);
+        });
     }
 
     /**
@@ -676,7 +678,7 @@ public interface BaseMapper<T> {
         R result;
         try {
             MappedStatementTypes.setCurrentType(asType);
-            result = (R) selectOneById(id);
+            result = (R) selectOneById(id).orElse(null);
         } finally {
             MappedStatementTypes.clear();
         }

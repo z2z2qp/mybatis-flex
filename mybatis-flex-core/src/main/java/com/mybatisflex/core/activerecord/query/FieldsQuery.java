@@ -82,7 +82,7 @@ public class FieldsQuery<T extends Model<T>> extends FieldsBuilder<T> {
     public <R> R oneByIdAs(Class<R> asType) {
         try {
             MappedStatementTypes.setCurrentType(asType);
-            List<R> entities = Collections.singletonList((R) baseMapper().selectOneById((Serializable) pkValue()));
+            List<R> entities = Collections.singletonList((R) baseMapper().selectOneById((Serializable) pkValue()).orElse(null));
             FieldQueryManager.queryFields(baseMapper(), entities, fieldQueryMap);
             return entities.getFirst();
         } finally {
