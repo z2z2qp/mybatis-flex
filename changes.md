@@ -2,8 +2,27 @@
 
 查看 [全部代码贡献者](/zh/intro/what-is-mybatisflex.html#贡献者)。
 
+## v1.11.7 20260504
+- feat(transaction): 在 Db.tx 事务管理中，新增 txWithDecider 方法，用于自定义 Rollback 逻辑
+- fix: 修复flex原生关联查询未处理schema
+- fix: 为了适配 idea 2025.2.6 和 idea 2025.3, 统一 lombok 版本并升级到 1.18.38
+- fix: 处理 SQL 语句中存在问号运算符(?)时转义字符串(??)被当成参数化处理
+- fix: SORT不是达梦和ORACLE关键字，执行会报错
+
+
+## v1.11.6 20260203
+* 新增: 为core模块引入JSpecify，并为主要接口增加空值注解，感谢 @zhongying
+* 新增: QueryMethods 增加 COALESCE 函数方法，感谢 @Yang
+* 优化: 更新带有可空注释的方法返回类型
+* 优化: 添加默认的类加载器实用程序方法和重构的LambdaUtil，以使用ClassUtil.getDefaultClassLoader而不是直接上下文类加载器
+* 优化: 将mybatis-spring依赖项更新到4.0.0版本
+* 优化: 完善@EnumValue强制实现类包含同名字段问题，修改为仅判断泛型方法时需要同名字段，感谢 @Crazy
+* 优化: 更新SpringBoot4依赖及文档说明，感谢 @陶志鹏
+
+
 ## v1.11.5 20251224
 * 新增：新增 `mybatis-flex-spring-boot4-starter` 模块，支持 Spring Boot 4
+* 新增：引入 JSpecify 空值注解，用于 API 空值标注（不包含空值检查工具）
 * 新增：Query 模块新增 `OrderType` 获取方法，感谢 @ruansheng8
 * 新增：Core 模块新增 `getQueryColumn` 方法，感谢 @ruansheng8
 * 优化：统一 Core 模块的代码风格（`-m core`），感谢 @ruansheng8
