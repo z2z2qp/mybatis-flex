@@ -39,7 +39,7 @@ public class SampleApplication implements CommandLineRunner, ApplicationListener
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println(this.accountMapper.selectOneById(1));
+        System.out.println(this.accountMapper.selectOneById(1).orElse(null));
     }
 
     public static void main(String[] args) {
