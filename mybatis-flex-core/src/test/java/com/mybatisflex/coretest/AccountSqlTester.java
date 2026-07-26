@@ -25,6 +25,8 @@ import com.mybatisflex.core.dialect.impl.CommonsDialectImpl;
 import com.mybatisflex.core.dialect.impl.OracleDialect;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.DistinctQueryColumn;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryTable;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.query.RawQueryColumn;
 import com.mybatisflex.core.query.SqlOperators;
@@ -664,6 +666,53 @@ public class AccountSqlTester {
                 "LEFT JOIN `tb_article` ON `tb_account`.`id` = `tb_article`.`account_id` " +
                 "WHERE `tb_account`.`user_name` = ?"
             , sql);
+        System.out.println(sql);
+    }
+
+    @Test
+    public void testDeleteWithRecursive() {
+        QueryTable cte = new QueryTable("CTE");
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .withRecursive("CTE").asSelect(
+                select().from(ACCOUNT).where(ACCOUNT.ID.eq(10))
+            )
+            .from(ACCOUNT)
+            .where(ACCOUNT.ID.in(select(new QueryColumn(cte, "id")).from(cte)))
+            .and(ACCOUNT.AGE.eq(20));
+
+        IDialect dialect = new CommonsDialectImpl();
+        String sql = dialect.forDeleteByQuery(queryWrapper);
+
+        Assert.assertEquals("WITH RECURSIVE CTE AS (" +
+                "SELECT * FROM `tb_account` WHERE `id` = ?" +
+                ") DELETE FROM `tb_account` WHERE `id` IN (SELECT `id` FROM `CTE`) AND `age` = ?"
+            , sql);
+        Assert.assertArrayEquals(new Object[]{10, 20}, CPI.getValueArray(queryWrapper));
+        System.out.println(sql);
+    }
+
+    @Test
+    public void testLogicDeleteWithRecursive() {
+        QueryTable cte = new QueryTable("CTE");
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .withRecursive("CTE").asSelect(
+                select().from(ACCOUNT).where(ACCOUNT.ID.eq(10))
+            )
+            .from(ACCOUNT)
+            .where(ACCOUNT.ID.in(select(new QueryColumn(cte, "id")).from(cte)))
+            .and(ACCOUNT.AGE.eq(20));
+
+        IDialect dialect = new CommonsDialectImpl();
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(Account.class);
+        tableInfo.appendConditions(null, queryWrapper);
+        String sql = dialect.forDeleteEntityBatchByQuery(tableInfo, queryWrapper);
+
+        Assert.assertEquals("WITH RECURSIVE CTE AS (" +
+                "SELECT * FROM `tb_account` WHERE `id` = ?" +
+                ") UPDATE `tb_account` SET `is_delete` = 1 " +
+                "WHERE (`id` IN (SELECT `id` FROM `CTE`) AND `age` = ?) AND `is_delete` = ?"
+            , sql);
+        Assert.assertArrayEquals(new Object[]{10, 20, 0}, CPI.getValueArray(queryWrapper));
         System.out.println(sql);
     }
 
