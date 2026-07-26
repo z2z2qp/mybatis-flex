@@ -396,6 +396,13 @@ public class CommonsDialectImpl implements IDialect {
 
 
     ////////////build query sql///////
+    protected void buildWithSql(StringBuilder sqlBuilder, QueryWrapper queryWrapper) {
+        With with = CPI.getWith(queryWrapper);
+        if (with != null) {
+            sqlBuilder.append(with.toSql(this));
+        }
+    }
+
     @Override
     public String buildSelectSql(QueryWrapper queryWrapper) {
         return buildSelectSql(queryWrapper, Collections.emptyList());
@@ -441,10 +448,7 @@ public class CommonsDialectImpl implements IDialect {
         }
 
         StringBuilder sqlBuilder = new StringBuilder();
-        With with = CPI.getWith(queryWrapper);
-        if (with != null) {
-            sqlBuilder.append(with.toSql(this));
-        }
+        buildWithSql(sqlBuilder, queryWrapper);
 
         buildSelectColumnSql(sqlBuilder, allTables, selectColumns, CPI.getHint(queryWrapper));
 
@@ -545,7 +549,9 @@ public class CommonsDialectImpl implements IDialect {
         List<QueryTable> allTables = CollectionUtil.merge(queryTables, joinTables);
 
         // ignore selectColumns
-        StringBuilder sqlBuilder = new StringBuilder(DELETE);
+        StringBuilder sqlBuilder = new StringBuilder();
+        buildWithSql(sqlBuilder, queryWrapper);
+        sqlBuilder.append(DELETE);
         String hint = CPI.getHint(queryWrapper);
         if (StringUtil.hasText(hint)) {
             sqlBuilder.append(BLANK).append(hint).deleteCharAt(sqlBuilder.length() - 1);
@@ -814,7 +820,9 @@ public class CommonsDialectImpl implements IDialect {
         List<QueryTable> allTables = CollectionUtil.merge(queryTables, joinTables);
 
         // ignore selectColumns
-        StringBuilder sqlBuilder = new StringBuilder(UPDATE).append(forHint(CPI.getHint(queryWrapper)));
+        StringBuilder sqlBuilder = new StringBuilder();
+        buildWithSql(sqlBuilder, queryWrapper);
+        sqlBuilder.append(UPDATE).append(forHint(CPI.getHint(queryWrapper)));
         sqlBuilder.append(tableInfo.getWrapSchemaAndTableName(this, OperateType.DELETE));
         sqlBuilder.append(SET).append(buildLogicDeletedSet(logicDeleteColumn, tableInfo));
 
