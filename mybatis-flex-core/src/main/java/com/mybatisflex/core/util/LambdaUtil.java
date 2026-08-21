@@ -115,6 +115,27 @@ public class LambdaUtil {
     }
 
 
+    /**
+     * 清空 {@link LambdaUtil} 内部的三张 Lambda 解析缓存：
+     * {@code fieldNameMap}、{@code implClassMap}、{@code queryColumnMap}。
+     *
+     * <p>典型场景：开发期热加载后，旧的 Lambda 合成类可能已随 ClassLoader 一同废弃，
+     * 或实体类字段发生了变更，需要让下一次 {@code getFieldName} / {@code getQueryColumn}
+     * 按最新的 Class 重新解析。生产环境无需调用。
+     *
+     * <p>通常与 {@link TableInfoFactory#clear()} 配合使用，
+     * 以保证 TableInfo 与 Lambda 缓存同时失效。
+     *
+     * @return 清空前三张缓存中的条目总数
+     * @since 1.11.9
+     */
+    public static int clear() {
+        int total = fieldNameMap.size() + implClassMap.size() + queryColumnMap.size();
+        fieldNameMap.clear();
+        implClassMap.clear();
+        queryColumnMap.clear();
+        return total;
+    }
 
 
 }
