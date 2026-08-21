@@ -107,6 +107,12 @@ public class TableInfo {
     // 大字段列
     private String[] largeColumns = new String[0];
 
+    // 不参与 insert 的列
+    private String[] notInsertableColumns = new String[0];
+
+    // 不参与 update 的列
+    private String[] notUpdatableColumns = new String[0];
+
     // 默认查询列，排除 large 等字段
     private String[] defaultQueryColumns = new String[0];
     // 所有的字段，但除了主键的列
@@ -275,6 +281,22 @@ public class TableInfo {
         this.largeColumns = largeColumns;
     }
 
+    public String[] getNotInsertableColumns() {
+        return notInsertableColumns;
+    }
+
+    public void setNotInsertableColumns(String[] notInsertableColumns) {
+        this.notInsertableColumns = notInsertableColumns;
+    }
+
+    public String[] getNotUpdatableColumns() {
+        return notUpdatableColumns;
+    }
+
+    public void setNotUpdatableColumns(String[] notUpdatableColumns) {
+        this.notUpdatableColumns = notUpdatableColumns;
+    }
+
     public String[] getDefaultQueryColumns() {
         return defaultQueryColumns;
     }
@@ -405,6 +427,8 @@ public class TableInfo {
     void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
         List<String> columnNames = new ArrayList<>();
+        List<String> notInsertableList = new ArrayList<>();
+        List<String> notUpdatableList = new ArrayList<>();
         for (int i = 0; i < columnInfoList.size(); i++) {
             ColumnInfo columnInfo = columnInfoList.get(i);
             // 真正的字段（没有做忽略标识）
@@ -416,11 +440,20 @@ public class TableInfo {
 
                 String[] alias = columnInfo.getAlias();
                 columnQueryMapping.put(columnInfo.column, new QueryColumn(schema, tableName, columnInfo.column, alias != null && alias.length > 0 ? alias[0] : null));
+
+                if (!columnInfo.isInsertable()) {
+                    notInsertableList.add(columnInfo.column);
+                }
+                if (!columnInfo.isUpdatable()) {
+                    notUpdatableList.add(columnInfo.column);
+                }
             }
         }
 
         this.columns = columnNames.toArray(new String[]{});
         this.allColumns = ArrayUtil.concat(allColumns, columns);
+        this.notInsertableColumns = notInsertableList.toArray(new String[0]);
+        this.notUpdatableColumns = notUpdatableList.toArray(new String[0]);
     }
 
 
@@ -433,6 +466,7 @@ public class TableInfo {
         this.primaryColumns = new String[primaryKeyList.size()];
 
         List<String> insertIdFields = new ArrayList<>();
+        List<String> notInsertableList = new ArrayList<>(Arrays.asList(this.notInsertableColumns));
 
         for (int i = 0; i < primaryKeyList.size(); i++) {
             IdInfo idInfo = primaryKeyList.get(i);
@@ -444,6 +478,10 @@ public class TableInfo {
                 insertIdFields.add(idInfo.getColumn());
             }
 
+            if (!idInfo.isInsertable()) {
+                notInsertableList.add(idInfo.getColumn());
+            }
+
             columnInfoMapping.put(idInfo.column, idInfo);
             propertyColumnMapping.put(idInfo.property, idInfo.column);
 
@@ -452,6 +490,7 @@ public class TableInfo {
         }
         this.allColumns = ArrayUtil.concat(allColumns, primaryColumns);
         this.insertPrimaryKeys = insertIdFields.toArray(new String[0]);
+        this.notInsertableColumns = notInsertableList.toArray(new String[0]);
     }
 
 
@@ -470,17 +509,37 @@ public class TableInfo {
 
         List<Object> values = new ArrayList<>();
         for (String insertColumn : insertColumns) {
-            if (onInsertColumns == null || !onInsertColumns.containsKey(insertColumn)) {
-                if (rawValueMap.containsKey(insertColumn)) {
-                    values.addAll(Arrays.asList(rawValueMap.remove(insertColumn).getParams()));
-                    continue;
+//            if (onInsertColumns == null || !onInsertColumns.containsKey(insertColumn)) {
+//                if (rawValueMap.containsKey(insertColumn)) {
+//                    values.addAll(Arrays.asList(rawValueMap.remove(insertColumn).getParams()));
+//                    continue;
+//                }
+//                Object value = buildColumnSqlArg(metaObject, insertColumn);
+//                if (ignoreNulls && value == null) {
+//                    continue;
+//                }
+//                values.add(value);
+//            }
+            if (onInsertColumns != null && onInsertColumns.containsKey(insertColumn)) {
+                String onInsertValue = onInsertColumns.get(insertColumn);
+                if (onInsertValue.contains("?")) {
+                    Object value = buildColumnSqlArg(metaObject, insertColumn);
+                    if (ignoreNulls && value == null) {
+                        continue;
+                    }
+                    values.add(value);
                 }
-                Object value = buildColumnSqlArg(metaObject, insertColumn);
-                if (ignoreNulls && value == null) {
-                    continue;
-                }
-                values.add(value);
+                continue;
             }
+            if (rawValueMap.containsKey(insertColumn)) {
+                values.addAll(Arrays.asList(rawValueMap.remove(insertColumn).getParams()));
+                continue;
+            }
+            Object value = buildColumnSqlArg(metaObject, insertColumn);
+            if (ignoreNulls && value == null) {
+                continue;
+            }
+            values.add(value);
         }
         values.addAll(rawValueMap.values()
             .stream()
@@ -498,13 +557,16 @@ public class TableInfo {
      */
     public String[] obtainInsertColumns(Object entity, boolean ignoreNulls) {
         if (!ignoreNulls) {
-            return ArrayUtil.concat(insertPrimaryKeys, columns);
+            return filterNotInsertableColumns(ArrayUtil.concat(insertPrimaryKeys, columns));
         }
         // 忽略 null 字段，
         else {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
             List<String> retColumns = new ArrayList<>();
             for (String insertColumn : allColumns) {
+                if (ArrayUtil.contains(notInsertableColumns, insertColumn)) {
+                    continue;
+                }
                 if (onInsertColumns != null && onInsertColumns.containsKey(insertColumn)) {
                     retColumns.add(insertColumn);
                 } else {
@@ -526,13 +588,29 @@ public class TableInfo {
 
         List<Object> values = new ArrayList<>(insertColumns.length);
         for (String insertColumn : insertColumns) {
-            if (onInsertColumns == null || !onInsertColumns.containsKey(insertColumn)) {
-                Object value = buildColumnSqlArg(metaObject, insertColumn);
-                if (ignoreNulls && value == null) {
-                    continue;
+//            if (onInsertColumns == null || !onInsertColumns.containsKey(insertColumn)) {
+//                Object value = buildColumnSqlArg(metaObject, insertColumn);
+//                if (ignoreNulls && value == null) {
+//                    continue;
+//                }
+//                values.add(value);
+//            }
+            if (onInsertColumns != null && onInsertColumns.containsKey(insertColumn)) {
+                String onInsertValue = onInsertColumns.get(insertColumn);
+                if (onInsertValue.contains("?")) {
+                    Object value = buildColumnSqlArg(metaObject, insertColumn);
+                    if (ignoreNulls && value == null) {
+                        continue;
+                    }
+                    values.add(value);
                 }
-                values.add(value);
+                continue;
             }
+            Object value = buildColumnSqlArg(metaObject, insertColumn);
+            if (ignoreNulls && value == null) {
+                continue;
+            }
+            values.add(value);
         }
         return values.toArray();
     }
@@ -547,7 +625,7 @@ public class TableInfo {
      */
     public String[] obtainInsertColumnsWithPk(Object entity, boolean ignoreNulls) {
         if (!ignoreNulls) {
-            return allColumns;
+            return filterNotInsertableColumns(allColumns);
         } else {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
             List<String> retColumns = new ArrayList<>();
@@ -559,6 +637,9 @@ public class TableInfo {
                 retColumns.add(primaryKey);
             }
             for (String insertColumn : columns) {
+                if (ArrayUtil.contains(notInsertableColumns, insertColumn)) {
+                    continue;
+                }
                 if (onInsertColumns != null && onInsertColumns.containsKey(insertColumn)) {
                     retColumns.add(insertColumn);
                 } else {
@@ -596,6 +677,19 @@ public class TableInfo {
         return map;
     }
 
+    private String[] filterNotInsertableColumns(String[] columns) {
+        if (ArrayUtil.isEmpty(notInsertableColumns)) {
+            return columns;
+        }
+        List<String> result = new ArrayList<>();
+        for (String column : columns) {
+            if (!ArrayUtil.contains(notInsertableColumns, column)) {
+                result.add(column);
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
     /**
      * 获取要修改的值
      *
@@ -619,13 +713,17 @@ public class TableInfo {
                     continue;
                 }
 
+                if (ArrayUtil.contains(notUpdatableColumns, column)) {
+                    continue;
+                }
+
                 // 忽略租户字段时 不要过滤租户字段
-                if(isIgnoreTenantCondition){
+                if (isIgnoreTenantCondition) {
                     if (Objects.equals(column, versionColumn)) {
                         continue;
                     }
                     // 过滤乐观锁字段 和 租户字段
-                }else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
+                } else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
 
@@ -649,13 +747,17 @@ public class TableInfo {
                     continue;
                 }
 
+                if (ArrayUtil.contains(notUpdatableColumns, column)) {
+                    continue;
+                }
+
                 // 忽略租户字段时 不要过滤租户字段
-                if(isIgnoreTenantCondition){
+                if (isIgnoreTenantCondition) {
                     if (Objects.equals(column, versionColumn)) {
                         continue;
                     }
                     // 过滤乐观锁字段 和 租户字段
-                }else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
+                } else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
 
@@ -690,15 +792,23 @@ public class TableInfo {
                 String column = getColumnByProperty(property);
 
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
+                    String onUpdateValue = onUpdateColumns.get(column);
+                    if (!onUpdateValue.contains("?")) {
+                        continue;
+                    }
+                }
+
+                if (ArrayUtil.contains(notUpdatableColumns, column)) {
                     continue;
                 }
+
                 // 忽略租户字段时 不要过滤租户字段
-                if(isIgnoreTenantCondition){
+                if (isIgnoreTenantCondition) {
                     if (Objects.equals(column, versionColumn)) {
                         continue;
                     }
                     // 过滤乐观锁字段 和 租户字段
-                }else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
+                } else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
 
@@ -742,16 +852,23 @@ public class TableInfo {
 
             for (String column : this.columns) {
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
+                    String onUpdateValue = onUpdateColumns.get(column);
+                    if (!onUpdateValue.contains("?")) {
+                        continue;
+                    }
+                }
+
+                if (ArrayUtil.contains(notUpdatableColumns, column)) {
                     continue;
                 }
 
                 // 忽略租户字段时 不要过滤租户字段
-                if(isIgnoreTenantCondition){
+                if (isIgnoreTenantCondition) {
                     if (Objects.equals(column, versionColumn)) {
                         continue;
                     }
                     // 过滤乐观锁字段 和 租户字段
-                }else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
+                } else if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
 

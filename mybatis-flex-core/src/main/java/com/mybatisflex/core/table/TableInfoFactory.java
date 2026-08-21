@@ -76,6 +76,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -257,6 +258,8 @@ public class TableInfoFactory {
                     tableInfo.setOnSetListeners(refTableInfo.getOnSetListeners());
                     tableInfo.setOnInsertColumns(refTableInfo.getOnInsertColumns());
                     tableInfo.setOnUpdateListeners(refTableInfo.getOnUpdateListeners());
+                    tableInfo.setNotInsertableColumns(refTableInfo.getNotInsertableColumns());
+                    tableInfo.setNotUpdatableColumns(refTableInfo.getNotUpdatableColumns());
                 }
             } else {
                 // 默认为类名转驼峰下划线
@@ -463,6 +466,11 @@ public class TableInfoFactory {
             columnInfo.setIgnore(columnAnnotation != null && columnAnnotation.ignore());
 
             if (columnAnnotation != null) {
+                columnInfo.setInsertable(columnAnnotation.insertable());
+                columnInfo.setUpdatable(columnAnnotation.updatable());
+            }
+
+            if (columnAnnotation != null) {
                 columnInfo.setComment(columnAnnotation.comment());
             }
 
@@ -630,6 +638,72 @@ public class TableInfoFactory {
             }
         }
         return false;
+    }
+
+
+    /**
+     * 清除指定实体类的缓存，包括 {@link #entityTableMap}、{@link #tableInfoMap}
+     * 以及 {@link #mapperTableInfoMap} 中所有指向该实体 {@link TableInfo} 的条目。
+     *
+     * <p>典型用途是开发期与热加载工具（例如 JRebel、Spring Boot DevTools）配合，
+     * 当实体类被重新加载（增/删字段、修改注解）后，先调用本方法清理旧的 TableInfo，
+     * 下一次 {@link #ofEntityClass(Class)} 就会用最新的 Class 重新解析。
+     *
+     * <p>注意：本方法只处理 flex 内部的三个缓存，并不会重建
+     * MyBatis {@code Configuration} 中已注册的 MappedStatement，
+     * 也不会影响已经生成的 QueryColumn 常量（如通过 annotation processor 生成的 XxxTableDef）。
+     * 完整的热加载还需要业务侧配合销毁并重建 SqlSessionFactory / Spring bean。
+     *
+     * @param entityClass 实体类，允许为 {@code null}（此时直接返回 0）
+     * @return 实际被清除的缓存条目数（0 表示原本就没有缓存）
+     * @since 1.11.9
+     */
+    public static int evict(@Nullable Class<?> entityClass) {
+        if (entityClass == null) {
+            return 0;
+        }
+        int removed = 0;
+        TableInfo tableInfo = entityTableMap.remove(entityClass);
+        if (tableInfo != null) {
+            removed++;
+            // tableInfoMap 中可能有其它 VO/Entity 指向同一个 TableInfo，仅在引用一致时移除
+            String tableKey = tableInfo.getTableNameWithSchema();
+            if (tableKey != null && tableInfoMap.get(tableKey) == tableInfo) {
+                tableInfoMap.remove(tableKey);
+                removed++;
+            }
+            // mapperTableInfoMap 中所有指向该 TableInfo 的 mapper 条目一并移除
+            Iterator<Map.Entry<Class<?>, TableInfo>> it = mapperTableInfoMap.entrySet().iterator();
+            while (it.hasNext()) {
+                if (it.next().getValue() == tableInfo) {
+                    it.remove();
+                    removed++;
+                }
+            }
+        }
+        return removed;
+    }
+
+
+    /**
+     * 清空 {@link TableInfoFactory} 的全部缓存：
+     * {@link #entityTableMap}、{@link #mapperTableInfoMap}、{@link #tableInfoMap}。
+     *
+     * <p>调用后所有实体的 {@link TableInfo} 都会在下一次访问时按当前 Class 重新构建。
+     * 仅用于开发期热加载 / 单元测试隔离等场景，生产环境无需调用。
+     *
+     * <p>{@link #initializedPackageNames} 不会被清空 —— 之前已经扫过的 mapper 包，
+     * 无需再次触发 {@link #init(String)} 扫描。
+     *
+     * @return 清空前三张缓存中的条目总数
+     * @since 1.11.9
+     */
+    public static int clear() {
+        int total = entityTableMap.size() + mapperTableInfoMap.size() + tableInfoMap.size();
+        entityTableMap.clear();
+        mapperTableInfoMap.clear();
+        tableInfoMap.clear();
+        return total;
     }
 
 }
