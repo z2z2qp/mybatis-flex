@@ -51,6 +51,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -233,6 +234,74 @@ public class FlexConfiguration extends Configuration {
             .useCache(ms.isUseCache())
             .cache(ms.getCache())
             .build();
+    }
+
+    /**
+     * 清理指定实体在 MyBatis 层的两处 ResultMap 缓存,用于热加载场景。
+     *
+     * <p>改 {@code @Table} 实体字段类型后,仅清 {@link TableInfoFactory} 的 TableInfo 缓存不够:
+     * {@link #replaceResultMap} 在 {@code hasResultMap(entityFQN)} 为 true 时会复用老的
+     * {@link ResultMap}(老的 javaType),导致类型转换异常(如 Oracle 17059)。本方法把两处
+     * 缓存一并清掉,下次查询用最新 TableInfo 重建 ResultMap。
+     *
+     * <p>清理范围:
+     * <ul>
+     *   <li>{@link #dynamicMappedStatementCache} -- 移除 key 后缀为 {@code ":<entityFQN>"} 的条目
+     *       (泛型/共享 mapper 场景写入);</li>
+     *   <li>{@link Configuration#resultMaps} -- 移除 key 等于 entityFQN 或以 {@code "<entityFQN>-"} 开头的条目
+     *       (具体 mapper 场景写入)。{@code resultMaps} 实际类型是 MyBatis 的 {@code StrictMap},
+     *       其 {@code removeIf} 继承自 {@code HashMap} 无 strict 检查,可安全移除。</li>
+     * </ul>
+     *
+     * <p><b>不自动生效</b>:本方法只是公开 API,flex 内部不订阅 reload 事件,需调用方在实体重加载
+     * 时机显式调用(JRebel listener / DevTools / 手动)。
+     *
+     * @param entityClass 实体类;{@code null} 时直接返回
+     * @since 1.11.9
+     */
+    public void evictEntity(Class<?> entityClass) {
+        if (entityClass == null) {
+            return;
+        }
+        String fqn = entityClass.getName();
+        dynamicMappedStatementCache.entrySet().removeIf(e -> e.getKey().endsWith(":" + fqn));
+        resultMaps.entrySet().removeIf(
+            e -> e.getKey().equals(fqn) || e.getKey().startsWith(fqn + "-"));
+    }
+
+    /**
+     * 返回 {@link #dynamicMappedStatementCache} 中所有 key 的快照（副本）。
+     *
+     * <p>用于排查/统计，非高频路径使用。返回的是调用时的快照，后续缓存变更不影响返回值。
+     *
+     * @return key 集合的快照
+     * @since 1.11.9
+     */
+    public static Set<String> getDynamicMappedStatementCacheKeys() {
+        return new java.util.HashSet<>(dynamicMappedStatementCache.keySet());
+    }
+
+    /**
+     * 返回 {@link #dynamicMappedStatementCache} 当前条目数。
+     *
+     * @return 动态 MappedStatement 缓存条目数
+     * @since 1.11.9
+     */
+    public static int getDynamicMappedStatementCacheSize() {
+        return dynamicMappedStatementCache.size();
+    }
+
+    /**
+     * 清空 {@link #dynamicMappedStatementCache}（static 全局缓存）。
+     *
+     * <p>注意：这是全局操作，会影响所有使用同一 ClassLoader 的 SqlSessionFactory。
+     * 一般仅用于"全量热加载/测试隔离"场景；按实体粒度清理请用
+     * {@link #evictEntity(Class)}。
+     *
+     * @since 1.11.9
+     */
+    public static void clearDynamicMappedStatementCache() {
+        dynamicMappedStatementCache.clear();
     }
 
     /**
